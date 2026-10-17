@@ -185,3 +185,10 @@ DATA-08 SEC-06: sau restore mọi credential không tin cậy; thông báo bắt
 
 - RED: `target/r2-06-red.log`; GREEN: `target/r2-06-green.log`. Lệnh và hash log: [biên bản](verification/r2-06.txt).
 - `bash scripts/check.sh`: 136/0/0/0 (tests/failures/errors/skipped), build/static/gitleaks/dependency/migration OK. Phạm vi tự động cục bộ; không suy thành đạt pilot.
+
+## Vòng 2 — mục 07 (18/10/2026)
+
+UAT-10 SEC-02/03: Round2MatrixTest thường trực giữ 45 assertion HTTP, hai nhóm/bốn actor, forged fields và đổi cặp group/task; version từ HTML. Negative control tháo membership guard đỏ 404->200; khôi phục guard rồi GREEN.
+
+- RED: `target/r2-07-red.log`; GREEN: `target/r2-07-green.log`. Lệnh và hash log: [biên bản](verification/r2-07.txt).
+- `bash scripts/check.sh`: 137/0/0/0 (tests/failures/errors/skipped), build/static/gitleaks/dependency/migration OK. Phạm vi tự động cục bộ; không suy thành đạt pilot.
