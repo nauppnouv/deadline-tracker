@@ -1,0 +1,1 @@
+NFR-04 local Windows, Docker Desktop MariaDB 11.8.9, Java 25.0.4.1; MockMvc (no network/TLS/browser); 3 groups x 5 users x 200 tasks, 5 concurrent threads, 100 warm requests (75 views/25 saves), p95=108ms, max=130ms; CPU=12; not a cloud SLA.

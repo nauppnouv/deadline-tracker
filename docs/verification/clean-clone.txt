@@ -1,0 +1,20 @@
+Clean local clone verification, 17/10/2026 UTC
+Code commit: 8d064995ee322e190380a6517969ae8aa73cffa2
+Clone: .tools\verification-a340b3c25bcd403f925cae3f085f7c2e
+Command: bash scripts/check.sh
+Prerequisites: Java25.0.4.1, Maven3.9.15, DockerDesktop29.8.2, Git Bash, gitleaks.
+JAVA_HOME points to original portable JDK25 (not copied into clone).
+MAVEN_REPO_LOCAL points to original downloaded cache; DEPENDENCY_CHECK_DATA points to original NVD cache.
+No target/classes, old database, application sessions or user credentials reused.
+New Testcontainers MariaDB11.8.9 instance, schema migrated V1/V2/V3 from empty.
+Tests run: 58, Failures: 0, Errors: 0, Skipped: 0
+OK build + tests
+OK template / SQL static checks
+OK gitleaks secret scan
+OK OWASP dependency audit (54 entries, 0 findings)
+OK immutable committed migrations
+No checks skipped. Git status of clone clean after check.
+Audit report date: 2026-10-17T16:46:27.538215200Z
+Raw check log SHA256: e6bcc12e30747ff28105f33704a68f466db3577f41001bc1cf08501a27f8243a
+Full raw logs/reports remain in the ignored clone target directory.
+Subsequent final receipt commit changes documentation only; runtime source is this verified commit.

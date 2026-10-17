@@ -1,6 +1,6 @@
 # Trở ngại, giới hạn và việc người làm
 
-Cập nhật17/10/2026. Không có build/test blocker đang mở ở mốc check58tests. Clone sạch còn chờ thực hiện.
+Cập nhật17/10/2026. Không có build/test blocker đang mở ở mốc check58tests. Clone sạch đã chạy58tests/check đầy đủ thành công, xem verification/clean-clone.txt.
 
 | Việc | Trạng thái / bằng chứng | Hành động |
 |---|---|---|
@@ -12,6 +12,7 @@ Cập nhật17/10/2026. Không có build/test blocker đang mở ở mốc check
 | Flyway/MariaDB | Runtime WARN: Using MariaDB 11.8 which is newer than the version Flyway has been verified with. The latest verified version of MariaDB is 11.7. | Giữ cảnh báo D23; migrations/validate/restart/restore chạy thật pinned11.8.9. Reviewer P7 đánh giá tương thích trước deploy; không gọi vendor certified |
 | Lịch backup thật | Chưa cài; mới có scripts và drill DB thử | Chủ vận hành chọn nơi giữ ngoài máy, lịch/người chịu trách nhiệm và cảnh báo; chưa cam kết RPO24h/RTO4h |
 | HTTPS/proxy/rate-limit Internet | Chưa triển khai | Chủ dự án quyết định chi phí/domain; kiểm tra certificate, forwarded headers/IP thật và cookie trên đúng môi trường |
+| Câu chữ SEC05 / D25 | Có giới hạn diễn giải công khai: framework phải lưu session ID/CSRF và trả cookie, raw invite cần phản hồi phân phối | Reviewer xác nhận phạm vi; không tuyên bố nghĩa đen cấm mọi ID/token trong mọi DB/response đã đạt |
 | P7/pilot | Chưa chạy, cần người/phiên mới | Mở chat mới Reviewer, sửa findings rồi chạy lại cổng; pilot2tuần chỉ sau đồng ý của nhóm |
 | Volume thử Compose | Cố ý giữ deadline-w1-e9918b41_database và deadline-w1-7c56fed6_database, chỉ dữ liệu giả; container/network đã gỡ | Chủ máy có thể xem report và quyết định dọn riêng volume thử; không global prune |
 

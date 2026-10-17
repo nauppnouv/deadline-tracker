@@ -113,7 +113,7 @@ Ngày khởi tạo: 17/10/2026. Chỉ cập nhật khi đã chạy thật. Log l
 - Browser IAB thật: login fake account, group overview, create task bằng Enter, Tab tới description, change status bằng Enter, DONE filter còn1kết quả nhưng overview3task/33%; 360px document/client/scroll đều360, không input thiếu label trên dashboard; console không warn/error. [Desktop](verification/group-desktop.png), [360px](verification/group-360.png), [detail](verification/task-360.png). Không phải kiểm toán accessibility toàn diện.
 - Compose thật [smoke](verification/compose-local.txt): packaged jar HTTP register/login/create group, restart còn group+session, UID10001; loopbackports. Chỉ dừng/gỡ container/network project thử, giữ volume trial được ghi trong report.
 - Flyway vẫn cảnh báo DB11.8 mới hơn mức verified11.7; chức năng trên pinned11.8.9 đã test, không coi là chứng nhận vendor. Xem D23/BLOCKERS.
-- Chưa chạy clean-clone check tại mốc ghi này; chưa deploy HTTPS thật, chưa lịch backup thật, chưa pilot/P7.
+- Tại mốc P6 cục bộ này chưa chạy clean clone; kết quả chạy sau được ghi ở mục cuối. Chưa deploy HTTPS thật, chưa lịch backup thật, chưa pilot/P7.
 
 ### Giới hạn diễn giải SEC-05 (D25)
 
@@ -122,3 +122,10 @@ Kết quả đạt trong bảng là kiểm chứng password thô/invitation raw 
 - Chốt US21: target/p6-backup-story.log check58tests/0failure/error/skip, SCA/gitleaks/migration OK. Restore artifact có UTC bắt đầu và elapsed milliseconds thực đo (không gồm app boot); không suy RTO môi trường thật.
 
 - Compose chạy lại từ jar sau check US21: PASS project deadline-w1-7c56fed6, account/group persisted sau restart, session còn hiệu lực, UID10001. Volume của cả hai lượt trial được giữ theo BLOCKERS. Console legacy biên dịch/chạy lại bằng JDK25 thành công, hai task/status và lỗi tên trống đúng. Markdown links local đã kiểm tra, không missing.
+
+## Chốt P6 — clone sạch
+
+- Đã clone local commit8d06499 vào thư mục mới trong .tools, không copy target hoặc DB. JDK25/Maven cache/NVD cache được tái sử dụng bằng biến môi trường, không user credential.
+- `bash scripts/check.sh` từ clone:58 tests,0 failure/error/skip; build/static/gitleaks/OWASP/migration đều OK, **không bước nào bị bỏ qua**. Git status clone sạch. [Biên bản](verification/clean-clone.txt), [đo tải clone](verification/load-clean-clone.txt), [restore clone](verification/restore-clean-clone.txt).
+- Mã runtime ở8d06499 đã được kiểm chứng; commit biên bản cuối chỉ cập nhật docs, không sửa source/migration/dependency.
+- P6 kết thúc trong phạm vi xây dựng và kiểm chứng cục bộ. P7 chưa chạy theo yêu cầu dừng; US20 còn deploy thật, US21 còn lịch/backup ngoài máy, US22 còn pilot. Giới hạn D23/Flyway và D25/SEC05 vẫn công khai, không suy ra chứng nhận sản phẩm an toàn.
