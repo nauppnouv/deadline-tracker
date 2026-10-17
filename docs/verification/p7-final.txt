@@ -1,0 +1,47 @@
+P7 verification receipt, 18/10/2026 Asia/Ho_Chi_Minh
+Scope: exactly five supplied review findings. All accepted and reproduced before fixing.
+Runtime/code commit: 83dbb34b5fce2276b0a2553f45d70bbb6eb01f50
+Branch: fix/p7-security-data-findings (local; not pushed/merged)
+
+RED commands and observed failures (not counted as successful checks):
+P7-01 bash scripts/mvn.sh test -Dtest=BackupFailureTest: 8 tests / 2 failures.
+P7-02 bash scripts/mvn.sh test -Dtest=RestoredSessionTest: 1 test / 1 failure; old cookie returned HTTP 200 instead of 302.
+P7-03 bash scripts/mvn.sh test -Dtest=GroupVersionWebTest: 2 tests / 2 failures; stale form overwrote name, missing version accepted.
+P7-04 bash scripts/mvn.sh test -Dtest=ChunkedRequestTest: 3 tests / 2 failures; oversized/wrong content type accepted.
+P7-05 bash scripts/mvn.sh test -Dtest=OwnerIntegrityTest: 4 tests / 4 failures; direct SQL/migration invariants missing.
+Raw logs: target/p7-01-red.log through target/p7-05-red.log (local ignored files).
+
+Full check after each finding: bash scripts/check.sh
+P7-01 66, P7-02 70, P7-03 72, P7-04 75, P7-05 79 tests PASS.
+Each successful full check: 0 failures/errors/skips; static checks, gitleaks, dependency audit and migration check OK.
+The resumed pre-fix full check failed 67 tests / 1 failure (group_member native checksum mismatch).
+The mismatch was investigated rather than skipped; logical checksum and tampered-data regression added under P7-02.
+Final original-worktree log: target/p7-05-check.log
+SHA256: 230d16f3fd714f247300aa27414379ec8e4ad0c2ea73ea5c2c18fbd6910bc676
+
+Clean clone command:
+git clone --no-hardlinks --single-branch --branch fix/p7-security-data-findings . .tools/p7-clean-83dbb34
+Clone HEAD: 83dbb34b5fce2276b0a2553f45d70bbb6eb01f50
+Followed README prerequisites: portable JDK25.0.4.1 via JAVA_HOME, Maven3.9.15, Docker Desktop, Git Bash, gitleaks.
+MAVEN_REPO_LOCAL and DEPENDENCY_CHECK_DATA reuse downloaded caches only.
+No target/classes, existing DB, sessions, application credentials or user-home configuration copied into clone.
+New disposable MariaDB11.8.9 instance; Flyway V1/V2/V3/V4 from empty, V3 upgrade and restore regressions also executed.
+Command in clone: bash scripts/check.sh
+Completed: 2026-10-17T18:21:50Z (18/10/2026 local)
+Tests run: 79, Failures: 0, Errors: 0, Skipped: 0
+OK build + tests
+OK template / SQL static checks
+OK gitleaks secret scan (no leaks found)
+OK dependency audit (54 dependency entries, 0 vulnerability findings)
+OK immutable committed migrations
+No checks skipped. Clone git status clean after check.
+Raw clean-clone log: target/p7-clean-check.log in original worktree
+SHA256: 4f0ac92ac70133843f0f742c7d898e563d7c0048450fd4573e2729b8c68c27a8
+Audit reports: .tools/p7-clean-83dbb34/target/dependency-check-report.{json,html}
+Subsequent receipt commit changes documentation only; verified runtime code remains the commit above.
+
+Not verified here: Internet HTTPS/proxy/real-IP deployment, proxy request-size enforcement, DoS capacity,
+image/OS vulnerability scan, off-machine backup schedule and incident RPO/RTO, post-snapshot credential
+reconciliation with real data, real-user pilot. No paid resources or real data were used.
+Flyway MariaDB11.8-vs-verified11.7 warning remains disclosed in D-23/BLOCKERS.
+Next: independent reviewer checks the fixes; project owner handles deployment and consensual pilot.

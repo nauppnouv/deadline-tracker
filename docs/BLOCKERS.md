@@ -13,7 +13,7 @@ Cập nhật 18/10/2026. Các kết quả 58 test phía dưới là mốc P6 cũ
 | Lịch backup thật | Chưa cài; mới có scripts và drill DB thử | Chủ vận hành chọn nơi giữ ngoài máy, lịch/người chịu trách nhiệm và cảnh báo; chưa cam kết RPO24h/RTO4h |
 | HTTPS/proxy/rate-limit Internet | Chưa triển khai | Chủ dự án quyết định chi phí/domain; kiểm tra certificate, forwarded headers/IP thật và cookie trên đúng môi trường |
 | Câu chữ SEC05 / D25 | Có giới hạn diễn giải công khai: framework phải lưu session ID/CSRF và trả cookie, raw invite cần phản hồi phân phối | Reviewer xác nhận phạm vi; không tuyên bố nghĩa đen cấm mọi ID/token trong mọi DB/response đã đạt |
-| P7/pilot | Review đã tìm năm phát hiện, bản sửa đã qua 79 test và toàn bộ check; pilot chưa chạy | Reviewer kiểm lại bản sửa trong phiên độc lập; pilot2tuần chỉ sau đồng ý của nhóm và kiểm chứng vận hành |
+| P7/pilot | Review đã tìm năm phát hiện, bản sửa và clone sạch đã qua 79 test/toàn bộ check; biên bản verification/p7-final.txt; pilot chưa chạy | Reviewer kiểm lại bản sửa trong phiên độc lập; pilot2tuần chỉ sau đồng ý của nhóm và kiểm chứng vận hành |
 | Volume thử Compose | Cố ý giữ deadline-w1-e9918b41_database và deadline-w1-7c56fed6_database, chỉ dữ liệu giả; container/network đã gỡ | Chủ máy có thể xem report và quyết định dọn riêng volume thử; không global prune |
 
 Không có cloud/account/email/domain/resource tính phí nào được agent tạo, không dùng credential thật. AWS2GB dự toán vượt50k/tuần; lựa chọn rẻ hơn vẫn cần xác nhận tổng phí và tình trạng còn hàng.

@@ -11,7 +11,8 @@ Cập nhật 18/10/2026. Đang sửa đúng năm phát hiện P7 trên nhánh `f
 - P7-03 RED 2 failure → GREEN 10 test, form có version, 409 giữ bản nháp. Full check 72 test PASS, static/gitleaks/dependency/migration OK, không skip (`target/p7-03-check.log`).
 - P7-04 RED 3 test/2 failure → GREEN 13 test (HTTP chunked thật, size biên, unsupported type, UTF-8/CSRF). Full check 75 test PASS, static/gitleaks/dependency/migration OK, không skip (`target/p7-04-check.log`). DEPLOY có giới hạn Caddy mẫu; proxy Internet chưa triển khai.
 - P7-05 RED 4 failure → GREEN 12 test: V4 bảo vệ Owner, kiểm nâng cấp V3 và trigger sau restore. Full `bash scripts/check.sh` 79 test PASS, 0 failure/error/skip; static/gitleaks/dependency/migration OK (`target/p7-05-check.log`). Không sửa V1/V2/V3.
-- Đang chốt: commit P7-05 rồi kiểm lại từ clone sạch theo AGENTS §10. Bước tiếp theo sau đó: bàn giao năm bản sửa để reviewer kiểm lại; deploy/pilot thật là việc của chủ dự án.
+- Đã chốt P7-05 ở commit `83dbb34`. Clone sạch `.tools/p7-clean-83dbb34` chạy `bash scripts/check.sh`: 79 test PASS, 0 failure/error/skip; static/gitleaks/dependency/migration OK, không bỏ qua; git status clone sạch. Chỉ dùng lại cache tải, không tái dùng DB/target. Biên bản và hash log: `docs/verification/p7-final.txt`.
+- Bước kế tiếp: chủ dự án mở phiên reviewer độc lập kiểm lại đúng năm bản sửa trên nhánh này. Không tự triển khai hoặc mở rộng tính năng. Nếu review có phát hiện mới, tái hiện bằng test trước rồi xử lý trong phạm vi được giao. Deploy/pilot thật và các cổng vận hành trong BLOCKERS do người thực hiện.
 - Không thay phiên bản thư viện/JDK, không chạy tài nguyên trả phí hoặc dữ liệu thật. Các mục P0–P6 phía dưới là lịch sử trước review; chưa có pilot.
 
 | Pha | Kết quả chạy thật |
@@ -23,7 +24,7 @@ Cập nhật 18/10/2026. Đang sửa đúng năm phát hiện P7 trên nhánh `f
 | P4 | Group/invitation atomic42 tests; commit9b82b70 |
 | P5 | Task UI/filter/errors/XSS48 tests; commitc559e9e |
 | P6 | Đã chốt build/check cục bộ và clone sạch58tests; dừng trước P7 |
-| P7/M7 | P7 đã nhận review và sửa năm phát hiện; chờ kiểm lại clone sạch/bàn giao reviewer. M7 chưa chạy, cần người dùng thật đồng ý. |
+| P7/M7 | P7 đã nhận review, sửa năm phát hiện, full check và clone sạch 79 test PASS; bàn giao reviewer kiểm lại. M7 chưa chạy, cần người dùng thật đồng ý. |
 
 ## Lịch sử bằng chứng P6 (trước review P7)
 
