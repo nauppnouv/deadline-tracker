@@ -14,3 +14,5 @@ Ngày 17/10/2026. Nhánh feat/w1-autonomous-build.
 - Build/check chạy thật thành công với JDK 25; đã có jar và test runtime 1/1.
 - P1 kế tiếp: test trước cho Group/Task/Filters; chưa triển khai nghiệp vụ W1.
 - Audit dependency chưa chạy; SEC-13 chưa kiểm chứng.
+
+- P1: US-01/02 domain Group đã có test RED→GREEN, check 9 tests PASS. Tiếp theo: Task create/status/edit/filter (US-03…06).
