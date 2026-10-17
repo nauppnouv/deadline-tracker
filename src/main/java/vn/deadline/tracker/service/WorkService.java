@@ -19,7 +19,7 @@ public class WorkService {
         access.active(actor); var domain=Group.create(name,description,actor);
         var row=new GroupEntity();row.id=domain.getId();row.name=domain.getName();row.description=domain.getDescription();row.ownerId=actor;row.createdAt=now();
         groups.saveAndFlush(row);
-        var member=new MemberEntity();member.id=UUID.randomUUID().toString();member.groupId=row.id;member.userId=actor;member.role="OWNER";member.joinedAt=now();members.saveAndFlush(member);
+        // V4 inserts the Owner membership in the same DB statement/transaction.
         return domain;
     }
     @Transactional(readOnly=true) public Group group(String actor,String groupId) {return access.member(actor,groupId);}

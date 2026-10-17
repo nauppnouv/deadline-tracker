@@ -8,7 +8,10 @@ Cập nhật 18/10/2026. Đang sửa đúng năm phát hiện P7 trên nhánh `f
 - P7-01 hoàn tất phần sửa: RED thật 8 test/2 failure → GREEN 9 test; full `scripts/check.sh` 66 test PASS, static/gitleaks/dependency/migration OK, không bỏ qua. Logs `target/p7-01-{red,green,check}.log`.
 - Đã tiếp tục theo yêu cầu mới của chủ dự án; gói handoff cũ là snapshot, không cập nhật bằng trạng thái phiên này.
 - P7-02 hoàn tất phần sửa: RED cookie HTTP 200 → GREEN HTTP 302; native checksum lệch đã điều tra bằng dữ liệu hàng giống hệt. Manifest mới SHA-256 logic, giữ count/FK, tamper bị chặn. Full `scripts/check.sh` 70 test PASS, static/gitleaks/dependency/migration OK, không skip (`target/p7-02-final-check.log`). OPS giữ cổng credential/quyền sau snapshot cho người vận hành.
-- P7-03 RED 2 failure → GREEN 10 test, form có version, 409 giữ bản nháp. Full check 72 test PASS, static/gitleaks/dependency/migration OK, không skip (`target/p7-03-check.log`). Tiếp theo P7-04 chunked → P7-05 Owner DB, cùng quy trình RED → GREEN → full check → bằng chứng.
+- P7-03 RED 2 failure → GREEN 10 test, form có version, 409 giữ bản nháp. Full check 72 test PASS, static/gitleaks/dependency/migration OK, không skip (`target/p7-03-check.log`).
+- P7-04 RED 3 test/2 failure → GREEN 13 test (HTTP chunked thật, size biên, unsupported type, UTF-8/CSRF). Full check 75 test PASS, static/gitleaks/dependency/migration OK, không skip (`target/p7-04-check.log`). DEPLOY có giới hạn Caddy mẫu; proxy Internet chưa triển khai.
+- P7-05 RED 4 failure → GREEN 12 test: V4 bảo vệ Owner, kiểm nâng cấp V3 và trigger sau restore. Full `bash scripts/check.sh` 79 test PASS, 0 failure/error/skip; static/gitleaks/dependency/migration OK (`target/p7-05-check.log`). Không sửa V1/V2/V3.
+- Đang chốt: commit P7-05 rồi kiểm lại từ clone sạch theo AGENTS §10. Bước tiếp theo sau đó: bàn giao năm bản sửa để reviewer kiểm lại; deploy/pilot thật là việc của chủ dự án.
 - Không thay phiên bản thư viện/JDK, không chạy tài nguyên trả phí hoặc dữ liệu thật. Các mục P0–P6 phía dưới là lịch sử trước review; chưa có pilot.
 
 | Pha | Kết quả chạy thật |
@@ -20,9 +23,9 @@ Cập nhật 18/10/2026. Đang sửa đúng năm phát hiện P7 trên nhánh `f
 | P4 | Group/invitation atomic42 tests; commit9b82b70 |
 | P5 | Task UI/filter/errors/XSS48 tests; commitc559e9e |
 | P6 | Đã chốt build/check cục bộ và clone sạch58tests; dừng trước P7 |
-| P7/M7 | Chưa chạy; reviewer chat mới/pilot người dùng do chủ dự án thực hiện |
+| P7/M7 | P7 đã nhận review và sửa năm phát hiện; chờ kiểm lại clone sạch/bàn giao reviewer. M7 chưa chạy, cần người dùng thật đồng ý. |
 
-## Bằng chứng mới nhất
+## Lịch sử bằng chứng P6 (trước review P7)
 
 - target/p6-verified.log: check58 tests,0 failure/error/skip; static/gitleaks/migration/OWASP audit đều OK. Evidence và artifacts ở docs/verification.
 - Tomcat11.0.24 audit High/Critical →vá11.0.27 →audit54entries/0findings; không suppress. OSSIndex tắt vì cần credential, NVD đã cập nhật thật.
@@ -34,7 +37,7 @@ Cập nhật 18/10/2026. Đang sửa đúng năm phát hiện P7 trên nhánh `f
 - NFR04 p95=169ms/max241ms,100request,5threads,3x5x200, MockMvc+MariaDB, không mạng/TLS/SLA.
 - Lỗi p6-full do hai build ghi target đã sửa bằng chạy tuần tự; lỗi fixture GRANT khi mở rộng restore đã sửa MYSQL_PWD. Không tính các lượt lỗi là đạt.
 
-## Đã dừng ở P6 — việc phiên sau
+## Lịch sử điểm dừng P6 (đã tiếp tục ở P7 phía trên)
 
 - Code runtime commit8d06499, ops e2af9bf, backup b4a4867. Clone sạch .tools/verification-a340b3c25bcd403f925cae3f085f7c2e check58tests/0failure/error/skip và toàn bộ check OK, không skip; docs/verification/clean-clone.txt có hash log/thời điểm audit. Chỉ tái dùng cache tải, DB và target đều mới.
 - Biên bản cuối chỉ đổi docs. Không push/merge nhánh feat/w1-autonomous-build; không tạo cloud/domain/email/tài nguyên tính phí, không credential thật.
@@ -42,6 +45,4 @@ Cập nhật 18/10/2026. Đang sửa đúng năm phát hiện P7 trên nhánh `f
 - Sau review: sửa findings và chạy lại cổng liên quan/fullcheck; chỉ sau đó chủ dự án quyết định publish/deploy/ngân sách, HTTPS/proxy/IP trust/image-OS scan, lịch backup ngoài máy và pilot có đồng ý. US20/21 là một phần vận hành, US22 chưa làm.
 - Các testcontainer tạm/demo đã đóng; hai Compose trial volume được giữ theo BLOCKERS, không chứa dữ liệu thật. Không dọn volume khác/global prune.
 
-D20 username nội bộ44ký tự; D21 disabled assignee; D22 vá Tomcat; D23 cảnh báo Flyway; D24 logout-all/compoundFK; D25 diễn giải credential không rò rỉ trong các luồng được phép. JDK25 .tools/java25; Maven .m2-local; NVD .tools/dependency-check. Docker/Git Bash đã có quyền chạy. Không tiếp tục P7 trong cùng chat này.
-
-- P7-04 RED 3 test/2 failure → GREEN 13 test (HTTP chunked thật, size biên, unsupported type, UTF-8/CSRF). Full check 75 test PASS, static/gitleaks/dependency/migration OK, không skip (target/p7-04-check.log). Chưa triển khai proxy; DEPLOY thêm giới hạn Caddy mẫu. Sau đó P7-05.
+D20 username nội bộ44ký tự; D21 disabled assignee; D22 vá Tomcat; D23 cảnh báo Flyway; D24 logout-all/compoundFK; D25 diễn giải credential không rò rỉ trong các luồng được phép. JDK25 .tools/java25; Maven .m2-local; NVD .tools/dependency-check. Docker/Git Bash đã có quyền chạy. D-26/D-27 ghi quyết định checksum/restore và Owner trong P7.

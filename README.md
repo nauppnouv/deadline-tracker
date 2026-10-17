@@ -1,6 +1,6 @@
 # Deadline Tracker — W1
 
-Quản lý công việc cho nhóm đồ án 4–5 người: giao việc, tiến độ, lọc hạn và lưu lịch sử. Bản web đã có mã nguồn/kiểm thử; kết quả chạy thật ở [EVIDENCE](docs/EVIDENCE.md). Chưa triển khai công khai, chưa pilot và chưa review P7. Kiểm thử không phải chứng nhận bảo mật.
+Quản lý công việc cho nhóm đồ án 4–5 người: giao việc, tiến độ, lọc hạn và lưu lịch sử. Bản web đã có mã nguồn/kiểm thử; kết quả chạy thật ở [EVIDENCE](docs/EVIDENCE.md). P7 đã nhận review và sửa năm phát hiện, chờ reviewer kiểm lại bản sửa. Chưa triển khai công khai, chưa pilot. Kiểm thử không phải chứng nhận bảo mật.
 
 ## Chạy cục bộ
 
@@ -9,11 +9,11 @@ Cần [JDK 25 LTS](https://adoptium.net/temurin/releases/?version=25), Maven 3.9
 ```bash
 git clone https://github.com/nauppnouv/deadline-tracker.git
 cd deadline-tracker
-# Chuyển sang feat/w1-autonomous-build khi chủ repo đã push nhánh đó.
+# Chuyển sang fix/p7-security-data-findings khi chủ repo đã push nhánh đó.
 bash scripts/check.sh
 ```
 
-Build tự chủ được commit trên `feat/w1-autonomous-build`; remote chỉ có phiên bản này sau khi chủ repo push nhánh. Clone local nhánh này cũng dùng được. Check chạy test trên MariaDB tạm, đóng gói jar, kiểm tra template/SQL, quét bí mật/dependency và migration. Lần đầu NVD có thể mất hàng chục phút, cần mạng. Nếu mất mạng: `RUN_DEPENDENCY_AUDIT=0 AUDIT_SKIP_REASON='không có mạng' bash scripts/check.sh`; đây là **bỏ qua SEC-13**, không phải audit đạt. Cài gitleaks từ nguồn chính thức để có bộ quét đầy đủ; fallback chỉ dò mẫu khóa phổ biến.
+Build tự chủ ban đầu ở `feat/w1-autonomous-build`, bản sửa P7 ở `fix/p7-security-data-findings`; remote chỉ có phiên bản này sau khi chủ repo push nhánh. Clone local nhánh này cũng dùng được. Check chạy test trên MariaDB tạm, đóng gói jar, kiểm tra template/SQL, quét bí mật/dependency và migration. Lần đầu NVD có thể mất hàng chục phút, cần mạng. Nếu mất mạng: `RUN_DEPENDENCY_AUDIT=0 AUDIT_SKIP_REASON='không có mạng' bash scripts/check.sh`; đây là **bỏ qua SEC-13**, không phải audit đạt. Cài gitleaks từ nguồn chính thức để có bộ quét đầy đủ; fallback chỉ dò mẫu khóa phổ biến.
 
 PowerShell: gọi Bash bằng `& 'C:/Program Files/Git/bin/bash.exe' scripts/check.sh`. Docker pipe bị từ chối thì kiểm tra Docker Desktop/quyền terminal; không bỏ integration test để lấy build xanh.
 

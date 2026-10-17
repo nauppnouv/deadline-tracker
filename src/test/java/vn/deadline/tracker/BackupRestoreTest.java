@@ -26,6 +26,10 @@ class BackupRestoreTest extends DatabaseTest {
             var restoredWork=restored.getBean(WorkService.class);
             assertEquals("Backup task",restoredWork.task(user,group,task.getId()).getTitle());
             assertEquals(vn.deadline.tracker.domain.RuleViolation.Kind.NOT_FOUND,assertThrows(vn.deadline.tracker.domain.RuleViolation.class,()->restoredWork.task(outsider,group,task.getId())).getKind());
+            var restoredJdbc=restored.getBean(org.springframework.jdbc.core.JdbcTemplate.class);
+            String fresh=restoredWork.createGroup(user,"Created after restore","").getId();
+            assertEquals(1,restoredJdbc.queryForObject("SELECT COUNT(*) FROM group_member WHERE group_id=? AND user_id=? AND role='OWNER'",Integer.class,fresh,user));
+            assertThrows(org.springframework.dao.DataAccessException.class,()->restoredJdbc.update("UPDATE group_member SET role='MEMBER' WHERE group_id=? AND user_id=?",fresh,user));
         }
         Files.writeString(Path.of("target/restore-verification.txt"),"APP_RESTORED_OK owner reads task; outsider rejected NOT_FOUND\n",java.nio.file.StandardOpenOption.APPEND);
         assertNotEquals(0,run("export RESTORE_DB=deadline_test BACKUP_FILE='"+file+"'; bash /deadline-project/scripts/verify-restore.sh").getExitCode());
