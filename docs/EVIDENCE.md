@@ -2,6 +2,18 @@
 
 Ngày khởi tạo: 17/10/2026. Chỉ cập nhật khi đã chạy thật. Log local trong target/; kết quả có thể tái hiện bằng lệnh và tên test.
 
+## P7 — sửa năm phát hiện review (18/10/2026)
+
+Các kết quả P0–P6 bên dưới là lịch sử kiểm tra 58 test cũ. Review đã tái hiện lỗ hổng ngoài phạm vi các test đó; chưa coi các cổng liên quan đạt cho những ca mới cho đến khi các dòng P7 hoàn tất.
+
+| Phát hiện | Trạng thái | Bằng chứng đã chạy |
+|---|---|---|
+| P7-01 metadata backup/restore, DATA-08/UAT-14 | đạt | RED: `bash scripts/mvn.sh test -Dtest=BackupFailureTest` — 8 test, 2 failure, 0 error/skip (`target/p7-01-red.log`). Sau sửa: `bash scripts/mvn.sh test -Dtest=BackupFailureTest,BackupRestoreTest` — 9 test PASS (`target/p7-01-green.log`). `bash scripts/check.sh` — 66 test PASS, static/gitleaks/dependency/migration OK, không bỏ qua (`target/p7-01-check.log`). Lỗi import harness trước RED không tính là tái hiện nghiệp vụ. DATA-08/UAT-14 còn mở P7-02. |
+| P7-02 phiên sau restore, SEC-06/UAT-01/13/14 | không đạt | Review tái hiện cookie đã logout nhận 200 sau restore; chưa sửa. |
+| P7-03 form nhóm cũ, DATA-04 | không đạt | Review tái hiện hai POST 302 và mất tên nhóm mới; chưa sửa. |
+| P7-04 request chunked, SEC-14 | không đạt | Review tái hiện 17.000 byte được nhận; chưa sửa. |
+| P7-05 Owner membership, DATA-02/BR-14 | không đạt | Review tái hiện SQL chèn nhóm thiếu membership Owner và đổi Owner thành Member; chưa sửa. |
+
 | Cổng | Trạng thái | Lệnh/test | Ngày | Kết quả |
 |---|---|---|---|---|
 | UAT-01 | đạt | bash scripts/check.sh; P4 | 17/10/2026 | AuthWebTest sessionLifecycle; simulated accounts, not pilot |

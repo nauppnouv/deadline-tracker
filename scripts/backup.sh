@@ -12,22 +12,39 @@ case "$BACKUP_DIR/" in "$repo/"*) echo 'Backups must be outside repository' >&2;
 chmod 700 "$BACKUP_DIR"
 export MYSQL_PWD="$DB_PASSWORD"
 sql=(mariadb --host="$DB_HOST" --port="${DB_PORT:-3306}" --user="$DB_USER" --batch --skip-column-names)
+# An assignment propagates the SQL exit status; process substitution does not.
+tables="$("${sql[@]}" "$DB_NAME" -e 'SHOW TABLES')"
+[[ -n "$tables" ]] || { echo 'No tables available for backup' >&2; exit 1; }
 file="$(mktemp "$BACKUP_DIR/deadline-$(date -u +%Y%m%dT%H%M%SZ).XXXXXX.sql.gz")"
+manifest="$file.tables.pending"
+complete=false
+cleanup() {
+  if [[ "$complete" != true ]]; then
+    rm -f -- "$file" "$file.sha256" "$file.tables.tsv" "$manifest"
+  fi
+}
+trap cleanup EXIT
 trap 'echo "Backup interrupted; incomplete file is not verified" >&2' ERR
 mariadb-dump --host="$DB_HOST" --port="${DB_PORT:-3306}" --user="$DB_USER" --single-transaction --routines --triggers --hex-blob "$DB_NAME" | gzip > "$file"
-sha256sum "$file" | cut -d ' ' -f 1 > "$file.sha256"
 # Stop application writes while generating this verification manifest.
 while IFS= read -r table; do
   [[ "$table" =~ ^[a-zA-Z0-9_]+$ ]] || exit 1
   count="$("${sql[@]}" "$DB_NAME" -e "SELECT COUNT(*) FROM \`$table\`")"
   checksum="$("${sql[@]}" "$DB_NAME" -e "CHECKSUM TABLE \`$table\` EXTENDED" | cut -f 2)"
+  [[ "$count" =~ ^[0-9]+$ && "$checksum" =~ ^[0-9]+$ ]] || { echo 'Invalid table verification data' >&2; exit 1; }
   printf '%s\t%s\t%s\n' "$table" "$count" "$checksum"
-done < <("${sql[@]}" "$DB_NAME" -e 'SHOW TABLES') > "$file.tables.tsv"
+done <<< "$tables" > "$manifest"
+[[ -s "$manifest" ]] || { echo 'Empty backup manifest' >&2; exit 1; }
+mv -- "$manifest" "$file.tables.tsv"
+sha256sum "$file" | cut -d ' ' -f 1 > "$file.sha256"
 chmod 600 "$file" "$file.sha256" "$file.tables.tsv"
 # Only remove our own generated backups, never unrelated files.
-mapfile -t backups < <(find "$BACKUP_DIR" -maxdepth 1 -type f -regextype posix-extended -regex '.*/deadline-[0-9]{8}T[0-9]{6}Z\.[a-zA-Z0-9]{6}\.sql\.gz' -printf '%T@ %f\n' | sort -rn | cut -d ' ' -f 2- | while IFS= read -r name; do
-  if [[ -f "$BACKUP_DIR/$name.sha256" && -f "$BACKUP_DIR/$name.tables.tsv" ]]; then printf '%s\n' "$name"; fi
-done)
+backup_names="$(find "$BACKUP_DIR" -maxdepth 1 -type f -regextype posix-extended -regex '.*/deadline-[0-9]{8}T[0-9]{6}Z\.[a-zA-Z0-9]{6}\.sql\.gz' -printf '%T@ %f\n' | sort -rn | cut -d ' ' -f 2-)"
+backups=()
+while IFS= read -r name; do
+  if [[ -n "$name" && -s "$BACKUP_DIR/$name.sha256" && -s "$BACKUP_DIR/$name.tables.tsv" ]]; then backups+=("$name"); fi
+done <<< "$backup_names"
+complete=true
 for ((i=keep; i<${#backups[@]}; i++)); do
   old="$BACKUP_DIR/${backups[$i]}"
   rm -- "$old" "$old.sha256" "$old.tables.tsv"

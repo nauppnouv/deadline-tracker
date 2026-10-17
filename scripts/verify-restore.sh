@@ -11,7 +11,9 @@ sql=(mariadb --host="$DB_HOST" --port="${DB_PORT:-3306}" --user="$DB_USER" --bat
 [[ "$("${sql[@]}" -e "SELECT COUNT(*) FROM information_schema.SCHEMATA WHERE SCHEMA_NAME='$RESTORE_DB'")" == 0 ]] || { echo 'Restore database already exists; refusing overwrite' >&2; exit 1; }
 "${sql[@]}" -e "CREATE DATABASE \`$RESTORE_DB\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
 gzip -dc -- "$BACKUP_FILE" | "${sql[@]}" "$RESTORE_DB"
-[[ "$("${sql[@]}" "$RESTORE_DB" -e 'SHOW TABLES' | sort)" == "$(cut -f 1 "$BACKUP_FILE.tables.tsv" | sort)" ]] || { echo 'Table inventory mismatch' >&2; exit 1; }
+actual_tables="$("${sql[@]}" "$RESTORE_DB" -e 'SHOW TABLES' | sort)"
+expected_tables="$(cut -f 1 "$BACKUP_FILE.tables.tsv" | sort)"
+[[ -n "$actual_tables" && "$actual_tables" == "$expected_tables" ]] || { echo 'Table inventory mismatch' >&2; exit 1; }
 while IFS=$'\t' read -r table expected_count expected_checksum; do
   [[ "$table" =~ ^[a-zA-Z0-9_]+$ && "$expected_count" =~ ^[0-9]+$ && "$expected_checksum" =~ ^[0-9]+$ ]] || exit 1
   count="$("${sql[@]}" "$RESTORE_DB" -e "SELECT COUNT(*) FROM \`$table\`")"
@@ -27,7 +29,9 @@ verify_fk() {
   [[ "$orphans" == 0 ]] || { echo "Foreign key violation: $current_key" >&2; exit 1; }
   printf 'FK_OK %s\n' "$current_key"
 }
+foreign_keys="$("${sql[@]}" -e "SELECT TABLE_NAME,CONSTRAINT_NAME,COLUMN_NAME,REFERENCED_TABLE_NAME,REFERENCED_COLUMN_NAME FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA='$RESTORE_DB' AND REFERENCED_TABLE_NAME IS NOT NULL ORDER BY TABLE_NAME,CONSTRAINT_NAME,ORDINAL_POSITION")"
 while IFS=$'\t' read -r table constraint column parent parent_column; do
+  [[ -n "$table" ]] || continue
   for identifier in "$table" "$constraint" "$column" "$parent" "$parent_column"; do [[ "$identifier" =~ ^[a-zA-Z0-9_]+$ ]] || exit 1; done
   key="$table.$constraint"
   if [[ "$key" != "$current_key" ]]; then
@@ -37,6 +41,6 @@ while IFS=$'\t' read -r table constraint column parent parent_column; do
   else
     join_condition+=" AND c.\`$column\`=p.\`$parent_column\`"; nonnull_condition+=" AND c.\`$column\` IS NOT NULL"
   fi
-done < <("${sql[@]}" -e "SELECT TABLE_NAME,CONSTRAINT_NAME,COLUMN_NAME,REFERENCED_TABLE_NAME,REFERENCED_COLUMN_NAME FROM information_schema.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA='$RESTORE_DB' AND REFERENCED_TABLE_NAME IS NOT NULL ORDER BY TABLE_NAME,CONSTRAINT_NAME,ORDINAL_POSITION")
+done <<< "$foreign_keys"
 verify_fk
 echo 'RESTORE_OK (trial database retained for inspection)'

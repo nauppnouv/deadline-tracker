@@ -1,6 +1,13 @@
 # Tiến độ và điểm tiếp tục
 
-Cập nhật17/10/2026. Nhánh feat/w1-autonomous-build, commit local, chưa push bản build này.
+Cập nhật 18/10/2026. Đang sửa đúng năm phát hiện P7 trên nhánh `fix/p7-security-data-findings`; chưa push/merge.
+
+## P7 — công việc hiện tại
+
+- Chấp nhận cả năm phát hiện review; xử lý ba Chặn pilot trước hai Nên sửa.
+- P7-01 hoàn tất phần sửa: RED thật 8 test/2 failure → GREEN 9 test; full `scripts/check.sh` 66 test PASS, static/gitleaks/dependency/migration OK, không bỏ qua. Logs `target/p7-01-{red,green,check}.log`.
+- Tiếp theo: P7-02 cookie sau restore → P7-03 form nhóm cũ → P7-04 chunked → P7-05 Owner DB. Mỗi mục phải RED → GREEN → full check → cập nhật bằng chứng.
+- Không thay phiên bản thư viện/JDK, không chạy tài nguyên trả phí hoặc dữ liệu thật. Các mục P0–P6 phía dưới là lịch sử trước review; chưa có pilot.
 
 | Pha | Kết quả chạy thật |
 |---|---|
