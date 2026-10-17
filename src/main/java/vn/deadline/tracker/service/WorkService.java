@@ -26,9 +26,11 @@ public class WorkService {
     @Transactional(readOnly=true) public List<GroupEntity> groups(String actor) {
         access.active(actor); return groups.findAllById(members.findByUserId(actor).stream().map(m->m.groupId).toList()).stream().sorted(Comparator.comparing(g->g.name)).toList();
     }
-    public void renameGroup(String actor,String groupId,String name,String description) {
+    public void renameGroup(String actor,String groupId,String name,String description,long expectedVersion) {
         var domain=access.owner(actor,groupId);domain.rename(actor,name,description);
-        var row=groups.findById(groupId).orElseThrow(RuleViolation::missing);row.name=domain.getName();row.description=domain.getDescription();groups.flush();
+        var row=groups.findById(groupId).orElseThrow(RuleViolation::missing);
+        if(row.version==null||row.version!=expectedVersion)throw RuleViolation.conflict();
+        row.name=domain.getName();row.description=domain.getDescription();groups.flush();
     }
     public Task createTask(String actor,String groupId,String title,String description,String assignee,Instant due) {
         var group=access.member(actor,groupId);access.assignable(groupId,assignee);var domain=Task.create(group,actor,title,description,assignee,due,clock);

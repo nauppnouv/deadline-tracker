@@ -5,6 +5,7 @@ import vn.deadline.tracker.service.*;import vn.deadline.tracker.domain.*;import 
 @Controller
 public class GroupController {
     public record Form(@NotBlank @Size(max=100) String name,@Size(max=1000) String description){}
+    public record SettingsForm(@NotBlank @Size(max=100) String name,@Size(max=1000) String description,@NotNull @PositiveOrZero Long version){}
     private final WorkService work;private final PeopleService people;private final InvitationService invites;private final java.time.Clock clock;
     public GroupController(WorkService work,PeopleService people,InvitationService invites,java.time.Clock clock){this.work=work;this.people=people;this.invites=invites;this.clock=clock;}
     @GetMapping("/") String home(){return "redirect:/groups";}
@@ -20,10 +21,17 @@ public class GroupController {
         model.addAttribute("tasks",all.stream().filter(t->filter.matches(t,now)).toList());model.addAttribute("owner",g.isOwner(actor.id()));model.addAttribute("progress",Progress.of(all,now));
         model.addAttribute("now",now);model.addAttribute("filter",filter);model.addAttribute("mine",mine);model.addAttribute("statuses",TaskStatus.values());return "group";
     }
-    @GetMapping("/groups/{group}/settings") String settings(@PathVariable String group,@AuthenticationPrincipal TrackerPrincipal actor,Model model){var g=work.group(actor.id(),group);g.requireOwner(actor.id());settingsModel(group,actor.id(),model);model.addAttribute("form",new Form(g.getName(),g.getDescription()));return "group-settings";}
-    @PostMapping("/groups/{group}/settings") String settings(@PathVariable String group,@AuthenticationPrincipal TrackerPrincipal actor,@Valid @ModelAttribute("form") Form form,BindingResult errors,Model model,jakarta.servlet.http.HttpServletResponse response){
+    @GetMapping("/groups/{group}/settings") String settings(@PathVariable String group,@AuthenticationPrincipal TrackerPrincipal actor,Model model){var g=work.group(actor.id(),group);g.requireOwner(actor.id());settingsModel(group,actor.id(),model);model.addAttribute("form",new SettingsForm(g.getName(),g.getDescription(),g.getVersion()));return "group-settings";}
+    @PostMapping("/groups/{group}/settings") String settings(@PathVariable String group,@AuthenticationPrincipal TrackerPrincipal actor,@Valid @ModelAttribute("form") SettingsForm form,BindingResult errors,Model model,jakarta.servlet.http.HttpServletResponse response){
         work.group(actor.id(),group).requireOwner(actor.id());if(errors.hasErrors()){settingsModel(group,actor.id(),model);response.setStatus(400);return "group-settings";}
-        try{work.renameGroup(actor.id(),group,form.name(),form.description());return "redirect:/groups/"+group+"/settings";}catch(RuleViolation e){if(e.getKind()!=RuleViolation.Kind.VALIDATION)throw e;errors.reject("invalid",e.getMessage());settingsModel(group,actor.id(),model);response.setStatus(400);return "group-settings";}
+        try{work.renameGroup(actor.id(),group,form.name(),form.description(),form.version());return "redirect:/groups/"+group+"/settings";}
+        catch(RuleViolation e){
+            if(e.getKind()!=RuleViolation.Kind.VALIDATION&&e.getKind()!=RuleViolation.Kind.CONFLICT)throw e;
+            errors.reject("invalid",e.getMessage());settingsModel(group,actor.id(),model);
+            boolean stale=e.getKind()==RuleViolation.Kind.CONFLICT;model.addAttribute("stale",stale);response.setStatus(stale?409:400);return "group-settings";
+        }catch(org.springframework.dao.OptimisticLockingFailureException e){
+            errors.reject("conflict",RuleViolation.conflict().getMessage());settingsModel(group,actor.id(),model);model.addAttribute("stale",true);response.setStatus(409);return "group-settings";
+        }
     }
-    private void settingsModel(String group,String actor,Model model){model.addAttribute("group",work.group(actor,group));model.addAttribute("invitations",invites.listings(actor,group));}
+    private void settingsModel(String group,String actor,Model model){model.addAttribute("group",work.group(actor,group));model.addAttribute("invitations",invites.listings(actor,group));model.addAttribute("stale",false);}
 }

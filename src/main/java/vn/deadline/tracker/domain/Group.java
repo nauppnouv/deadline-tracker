@@ -10,6 +10,7 @@ public final class Group {
     private final Set<String> members;
     private String name;
     private String description;
+    private long version;
     private Group(String id, String name, String description, String ownerId, Set<String> members) {
         this.id = Inputs.required(id,36,"Mã nhóm");
         this.ownerId = Inputs.required(ownerId,36,"Chủ nhóm");
@@ -25,6 +26,10 @@ public final class Group {
     public static Group restore(String id,String name,String description,String ownerId,Set<String> members) {
         return new Group(id,name,description,ownerId,members);
     }
+    public static Group restore(String id,String name,String description,String ownerId,Set<String> members,long version) {
+        var group=restore(id,name,description,ownerId,members);group.version=version;return group;
+    }
+    public long getVersion() { return version; }
     public boolean addMember(String userId) { return members.add(Inputs.required(userId,36,"Thành viên")); }
     public void requireMember(String userId) { if (!isMember(userId)) throw RuleViolation.missing(); }
     public void requireOwner(String userId) { requireMember(userId); if (!isOwner(userId)) throw RuleViolation.forbidden(); }

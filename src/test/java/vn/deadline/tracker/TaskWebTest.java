@@ -73,7 +73,7 @@ class TaskWebTest extends DatabaseTest {
     }
     @Test @DisplayName("US-18 SEC-08/09 UAT-16 user-controlled HTML is escaped in group/task/detail/forms")
     void xssAndHeaders()throws Exception{
-        String payload="<script>alert(1)</script>";work.renameGroup(owner.id(),group,payload,payload);
+        String payload="<script>alert(1)</script>";work.renameGroup(owner.id(),group,payload,payload,work.group(owner.id(),group).getVersion());
         var t=work.createTask(creator.id(),group,payload,payload,worker.id(),Instant.now().plusSeconds(3600));
         for(String path:List.of("/groups","/groups/"+group,url(t),url(t)+"/edit")){
             var response=mvc.perform(get(path).cookie(owner.cookie())).andExpect(status().isOk()).andExpect(header().string("Referrer-Policy","no-referrer")).andReturn().getResponse();

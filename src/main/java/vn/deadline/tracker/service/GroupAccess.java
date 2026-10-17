@@ -18,7 +18,7 @@ public class GroupAccess {
         active(actor);
         if(!members.existsByGroupIdAndUserId(groupId,actor)) throw RuleViolation.missing();
         var row=groups.findById(groupId).orElseThrow(RuleViolation::missing);
-        return Group.restore(row.id,row.name,row.description,row.ownerId,members.findByGroupIdOrderByJoinedAtAsc(groupId).stream().map(m->m.userId).collect(Collectors.toSet()));
+        return Group.restore(row.id,row.name,row.description,row.ownerId,members.findByGroupIdOrderByJoinedAtAsc(groupId).stream().map(m->m.userId).collect(Collectors.toSet()),row.version);
     }
     public Group owner(String actor,String groupId) {var group=member(actor,groupId);group.requireOwner(actor);return group;}
 }
