@@ -26,10 +26,13 @@ public class SecurityConfig {
     @Bean SecurityFilterChain security(HttpSecurity http,UserDetailsService users,PasswordEncoder encoder,RateLimiter limiter,AccountRepository accounts)throws Exception{
         var provider=new DaoAuthenticationProvider(users);provider.setPasswordEncoder(encoder);http.authenticationProvider(provider);
         http.authorizeHttpRequests(a->a.requestMatchers("/login","/register","/error","/css/**","/js/**").permitAll().anyRequest().authenticated());
-        http.formLogin(f->f.loginPage("/login").failureUrl("/login?error").defaultSuccessUrl("/groups",true).permitAll());
+        http.formLogin(f->f.loginPage("/login").failureHandler((request,response,error)->response.sendRedirect(request.getContextPath()+ReturnPath.login(request.getParameter("next"),"error")))
+            .successHandler((request,response,authentication)->{String next=ReturnPath.invitation(request.getParameter("next"));response.sendRedirect(request.getContextPath()+(next==null?"/groups":next));}).permitAll());
         http.requestCache(c->c.requestCache(new org.springframework.security.web.savedrequest.NullRequestCache()));
         http.logout(l->l.logoutUrl("/logout").logoutSuccessUrl("/login?logout").invalidateHttpSession(true).clearAuthentication(true).deleteCookies("SESSION"));
-        http.exceptionHandling(e->e.authenticationEntryPoint((request,response,error)->{if(request.getRequestURI().substring(request.getContextPath().length()).startsWith("/groups/"))response.sendError(404);else response.sendRedirect(request.getContextPath()+"/login");}));
+        http.exceptionHandling(e->e.authenticationEntryPoint((request,response,error)->{String path=request.getRequestURI().substring(request.getContextPath().length());
+            if(path.startsWith("/groups/"))response.sendError(404);
+            else response.sendRedirect(request.getContextPath()+(ReturnPath.invitation(path)==null?"/login":ReturnPath.login(path,"continue")));}));
         http.headers(h->h.contentSecurityPolicy(c->c.policyDirectives("default-src 'self'; script-src 'self'; style-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"))
             .referrerPolicy(r->r.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER)).frameOptions(f->f.deny()));
         http.addFilterBefore(new AuthAttemptFilter(limiter),UsernamePasswordAuthenticationFilter.class);

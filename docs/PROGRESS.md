@@ -31,3 +31,9 @@ Ngày 17/10/2026. Nhánh feat/w1-autonomous-build.
 - Account/session/CSRF/rate limit/central group access có test. 36 tests PASS; cookie flags/fixation/expiration và revoke all sessions đã kiểm chứng.
 - Maven/user home/Docker client config được cách ly trong repo; credential principal bị erase trước khi lưu session.
 - Tiếp P4: lời mời bằng token, hết hạn mốc biên, thu hồi, atomic join và luồng web.
+
+## P4 đã qua cổng
+
+- 42 tests PASS. Group create/settings, token invites, role checks, expiry/revoke/concurrent join có bằng chứng.
+- Màn hình nhóm/lời mời cơ bản đã chạy qua MVC; chưa đánh giá hình thức/responsive bằng trình duyệt.
+- Tiếp P5: task forms/details/status, dashboard/filter, XSS/headers và ma trận mọi route nhóm.

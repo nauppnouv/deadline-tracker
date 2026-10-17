@@ -6,11 +6,11 @@ import jakarta.servlet.http.HttpServletRequest;
 @Controller
 public class AuthController {
     private final AccountService accounts;public AuthController(AccountService accounts){this.accounts=accounts;}
-    @GetMapping("/login") String login(){return "login";}
-    @GetMapping("/register") String register(){return "register";}
-    @PostMapping("/register") String register(@RequestParam String username,@RequestParam String displayName,@RequestParam String password,Model model,jakarta.servlet.http.HttpServletResponse response){
-        try{accounts.register(username,displayName,password);return "redirect:/login?registered";}
-        catch(RuleViolation error){response.setStatus(400);model.addAttribute("message",error.getMessage());model.addAttribute("username",username);model.addAttribute("displayName",displayName);return "register";}
+    @GetMapping("/login") String login(@RequestParam(required=false) String next,Model model){model.addAttribute("next",vn.deadline.tracker.security.ReturnPath.invitation(next));return "login";}
+    @GetMapping("/register") String register(@RequestParam(required=false) String next,Model model){model.addAttribute("next",vn.deadline.tracker.security.ReturnPath.invitation(next));return "register";}
+    @PostMapping("/register") String register(@RequestParam String username,@RequestParam String displayName,@RequestParam String password,@RequestParam(required=false) String next,Model model,jakarta.servlet.http.HttpServletResponse response){
+        try{accounts.register(username,displayName,password);return "redirect:"+vn.deadline.tracker.security.ReturnPath.login(next,"registered");}
+        catch(RuleViolation error){response.setStatus(400);model.addAttribute("message",error.getMessage());model.addAttribute("username",username);model.addAttribute("displayName",displayName);model.addAttribute("next",vn.deadline.tracker.security.ReturnPath.invitation(next));return "register";}
     }
     @GetMapping("/account") String account(@AuthenticationPrincipal TrackerPrincipal principal,Model model){var a=accounts.current(principal.id());model.addAttribute("username",a.username);model.addAttribute("displayName",a.displayName);return "account";}
     @GetMapping("/password") String password(){return "password";}

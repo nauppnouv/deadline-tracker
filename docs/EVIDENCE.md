@@ -4,9 +4,9 @@ Ngày khởi tạo: 17/10/2026. Chỉ cập nhật khi đã chạy thật. Log l
 
 | Cổng | Trạng thái | Lệnh/test | Ngày | Kết quả |
 |---|---|---|---|---|
-| UAT-01 | chưa chạy | — | — | Chưa có bằng chứng |
-| UAT-02 | chưa chạy | — | — | Chưa có bằng chứng |
-| UAT-03 | chưa chạy | — | — | Chưa có bằng chứng |
+| UAT-01 | đạt | bash scripts/check.sh; P4 | 17/10/2026 | AuthWebTest sessionLifecycle; simulated accounts, not pilot |
+| UAT-02 | đạt | bash scripts/check.sh; P4 | 17/10/2026 | GroupInvitationWebTest creates group then four distinct accounts join: 5 members; simulated accounts, not pilot |
+| UAT-03 | đạt | bash scripts/check.sh; P4 | 17/10/2026 | InvitationTest expires/revokes/used token and two concurrent service joins; simulated accounts, not pilot |
 | UAT-04 | chưa chạy | — | — | Chưa có bằng chứng |
 | UAT-05 | chưa chạy | — | — | Chưa có bằng chứng |
 | UAT-06 | chưa chạy | — | — | Chưa có bằng chứng |
@@ -28,7 +28,7 @@ Ngày khởi tạo: 17/10/2026. Chỉ cập nhật khi đã chạy thật. Log l
 | SEC-04 | đạt | bash scripts/check.sh; AuthWebTest/RateLimitTest | 17/10/2026 | AuthWebTest.csrfProtection rejects missing/invalid token; valid registration succeeds; phạm vi build P3 |
 | SEC-05 | đạt | bash scripts/check.sh; AuthWebTest/RateLimitTest | 17/10/2026 | AuthWebTest.registrationRules: Argon2, lengths, Unicode; successful-run log scan no plain test password; phạm vi build P3 |
 | SEC-06 | đạt | bash scripts/check.sh; AuthWebTest/RateLimitTest | 17/10/2026 | AuthWebTest.sessionLifecycle/fixationAndExpiry/rateLimit: JDBC cookies, rotation, expiration, logout/change; RateLimitTest injected Clock; phạm vi build P3 |
-| SEC-07 | chưa chạy | — | — | Chưa có bằng chứng |
+| SEC-07 | đạt | InvitationTest + GroupInvitationWebTest; bash scripts/check.sh | 17/10/2026 | 256-bit token, hash-only DB, exact expiry, atomic join, no-referrer, POST+CSRF, no raw token in session |
 | SEC-08 | chưa chạy | — | — | Chưa có bằng chứng |
 | SEC-09 | chưa chạy | — | — | Chưa có bằng chứng |
 | SEC-10 | chưa chạy | — | — | Chưa có bằng chứng |
@@ -86,3 +86,10 @@ Ngày khởi tạo: 17/10/2026. Chỉ cập nhật khi đã chạy thật. Log l
 - Test bổ sung đã phát hiện và sửa cookie thiếu HttpOnly/SameSite trong mock servlet context; CookieSerializer khai báo rõ, prod Secure.
 - Expiration test dùng LAST_ACCESS_TIME và EXPIRY_TIME đúng cơ chế Spring Session; kiểm tra cookie cũ không vào account được.
 - Chưa có toàn bộ routes W1; SEC mapping/object matrix được chạy lại sau P5. SEC-13 còn chờ NVD scan.
+
+## P4 US-12…14 — nhóm và lời mời
+
+- RED service: target/p4-red.log thiếu InvitationService; RED view target/p4-web-red.log thiếu invitation template và phát hiện rollback-only do bắt exception membership trong transaction. Đã thay bằng truy vấn membership không ném exception.
+- GREEN cuối target/p4-final.log: 42 tests PASS, không error/failure/skip; gitleaks/check OK.
+- 4 service tests lời mời: hash/token, quyền, join đã-là-thành-viên không tiêu thụ, đã dùng từ chối, mốc 24h, thu hồi, hai người đồng thời.
+- Web flow đủ 5 thành viên, giả owner/role không hiệu lực; token không trong SPRING_SESSION_ATTRIBUTES; redirect chỉ chấp nhận đường dẫn lời mời nội bộ hợp lệ.

@@ -18,7 +18,7 @@ public class InvitationStore {
     public Claim claim(String invitationId,String actor) {
         var row=invitations.findById(invitationId).orElseThrow(RuleViolation::missing);
         if(members.existsByGroupIdAndUserId(row.groupId,actor)) return Claim.ALREADY_MEMBER;
-        var now=Timestamp.from(clock.instant());
+        var now=Timestamp.from(clock.instant().truncatedTo(java.time.temporal.ChronoUnit.MICROS));
         int count=jdbc.update("UPDATE invitation SET used_at=?, used_by=?, version=version+1 WHERE id=? AND used_at IS NULL AND revoked_at IS NULL AND expires_at>?",now,actor,invitationId,now);
         if(count==0) return Claim.UNAVAILABLE;
         jdbc.update("INSERT INTO group_member(id,group_id,user_id,role,joined_at) VALUES(?,?,?,'MEMBER',?)",UUID.randomUUID().toString(),row.groupId,actor,now);
