@@ -16,3 +16,5 @@ Ngày 17/10/2026. Nhánh feat/w1-autonomous-build.
 - Audit dependency chưa chạy; SEC-13 chưa kiểm chứng.
 
 - P1: US-01/02 domain Group đã có test RED→GREEN, check 9 tests PASS. Tiếp theo: Task create/status/edit/filter (US-03…06).
+
+- P1 hoàn tất phần miền US-01…06: check 19 tests PASS. Chuyển P2 schema/JPA/giao dịch và test MariaDB thật. Không kết luận cổng web đã qua.
