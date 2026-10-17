@@ -39,14 +39,22 @@ Hetzner: chủ dự án tự đăng ký/xác minh và kiểm tra giá cuối. Ch
 |---|---|
 | SPRING_PROFILES_ACTIVE | prod trên máy chủ, dev chỉ máy cá nhân |
 | DB_URL | jdbc:mariadb://127.0.0.1:3307/deadline cho mô hình host |
-| DB_USER / DB_PASSWORD | principal schema riêng / secret ngoài repo |
+| DB_USER / DB_PASSWORD / DB_ROOT_PASSWORD | principal schema riêng / hai secret khác nhau, mỗi mật khẩu ít nhất 16 ký tự; secret ngoài repo |
 | SERVER_ADDRESS / SERVER_PORT | 127.0.0.1 / 8080 trên host |
 | TZ / JVM | UTC / -Duser.timezone=UTC |
-| SERVER_FORWARD_HEADERS_STRATEGY | native, **chỉ khi proxy đã cấu hình tin cậy** |
-| SERVER_TOMCAT_REMOTEIP_INTERNAL_PROXIES | regex chỉ loopback: 127\\.0\\.0\\.1\|::1; không dùng regex rỗng/tin toàn mạng |
-| SERVER_TOMCAT_REDIRECT_CONTEXT_ROOT | false khi TLS kết thúc tại reverse proxy, theo tài liệu Boot |
+| Forwarded headers / Tomcat trust | dùng nguyên khối EnvironmentFile bên dưới, chỉ cho Caddy trên host loopback |
 
-Giá trị regex trong environment phải là `127\.0\.0\.1|::1` (một backslash mỗi dấu chấm); kiểm tra đúng escaping của systemd/envfile. **Mô hình này chạy app trên host**. Nếu app chạy container, peer IP khác loopback; không sao chép nguyên trusted-proxy config rồi mở port. Mặc định app không tin forwarded headers. Rate limiter vẫn dùng địa chỉ Tomcat đã xác thực; không tự đọc header do client gửi.
+Prod kiểm preflight trước khi tạo context/kết nối DB: thiếu mật khẩu DB/root, placeholder mới `CHANGE_ME_...` hoặc placeholder cũ, dưới 16 ký tự, hai mật khẩu trùng nhau đều bị từ chối. Mật khẩu datasource override cũng phải hợp lệ và khác root. Phải đặt tường minh SERVER_ADDRESS thành địa chỉ loopback dạng số; override server.address cũng phải loopback; forwarded headers phải native. application-prod mặc định bind 127.0.0.1 là lớp chặn bổ sung, không thay nghĩa vụ đặt SERVER_ADDRESS. Không in giá trị mật khẩu trong thông báo lỗi. Compose là **DEV ONLY**, không dùng nguyên tệp để public.
+
+Một khối cấu hình forwarded headers duy nhất để sao chép vào **EnvironmentFile của systemd** (giữ nguyên một backslash mỗi dấu chấm; đây không phải lệnh shell):
+
+```ini
+SERVER_FORWARD_HEADERS_STRATEGY=native
+SERVER_TOMCAT_REMOTEIP_INTERNAL_PROXIES='127\.0\.0\.1|::1'
+SERVER_TOMCAT_REDIRECT_CONTEXT_ROOT=false
+```
+
+Giữ dấu nháy đơn quanh regex: EnvironmentFile giữ nguyên backslash bên trong chuỗi này theo [quy tắc systemd](https://github.com/systemd/systemd/blob/main/man/systemd.exec.xml). **Mô hình này chạy app trên host**. Nếu app chạy container, peer IP khác loopback; không sao chép nguyên trusted-proxy config rồi mở port. Rate limiter dùng địa chỉ Tomcat đã xác thực; không tự đọc header do client gửi. Kiểm giá trị bind thực sau triển khai. Preflight theo [EnvironmentPostProcessor của Boot 4.1.1](https://docs.spring.io/spring-boot/api/java/org/springframework/boot/EnvironmentPostProcessor.html); kiểm cấu hình không thay thế kiểm HTTPS/proxy/IP ngoài Internet.
 
 Caddyfile tối thiểu (thay bằng domain bạn sở hữu):
 

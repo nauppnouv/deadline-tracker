@@ -23,10 +23,11 @@ class SchemaStartupTest extends DatabaseTest {
     }
     org.springframework.context.ConfigurableApplicationContext start() { return start("test"); }
     org.springframework.context.ConfigurableApplicationContext start(String profile) {
-        return new SpringApplicationBuilder(DeadlineTrackerApplication.class).web(WebApplicationType.NONE).profiles(profile)
-            .initializers(ctx->ctx.getEnvironment().getPropertySources().addFirst(new org.springframework.core.env.MapPropertySource("schema-fixture",Map.of(
+        var environment=new org.springframework.core.env.StandardEnvironment();
+        environment.getPropertySources().addFirst(new org.springframework.core.env.MapPropertySource("schema-fixture",Map.of(
                 "spring.datasource.url",url,"spring.datasource.username",DB.getUsername(),"spring.datasource.password",DB.getPassword(),"spring.session.jdbc.cleanup-cron","-",
-                "DB_PASSWORD",DB.getPassword(),"DB_ROOT_PASSWORD",UUID.randomUUID().toString(),"SERVER_ADDRESS","127.0.0.1","server.forward-headers-strategy","native")))).run();
+                "DB_PASSWORD",DB.getPassword(),"DB_ROOT_PASSWORD",UUID.randomUUID().toString(),"SERVER_ADDRESS","127.0.0.1","server.forward-headers-strategy","native")));
+        return new SpringApplicationBuilder(DeadlineTrackerApplication.class).environment(environment).web(WebApplicationType.NONE).profiles(profile).run();
     }
     void rejected(String object) {
         var error=assertThrows(Exception.class,()->{try(var ignored=start()) { fail("Context must refuse missing "+object); }});

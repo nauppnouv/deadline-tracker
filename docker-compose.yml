@@ -1,3 +1,4 @@
+# DEV ONLY: chỉ cho máy phát triển cục bộ; không dùng nguyên tệp để public/pilot.
 name: deadline-tracker
 services:
   db:

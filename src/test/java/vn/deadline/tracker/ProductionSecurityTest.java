@@ -3,7 +3,7 @@ import org.junit.jupiter.api.*;import org.springframework.beans.factory.annotati
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;import org.springframework.test.context.ActiveProfiles;import org.springframework.test.web.servlet.MockMvc;
 import java.nio.file.*;import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-@SpringBootTest @AutoConfigureMockMvc @ActiveProfiles("prod")
+@SpringBootTest(properties={"DB_PASSWORD=App production test passphrase 123!","DB_ROOT_PASSWORD=Root production test passphrase 456!","SERVER_ADDRESS=127.0.0.1","server.forward-headers-strategy=native"}) @AutoConfigureMockMvc @ActiveProfiles("prod")
 @org.springframework.context.annotation.Import(ProductionSecurityTest.Probes.class)
 @org.junit.jupiter.api.extension.ExtendWith(org.springframework.boot.test.system.OutputCaptureExtension.class)
 class ProductionSecurityTest extends DatabaseTest {

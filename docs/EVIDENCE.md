@@ -164,3 +164,10 @@ R2-02 DATA-04 UAT-04/07/11: version mọi form lấy từ HTML đúng action, g�
 
 - RED: `target/r2-03-red-1.log`; GREEN: `target/r2-03-green.log`. Lệnh và hash log: [biên bản](verification/r2-03.txt).
 - `bash scripts/check.sh`: 112/0/0/0 (tests/failures/errors/skipped), build/static/gitleaks/dependency/migration OK. Phạm vi tự động cục bộ; không suy thành đạt pilot.
+
+## Vòng 2 — mục 04 (18/10/2026)
+
+Triển khai fail-closed SEC-06/09/12: preflight prod trước context/DB; từ chối secret mẫu/ngắn/trùng, thiếu hoặc non-loopback bind, forwarded headers khác native. Mặc định prod loopback; compose DEV ONLY, placeholder CHANGE_ME, một khối cấu hình proxy.
+
+- RED: `target/r2-04-red.log`; GREEN: `target/r2-04-green.log`. Lệnh và hash log: [biên bản](verification/r2-04.txt).
+- `bash scripts/check.sh`: 134/0/0/0 (tests/failures/errors/skipped), build/static/gitleaks/dependency/migration OK. Phạm vi tự động cục bộ; không suy thành đạt pilot.

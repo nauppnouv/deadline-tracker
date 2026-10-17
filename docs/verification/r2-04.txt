@@ -1,0 +1,58 @@
+18/10/2026 Asia/Saigon
+Triển khai fail-closed SEC-06/09/12: preflight prod trước context/DB; từ chối secret mẫu/ngắn/trùng, thiếu hoặc non-loopback bind, forwarded headers khác native. Mặc định prod loopback; compose DEV ONLY, placeholder CHANGE_ME, một khối cấu hình proxy.
+Commands are run from repository root using Git Bash and scripts/mvn.sh (portable JDK25).
+All DBs are disposable MariaDB containers; no pilot data.
+
+target\r2-04-red.log
+SHA256=99bd9040c9f40466b092adafde796b8c01b007398bb78d5bc81c07a1d75210bb
+[ERROR] Tests run: 21, Failures: 20, Errors: 0, Skipped: 0, Time elapsed: 1.424 s <<< FAILURE! -- in vn.deadline.tracker.ProductionPreflightTest
+[ERROR] Tests run: 21, Failures: 20, Errors: 0, Skipped: 0
+[INFO] BUILD FAILURE
+
+target\r2-04-green.log
+SHA256=590c4aa80e46e88b9f2623c00c948b128111c51f5d32484e96bef89a54fadc76
+[INFO] Tests run: 22, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.250 s -- in vn.deadline.tracker.ProductionPreflightTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 15.07 s -- in vn.deadline.tracker.ProductionSecurityTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 10.92 s -- in vn.deadline.tracker.SchemaStartupTest
+[INFO] Tests run: 37, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+
+target\r2-04-check.log
+SHA256=a2a57f5f3ff0012a5d346aecccaf1871d9b1f26ce51d0319e408c8515b59c660
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 21.01 s -- in vn.deadline.tracker.BackupFailureTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.640 s -- in vn.deadline.tracker.BackupRestoreTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vn.deadline.tracker.BuildSmokeTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.773 s -- in vn.deadline.tracker.ChunkedRequestTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.043 s -- in vn.deadline.tracker.GroupDomainTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.951 s -- in vn.deadline.tracker.GroupInvitationWebTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.214 s -- in vn.deadline.tracker.GroupVersionWebTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.658 s -- in vn.deadline.tracker.InvitationTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 14.64 s -- in vn.deadline.tracker.MigrationGuardTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.981 s -- in vn.deadline.tracker.OpsWorkflowTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.045 s -- in vn.deadline.tracker.OwnerIntegrityTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.828 s -- in vn.deadline.tracker.PersistenceTest
+[INFO] Tests run: 22, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.631 s -- in vn.deadline.tracker.ProductionPreflightTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.181 s -- in vn.deadline.tracker.ProductionSecurityTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vn.deadline.tracker.RateLimitTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 20.81 s -- in vn.deadline.tracker.RepresentativeLoadTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.590 s -- in vn.deadline.tracker.RestartPersistenceTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 9.256 s -- in vn.deadline.tracker.RestoredSessionTest
+R2 no TRIGGER privilege backup exit=1 stderr=WARNING: option --ssl-verify-server-cert is disabled, because of an insecure passwordless login.
+R2 missing triggers restore exit=1 output= stderr=WARNING: option --ssl-verify-server-cert is disabled, because of an insecure passwordless login.
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 25.81 s -- in vn.deadline.tracker.Round2VariantsTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 17.77 s -- in vn.deadline.tracker.SchemaStartupTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.070 s -- in vn.deadline.tracker.TaskDomainTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 9.103 s -- in vn.deadline.tracker.TaskWebTest
+[INFO] Tests run: 134, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+OK build + tests
+OK template / SQL static checks
+OK secret scan
+[INFO] BUILD SUCCESS
+OK dependency audit
+OK immutable committed migrations (baseline=origin/main)
+
+RED: bash scripts/mvn.sh test -Dtest=ProductionPreflightTest (21 tests, 20 failures, 0 errors).
+GREEN: bash scripts/mvn.sh test -Dtest=ProductionPreflightTest,ProductionSecurityTest,SchemaStartupTest (37 tests, 0 failures/errors/skips).
+CHECK: bash scripts/check.sh
+Preflight includes 18 separate invalid configurations; positive 16-character boundary/IPv6/dev, unchanged prod headers and schema startup. Copy-block test verifies literal peer regex and one occurrence of each setting. No real systemd/Caddy/TLS/Internet deployment tested.
