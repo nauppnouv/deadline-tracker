@@ -5,6 +5,8 @@ import vn.deadline.tracker.domain.RuleViolation;
 import java.util.UUID;
 @ControllerAdvice
 public class WebErrors {
+    @ExceptionHandler({org.springframework.web.servlet.resource.NoResourceFoundException.class,org.springframework.web.servlet.NoHandlerFoundException.class}) ModelAndView notFound(Exception error){return page(404,"Không tìm thấy tài nguyên.");}
+    @ExceptionHandler(org.springframework.web.HttpRequestMethodNotSupportedException.class) ModelAndView method(Exception error){return page(405,"Thao tác không được hỗ trợ.");}
     @ExceptionHandler(RuleViolation.class) ModelAndView rule(RuleViolation error){return page(switch(error.getKind()){case VALIDATION->400;case NOT_FOUND->404;case FORBIDDEN->403;case CONFLICT->409;},error.getMessage());}
     @ExceptionHandler(OptimisticLockingFailureException.class) ModelAndView conflict(Exception error){return page(409,"Dữ liệu đã thay đổi. Vui lòng tải lại.");}
     @ExceptionHandler({org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class,org.springframework.web.bind.MissingServletRequestParameterException.class}) ModelAndView invalid(Exception error){return page(400,"Thông tin gửi lên không hợp lệ hoặc còn thiếu.");}

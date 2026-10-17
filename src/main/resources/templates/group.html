@@ -1,2 +1,143 @@
 <!doctype html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org"><head th:replace="~{fragments :: head('Công việc của nhóm')}"></head><body><header th:replace="~{fragments :: header}"></header><main class="container"><a th:href="@{/groups}">← Nhóm của tôi</a><div class="page-heading"><div><p class="eyebrow">NHÓM ĐỒ ÁN</p><h1 th:text="${group.name}"></h1><p th:text="${group.description}"></p></div><a class="button secondary" th:if="${owner}" th:href="@{/groups/{id}/settings(id=${group.id})}">Thiết lập &amp; mời thành viên</a></div><section class="card"><h2>Thành viên</h2><ul class="member-list"><li th:each="person : ${members}"><span th:text="${person.displayName}"></span><span class="badge" th:if="${person.owner}">Chủ nhóm</span></li></ul></section><section class="card"><h2>Công việc</h2><p th:if="${#lists.isEmpty(tasks)}">Nhóm chưa có công việc.</p><ul><li th:each="task : ${tasks}"><span th:text="${task.title}"></span> · <span th:text="${time.status(task.status)}"></span></li></ul></section></main></body></html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Công việc của nhóm')}">
+</head>
+<body>
+<header th:replace="~{fragments :: header}">
+</header>
+<main class="container">
+<a class="back-link" th:href="@{/groups}">← Nhóm của tôi</a>
+<div class="page-heading">
+<div>
+<p class="eyebrow">NHÓM ĐỒ ÁN</p>
+<h1 th:text="${group.name}">
+</h1>
+<p class="muted" th:text="${group.description}">
+</p>
+</div>
+<div class="actions">
+<a class="button secondary" th:if="${owner}" th:href="@{/groups/{id}/settings(id=${group.id})}">Thiết lập nhóm</a>
+<a class="button" th:href="@{/groups/{id}/tasks/new(id=${group.id})}">+ Tạo công việc</a>
+</div>
+</div>
+<section class="summary-grid" aria-label="Tổng quan toàn nhóm">
+<div class="stat">
+<span>Tất cả</span>
+<strong th:text="${progress.total}">
+</strong>
+</div>
+<div class="stat">
+<span>Chưa làm</span>
+<strong th:text="${progress.todo}">
+</strong>
+</div>
+<div class="stat">
+<span>Đang làm</span>
+<strong th:text="${progress.inProgress}">
+</strong>
+</div>
+<div class="stat">
+<span>Hoàn thành</span>
+<strong th:text="${progress.done}">
+</strong>
+</div>
+<div class="stat danger-stat">
+<span>Quá hạn</span>
+<strong th:text="${progress.overdue}">
+</strong>
+</div>
+</section>
+<div class="progress-band">
+<label for="group-progress">Tiến độ nhóm <strong th:text="${progress.percent + '%'}">
+</strong>
+</label>
+<progress id="group-progress" max="100" th:value="${progress.percent}">
+</progress>
+</div>
+<div class="workspace">
+<section class="card">
+<div class="section-heading">
+<h2>Công việc</h2>
+<span class="muted" th:text="${#lists.size(tasks) + ' kết quả'}">
+</span>
+</div>
+<form class="filterbar" th:action="@{/groups/{id}(id=${group.id})}" method="get">
+<div>
+<label for="assigneeId">Người phụ trách</label>
+<select id="assigneeId" name="assigneeId" th:disabled="${mine}">
+<option value="">Tất cả thành viên</option>
+<option th:each="person : ${members}" th:value="${person.id}" th:text="${person.displayName}" th:selected="${person.id == filter.assigneeId}">
+</option>
+</select>
+</div>
+<div>
+<label for="status">Trạng thái</label>
+<select id="status" name="status">
+<option value="">Tất cả</option>
+<option th:each="option : ${statuses}" th:value="${option}" th:text="${time.status(option)}" th:selected="${option == filter.status}">
+</option>
+</select>
+</div>
+<div>
+<label for="due">Thời hạn</label>
+<select id="due" name="due">
+<option value="ALL" th:selected="${filter.due.name() == 'ALL'}">Tất cả</option>
+<option value="SOON" th:selected="${filter.due.name() == 'SOON'}">Trong 24 giờ tới</option>
+<option value="OVERDUE" th:selected="${filter.due.name() == 'OVERDUE'}">Đã quá hạn</option>
+</select>
+</div>
+<label class="check-label">
+<input type="checkbox" name="mine" value="true" th:checked="${mine}"> Chỉ việc của tôi</label>
+<div class="actions">
+<button type="submit">Lọc</button>
+<a th:href="@{/groups/{id}(id=${group.id})}">Xóa lọc</a>
+</div>
+</form>
+<div class="empty" th:if="${#lists.isEmpty(tasks)}">
+<h3 th:text="${progress.total == 0 ? 'Nhóm chưa có công việc' : 'Không có việc khớp bộ lọc'}">
+</h3>
+<p class="muted" th:text="${progress.total == 0 ? 'Tạo đầu việc đầu tiên và giao cho một thành viên.' : 'Thử đổi điều kiện hoặc xóa bộ lọc để xem các việc khác.'}">
+</p>
+</div>
+<div class="task-list">
+<article class="task-row" th:each="task : ${tasks}">
+<div class="task-main">
+<a class="task-title" th:href="@{/groups/{g}/tasks/{t}(g=${group.id},t=${task.id})}" th:text="${task.title}">
+</a>
+<span class="muted" th:text="${names[task.assigneeId]}">
+</span>
+</div>
+<div class="deadline">
+<time th:text="${time.format(task.dueAt)}">
+</time>
+<span class="badge danger" th:if="${task.isOverdue(now)}">Quá hạn</span>
+<span class="badge soon" th:if="${task.isDueSoon(now)}">Sắp đến hạn</span>
+</div>
+<span class="badge" th:classappend="${task.status.name()}" th:text="${time.status(task.status)}">
+</span>
+</article>
+</div>
+</section>
+<aside class="card members-panel">
+<h2>Thành viên <span class="muted" th:text="${#lists.size(members)}">
+</span>
+</h2>
+<ul class="member-list">
+<li th:each="person : ${members}">
+<span class="avatar" aria-hidden="true">●</span>
+<div>
+<strong th:text="${person.displayName}">
+</strong>
+<small th:text="${person.owner ? 'Chủ nhóm' : 'Thành viên'}">
+</small>
+</div>
+</li>
+</ul>
+<a th:if="${owner}" th:href="@{/groups/{id}/settings(id=${group.id})}">Mời thêm thành viên →</a>
+</aside>
+</div>
+</main>
+<script defer th:src="@{/js/app.js}">
+</script>
+</body>
+</html>

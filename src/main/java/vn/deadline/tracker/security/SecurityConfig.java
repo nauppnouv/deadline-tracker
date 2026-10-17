@@ -23,7 +23,7 @@ public class SecurityConfig {
         var row=accounts.findByUsername(name).filter(a->a.enabled).orElseThrow(()->new UsernameNotFoundException("Invalid credentials"));
         return new TrackerPrincipal(row.id,row.username,row.passwordHash,row.version);
     };}
-    @Bean SecurityFilterChain security(HttpSecurity http,UserDetailsService users,PasswordEncoder encoder,RateLimiter limiter,AccountRepository accounts)throws Exception{
+    @Bean SecurityFilterChain security(HttpSecurity http,UserDetailsService users,PasswordEncoder encoder,RateLimiter limiter,AccountRepository accounts,vn.deadline.tracker.service.GroupAccess groupAccess)throws Exception{
         var provider=new DaoAuthenticationProvider(users);provider.setPasswordEncoder(encoder);http.authenticationProvider(provider);
         http.authorizeHttpRequests(a->a.requestMatchers("/login","/register","/error","/css/**","/js/**").permitAll().anyRequest().authenticated());
         http.formLogin(f->f.loginPage("/login").failureHandler((request,response,error)->response.sendRedirect(request.getContextPath()+ReturnPath.login(request.getParameter("next"),"error")))
@@ -37,6 +37,7 @@ public class SecurityConfig {
             .referrerPolicy(r->r.policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER)).frameOptions(f->f.deny()));
         http.addFilterBefore(new AuthAttemptFilter(limiter),UsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(new AccountStateFilter(accounts),AuthorizationFilter.class);
+        http.addFilterBefore(new GroupMembershipFilter(groupAccess),AccountStateFilter.class);
         return http.build();
     }
 }

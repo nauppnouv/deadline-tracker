@@ -5,8 +5,8 @@ import vn.deadline.tracker.service.*;import vn.deadline.tracker.domain.*;import 
 @Controller
 public class GroupController {
     public record Form(@NotBlank @Size(max=100) String name,@Size(max=1000) String description){}
-    private final WorkService work;private final PeopleService people;private final InvitationService invites;
-    public GroupController(WorkService work,PeopleService people,InvitationService invites){this.work=work;this.people=people;this.invites=invites;}
+    private final WorkService work;private final PeopleService people;private final InvitationService invites;private final java.time.Clock clock;
+    public GroupController(WorkService work,PeopleService people,InvitationService invites,java.time.Clock clock){this.work=work;this.people=people;this.invites=invites;this.clock=clock;}
     @GetMapping("/") String home(){return "redirect:/groups";}
     @GetMapping("/groups") String groups(@AuthenticationPrincipal TrackerPrincipal actor,Model model){model.addAttribute("groups",work.groups(actor.id()));model.addAttribute("actorId",actor.id());return "groups";}
     @GetMapping("/groups/new") String create(Model model){model.addAttribute("form",new Form("",""));model.addAttribute("editing",false);return "group-form";}
@@ -14,8 +14,11 @@ public class GroupController {
         model.addAttribute("editing",false);if(errors.hasErrors()){response.setStatus(400);return "group-form";}
         try{return "redirect:/groups/"+work.createGroup(actor.id(),form.name(),form.description()).getId();}catch(RuleViolation e){if(e.getKind()!=RuleViolation.Kind.VALIDATION)throw e;errors.reject("invalid",e.getMessage());response.setStatus(400);return "group-form";}
     }
-    @GetMapping("/groups/{group}") String group(@PathVariable String group,@AuthenticationPrincipal TrackerPrincipal actor,Model model){
-        var g=work.group(actor.id(),group);model.addAttribute("group",g);model.addAttribute("members",people.members(actor.id(),group));model.addAttribute("tasks",work.tasks(actor.id(),group));model.addAttribute("owner",g.isOwner(actor.id()));return "group";
+    @GetMapping("/groups/{group}") String group(@PathVariable String group,@AuthenticationPrincipal TrackerPrincipal actor,@RequestParam(required=false) String assigneeId,@RequestParam(required=false) TaskStatus status,@RequestParam(defaultValue="ALL") TaskFilter.Due due,@RequestParam(defaultValue="false") boolean mine,Model model){
+        var g=work.group(actor.id(),group);var members=people.members(actor.id(),group);var all=work.tasks(actor.id(),group);var now=clock.instant();var filter=new TaskFilter(mine?actor.id():assigneeId,status,due);
+        model.addAttribute("group",g);model.addAttribute("members",members);model.addAttribute("names",members.stream().collect(java.util.stream.Collectors.toMap(PeopleService.Person::id,PeopleService.Person::displayName)));
+        model.addAttribute("tasks",all.stream().filter(t->filter.matches(t,now)).toList());model.addAttribute("owner",g.isOwner(actor.id()));model.addAttribute("progress",Progress.of(all,now));
+        model.addAttribute("now",now);model.addAttribute("filter",filter);model.addAttribute("mine",mine);model.addAttribute("statuses",TaskStatus.values());return "group";
     }
     @GetMapping("/groups/{group}/settings") String settings(@PathVariable String group,@AuthenticationPrincipal TrackerPrincipal actor,Model model){var g=work.group(actor.id(),group);g.requireOwner(actor.id());settingsModel(group,actor.id(),model);model.addAttribute("form",new Form(g.getName(),g.getDescription()));return "group-settings";}
     @PostMapping("/groups/{group}/settings") String settings(@PathVariable String group,@AuthenticationPrincipal TrackerPrincipal actor,@Valid @ModelAttribute("form") Form form,BindingResult errors,Model model,jakarta.servlet.http.HttpServletResponse response){

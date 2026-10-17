@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Chi tiết công việc')}">
+</head>
+<body>
+<header th:replace="~{fragments :: header}">
+</header>
+<main class="container">
+<a class="back-link" th:href="@{/groups/{id}(id=${group.id})}">← <span th:text="${group.name}">
+</span>
+</a>
+<div class="page-heading">
+<div>
+<p class="eyebrow">CÔNG VIỆC</p>
+<h1 th:text="${task.title}">
+</h1>
+<span class="badge" th:classappend="${task.status.name()}" th:text="${time.status(task.status)}">
+</span>
+<span class="badge danger" th:if="${task.isOverdue(now)}">Quá hạn</span>
+<span class="badge soon" th:if="${task.isDueSoon(now)}">Sắp đến hạn</span>
+</div>
+<a class="button secondary" th:if="${canEdit}" th:href="@{/groups/{g}/tasks/{t}/edit(g=${group.id},t=${task.id})}">Chỉnh sửa</a>
+</div>
+<div class="workspace">
+<section class="card">
+<h2>Mô tả công việc</h2>
+<p class="pre-wrap" th:text="${#strings.isEmpty(task.description) ? 'Chưa có mô tả.' : task.description}">
+</p>
+<dl class="details">
+<dt>Người phụ trách</dt>
+<dd th:text="${names[task.assigneeId]}">
+</dd>
+<dt>Hạn nộp</dt>
+<dd>
+<span th:text="${time.format(task.dueAt)}">
+</span> <small>giờ Việt Nam</small>
+</dd>
+<dt>Người tạo</dt>
+<dd th:text="${names[task.createdBy]}">
+</dd>
+<dt>Đã hoàn thành lúc</dt>
+<dd th:text="${time.format(task.completedAt)}">
+</dd>
+</dl>
+</section>
+<aside class="card">
+<h2>Cập nhật tiến độ</h2>
+<form th:if="${canStatus}" th:action="@{/groups/{g}/tasks/{t}/status(g=${group.id},t=${task.id})}" method="post">
+<input type="hidden" name="version" th:value="${task.version}">
+<label for="status">Trạng thái</label>
+<select id="status" name="status">
+<option th:each="option : ${statuses}" th:value="${option}" th:text="${time.status(option)}" th:selected="${option == task.status}">
+</option>
+</select>
+<button type="submit">Cập nhật</button>
+</form>
+<p class="muted" th:unless="${canStatus}">Chỉ người đang được giao công việc có thể cập nhật trạng thái.</p>
+</aside>
+</div>
+</main>
+<script defer th:src="@{/js/app.js}">
+</script>
+</body>
+</html>

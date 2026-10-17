@@ -7,21 +7,21 @@ Ngày khởi tạo: 17/10/2026. Chỉ cập nhật khi đã chạy thật. Log l
 | UAT-01 | đạt | bash scripts/check.sh; P4 | 17/10/2026 | AuthWebTest sessionLifecycle; simulated accounts, not pilot |
 | UAT-02 | đạt | bash scripts/check.sh; P4 | 17/10/2026 | GroupInvitationWebTest creates group then four distinct accounts join: 5 members; simulated accounts, not pilot |
 | UAT-03 | đạt | bash scripts/check.sh; P4 | 17/10/2026 | InvitationTest expires/revokes/used token and two concurrent service joins; simulated accounts, not pilot |
-| UAT-04 | chưa chạy | — | — | Chưa có bằng chứng |
-| UAT-05 | chưa chạy | — | — | Chưa có bằng chứng |
-| UAT-06 | chưa chạy | — | — | Chưa có bằng chứng |
-| UAT-07 | chưa chạy | — | — | Chưa có bằng chứng |
-| UAT-08 | chưa chạy | — | — | Chưa có bằng chứng |
-| UAT-09 | chưa chạy | — | — | Chưa có bằng chứng |
-| UAT-10 | chưa chạy | — | — | Chưa có bằng chứng |
-| UAT-11 | chưa chạy | — | — | Chưa có bằng chứng |
-| UAT-12 | chưa chạy | — | — | Chưa có bằng chứng |
+| UAT-04 | đạt | bash scripts/check.sh; P5 | 17/10/2026 | TaskWebTest.createAndValidation: real web create, invalid fields preserve description, forged fields ignored; test data only |
+| UAT-05 | đạt | bash scripts/check.sh; P5 | 17/10/2026 | TaskWebTest.statusPermission: Owner/creator rejected, assigned user completes; test data only |
+| UAT-06 | đạt | bash scripts/check.sh; P5 | 17/10/2026 | TaskWebTest.editAndConflict and TaskDomainTest: reassign/reset/revoke; test data only |
+| UAT-07 | đạt | bash scripts/check.sh; P5 | 17/10/2026 | TaskWebTest.statusPermission + PersistenceTest: same status idempotent, completedAt, reopening; test data only |
+| UAT-08 | đạt | bash scripts/check.sh; P5 | 17/10/2026 | TaskDomainTest boundary Clock and TaskWebTest filter; test data only |
+| UAT-09 | đạt | bash scripts/check.sh; P5 | 17/10/2026 | RestartPersistenceTest + TaskWebTest edits overdue task; test data only |
+| UAT-10 | đạt | bash scripts/check.sh; P5 | 17/10/2026 | TaskWebTest.everyEndpointIsolation: foreign owner and anonymous across GET/POST routes, including malformed params; test data only |
+| UAT-11 | đạt | bash scripts/check.sh; P5 | 17/10/2026 | TaskWebTest.editAndConflict preserves stale form, returns 409; DB concurrent writer test; test data only |
+| UAT-12 | đạt | bash scripts/check.sh; P5 | 17/10/2026 | TaskWebTest.filtersAndPastDue totals independent of filters; zero/50% domain test; test data only |
 | UAT-13 | chưa chạy | — | — | Chưa có bằng chứng |
 | UAT-14 | chưa chạy | — | — | Chưa có bằng chứng |
-| UAT-15 | chưa chạy | — | — | Chưa có bằng chứng |
-| UAT-16 | chưa chạy | — | — | Chưa có bằng chứng |
-| UAT-17 | chưa chạy | — | — | Chưa có bằng chứng |
-| UAT-18 | chưa chạy | — | — | Chưa có bằng chứng |
+| UAT-15 | đạt | bash scripts/check.sh; P5 | 17/10/2026 | AuthWebTest CSRF missing/invalid; GroupInvitationWebTest join POST; test data only |
+| UAT-16 | đạt | bash scripts/check.sh; P5 | 17/10/2026 | TaskWebTest.xssAndHeaders; test data only |
+| UAT-17 | đạt | bash scripts/check.sh; P5 | 17/10/2026 | AuthWebTest.rateLimit + RateLimitTest IP/username and expiry; test data only |
+| UAT-18 | đạt | bash scripts/check.sh; P5 | 17/10/2026 | TaskWebTest.filtersAndPastDue reassignment preserves past deadline; test data only |
 | SEC-01 | đạt | bash scripts/check.sh; AuthWebTest/RateLimitTest | 17/10/2026 | AuthWebTest.mappingInventory enumerates current MVC routes; re-run after new routes; phạm vi build P3 |
 | SEC-02 | đạt | bash scripts/check.sh; AuthWebTest/RateLimitTest | 17/10/2026 | Explicit auth form parameters ignore forged actorId/role; task create binding rechecked P5; phạm vi build P3 |
 | SEC-03 | đạt | bash scripts/check.sh; AuthWebTest/RateLimitTest | 17/10/2026 | AuthWebTest.accessMatrix: Owner A, Member A, Owner B, anonymous against protected group probe; phạm vi build P3 |
@@ -29,8 +29,8 @@ Ngày khởi tạo: 17/10/2026. Chỉ cập nhật khi đã chạy thật. Log l
 | SEC-05 | đạt | bash scripts/check.sh; AuthWebTest/RateLimitTest | 17/10/2026 | AuthWebTest.registrationRules: Argon2, lengths, Unicode; successful-run log scan no plain test password; phạm vi build P3 |
 | SEC-06 | đạt | bash scripts/check.sh; AuthWebTest/RateLimitTest | 17/10/2026 | AuthWebTest.sessionLifecycle/fixationAndExpiry/rateLimit: JDBC cookies, rotation, expiration, logout/change; RateLimitTest injected Clock; phạm vi build P3 |
 | SEC-07 | đạt | InvitationTest + GroupInvitationWebTest; bash scripts/check.sh | 17/10/2026 | 256-bit token, hash-only DB, exact expiry, atomic join, no-referrer, POST+CSRF, no raw token in session |
-| SEC-08 | chưa chạy | — | — | Chưa có bằng chứng |
-| SEC-09 | chưa chạy | — | — | Chưa có bằng chứng |
+| SEC-08 | đạt | bash scripts/check.sh; P5 | 17/10/2026 | TaskWebTest.xssAndHeaders; group/task/detail/forms escape script payload; no unsafe-inline; source no th:utext |
+| SEC-09 | đạt | bash scripts/check.sh; P5 | 17/10/2026 | CSP, nosniff, DENY, no-referrer in MVC responses; production TLS/HSTS tested P6 |
 | SEC-10 | chưa chạy | — | — | Chưa có bằng chứng |
 | SEC-11 | chưa chạy | — | — | Chưa có bằng chứng |
 | SEC-12 | chưa chạy | — | — | Chưa có bằng chứng |
@@ -93,3 +93,10 @@ Ngày khởi tạo: 17/10/2026. Chỉ cập nhật khi đã chạy thật. Log l
 - GREEN cuối target/p4-final.log: 42 tests PASS, không error/failure/skip; gitleaks/check OK.
 - 4 service tests lời mời: hash/token, quyền, join đã-là-thành-viên không tiêu thụ, đã dùng từ chối, mốc 24h, thu hồi, hai người đồng thời.
 - Web flow đủ 5 thành viên, giả owner/role không hiệu lực; token không trong SPRING_SESSION_ATTRIBUTES; redirect chỉ chấp nhận đường dẫn lời mời nội bộ hợp lệ.
+
+## P5 US-15…18 — giao diện và quyền
+
+- RED target/p5-red.log: task routes/forms chưa có. GREEN target/p5-green.log: 48 tests PASS, gitleaks/static checks OK.
+- Tạo/sửa/detail/status, giữ form lỗi và stale input 409; filter/progress; XSS escaped; foreign/anonymous bị chặn trước binding, kể cả malformed status.
+- Giao diện responsive CSS cục bộ, không inline JS/style; chưa tuyên bố NFR-05 đã quan sát bằng browser.
+- Dependency audit thực tế đã chạy, báo Tomcat 11.0.24 High/Critical. Đây là RED SEC-13 cần sửa P6, không bị suppress hoặc coi đạt.

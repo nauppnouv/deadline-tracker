@@ -37,3 +37,10 @@ Ngày 17/10/2026. Nhánh feat/w1-autonomous-build.
 - 42 tests PASS. Group create/settings, token invites, role checks, expiry/revoke/concurrent join có bằng chứng.
 - Màn hình nhóm/lời mời cơ bản đã chạy qua MVC; chưa đánh giá hình thức/responsive bằng trình duyệt.
 - Tiếp P5: task forms/details/status, dashboard/filter, XSS/headers và ma trận mọi route nhóm.
+
+## P5 đã qua kiểm tra chức năng
+
+- 48 tests PASS; UI task/filter/progress + XSS/object access đã kiểm chứng bằng MockMvc và MariaDB.
+- P6 đang bắt đầu: vá Tomcat theo audit, ops/backup/restore, tài liệu, browser/clean clone và chạy lại toàn bộ cổng.
+- SEC-13 hiện KHÔNG ĐẠT: Tomcat 11.0.24 theo dependency-check, report ở target/dependency-check-report.json.
+- Chưa có deploy thật, pilot hoặc review P7.
