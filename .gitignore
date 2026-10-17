@@ -1,2 +1,11 @@
 out/
 *.class
+target/
+.tools/
+.m2-local/
+.env*
+!.env.example
+.idea/
+.vscode/
+*.log
+backups/

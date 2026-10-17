@@ -1,0 +1,5 @@
+[extend]
+useDefault = true
+[allowlist]
+description = "Generated files, dependency caches and local tool archives"
+paths = ['''(^|/)(\.git|\.tools|\.m2-local|target|out)/''']
