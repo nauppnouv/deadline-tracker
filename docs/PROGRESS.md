@@ -77,3 +77,9 @@ D20 username nội bộ44ký tự; D21 disabled assignee; D22 vá Tomcat; D23 c�
 - R2-04 SEC-14: HTTP thật application/* và */* trả 400, nhóm không đổi. Sửa kỳ vọng test và DEPLOY; không sửa RequestSizeFilter hay mã ứng dụng.
 - RED → GREEN; `bash scripts/check.sh`: 136/0/0/0, mọi cổng OK. Bằng chứng: `docs/verification/r2-05.txt`.
 - Tiếp tục đúng thứ tự yêu cầu; không push/merge, không thay V1–V4, không thay phiên bản. Deploy/pilot thật chưa chạy.
+
+## Sửa review vòng 2 — mục 06
+
+- DATA-08 SEC-06: sau restore mọi credential không tin cậy; thông báo bắt buộc reset từng tài khoản trước RESTORE_OK; OPS áp dụng mọi tài khoản còn được phép, giữ disabled. Chỉ thông báo/tài liệu, không đổi hành vi dữ liệu tài khoản.
+- RED → GREEN; `bash scripts/check.sh`: 136/0/0/0, mọi cổng OK. Bằng chứng: `docs/verification/r2-06.txt`.
+- Tiếp tục đúng thứ tự yêu cầu; không push/merge, không thay V1–V4, không thay phiên bản. Deploy/pilot thật chưa chạy.

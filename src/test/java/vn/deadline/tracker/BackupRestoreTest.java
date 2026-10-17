@@ -20,6 +20,10 @@ class BackupRestoreTest extends DatabaseTest {
         String restore="deadline_restore_"+UUID.randomUUID().toString().replace("-","");
         long restoreStart=System.nanoTime();var verified=run("export RESTORE_DB="+restore+" BACKUP_FILE='"+file+"'; bash /deadline-project/scripts/verify-restore.sh");long restoreMillis=(System.nanoTime()-restoreStart)/1_000_000;
         assertEquals(0,verified.getExitCode(),verified.getStderr());assertTrue(verified.getStdout().contains("RESTORE_OK"));
+        String mandatory="đặt lại mật khẩu từng tài khoản bằng ops reset-password trước khi mở lại web";
+        assertTrue(verified.getStdout().contains(mandatory),"Restore must explicitly require resetting every eligible account");
+        assertTrue(verified.getStdout().indexOf(mandatory)<verified.getStdout().indexOf("RESTORE_OK"));
+        assertTrue(Files.readString(Path.of("docs/OPS.md")).contains(mandatory),"Runbook must require every account, not just changes after snapshot");
         Files.createDirectories(Path.of("target"));Files.writeString(Path.of("target/restore-verification.txt"),"RESTORE_STARTED_UTC="+Instant.now().minusMillis(restoreMillis)+"\nRESTORE_ELAPSED_MS="+restoreMillis+" (trial data only; excludes application boot)\n"+verified.getStdout());
         var grant=run("MYSQL_PWD=\"$DB_PASSWORD\" mariadb -h127.0.0.1 -uroot -e \"GRANT ALL ON \\`"+restore+"\\`.* TO 'deadline_test'@'%'\"");assertEquals(0,grant.getExitCode(),grant.getStderr());
         try(var restored=new org.springframework.boot.builder.SpringApplicationBuilder(DeadlineTrackerApplication.class).web(org.springframework.boot.WebApplicationType.NONE).profiles("test").initializers(ctx->ctx.getEnvironment().getPropertySources().addFirst(new org.springframework.core.env.MapPropertySource("restored-database",Map.of("spring.datasource.url",DB.getJdbcUrl().replace("/deadline_test","/"+restore),"spring.datasource.username",DB.getUsername(),"spring.datasource.password",DB.getPassword(),"spring.session.jdbc.cleanup-cron","-")))).run()){

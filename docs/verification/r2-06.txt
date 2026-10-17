@@ -1,0 +1,55 @@
+18/10/2026 Asia/Saigon
+DATA-08 SEC-06: sau restore mọi credential không tin cậy; thông báo bắt buộc reset từng tài khoản trước RESTORE_OK; OPS áp dụng mọi tài khoản còn được phép, giữ disabled. Chỉ thông báo/tài liệu, không đổi hành vi dữ liệu tài khoản.
+Commands are run from repository root using Git Bash and scripts/mvn.sh (portable JDK25).
+All DBs are disposable MariaDB containers; no pilot data.
+
+target\r2-06-red.log
+SHA256=f01489430b3f7259677027318e4dd35a149d3a23b1e0b293b4d63be85ad1f412
+[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0, Time elapsed: 26.55 s <<< FAILURE! -- in vn.deadline.tracker.BackupRestoreTest
+[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0
+[INFO] BUILD FAILURE
+
+target\r2-06-green.log
+SHA256=f205a660708dffbe8c91b20a07cd31bd7f58ab3fa1168c8f028635dffcdd1428
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 29.88 s -- in vn.deadline.tracker.BackupRestoreTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+
+target\r2-06-check.log
+SHA256=0e16f8ef656c758a79388f9c11748fb692c67db8ee60c8d9beeeadb97f320110
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 22.57 s -- in vn.deadline.tracker.BackupFailureTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.455 s -- in vn.deadline.tracker.BackupRestoreTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.004 s -- in vn.deadline.tracker.BuildSmokeTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.751 s -- in vn.deadline.tracker.ChunkedRequestTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.030 s -- in vn.deadline.tracker.GroupDomainTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.116 s -- in vn.deadline.tracker.GroupInvitationWebTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.081 s -- in vn.deadline.tracker.GroupVersionWebTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.237 s -- in vn.deadline.tracker.InvitationTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 12.48 s -- in vn.deadline.tracker.MigrationGuardTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.862 s -- in vn.deadline.tracker.OpsWorkflowTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.418 s -- in vn.deadline.tracker.OwnerIntegrityTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.536 s -- in vn.deadline.tracker.PersistenceTest
+[INFO] Tests run: 22, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.275 s -- in vn.deadline.tracker.ProductionPreflightTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.675 s -- in vn.deadline.tracker.ProductionSecurityTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vn.deadline.tracker.RateLimitTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 13.83 s -- in vn.deadline.tracker.RepresentativeLoadTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.282 s -- in vn.deadline.tracker.RestartPersistenceTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.320 s -- in vn.deadline.tracker.RestoredSessionTest
+R2 no TRIGGER privilege backup exit=1 stderr=WARNING: option --ssl-verify-server-cert is disabled, because of an insecure passwordless login.
+R2 missing triggers restore exit=1 output= stderr=WARNING: option --ssl-verify-server-cert is disabled, because of an insecure passwordless login.
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 26.60 s -- in vn.deadline.tracker.Round2VariantsTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 15.82 s -- in vn.deadline.tracker.SchemaStartupTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.056 s -- in vn.deadline.tracker.TaskDomainTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 10.65 s -- in vn.deadline.tracker.TaskWebTest
+[INFO] Tests run: 136, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+OK build + tests
+OK template / SQL static checks
+OK secret scan
+[INFO] BUILD SUCCESS
+OK dependency audit
+OK immutable committed migrations (baseline=origin/main)
+
+RED/GREEN: bash scripts/mvn.sh test -Dtest=BackupRestoreTest
+CHECK: bash scripts/check.sh
+RED 1 test/1 failure/0 errors: mandatory reset notice absent. GREEN 1 test PASS: notice before RESTORE_OK and same instruction in OPS, normal restore/count/checksum/Owner/session/retention checks retained. Runtime diff in this commit adds echo only; no password hash/enabled/must-change data changes.

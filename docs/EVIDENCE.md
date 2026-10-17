@@ -178,3 +178,10 @@ R2-04 SEC-14: HTTP thật application/* và */* trả 400, nhóm không đổi. 
 
 - RED: `target/r2-05-red.log`; GREEN: `target/r2-05-green.log`. Lệnh và hash log: [biên bản](verification/r2-05.txt).
 - `bash scripts/check.sh`: 136/0/0/0 (tests/failures/errors/skipped), build/static/gitleaks/dependency/migration OK. Phạm vi tự động cục bộ; không suy thành đạt pilot.
+
+## Vòng 2 — mục 06 (18/10/2026)
+
+DATA-08 SEC-06: sau restore mọi credential không tin cậy; thông báo bắt buộc reset từng tài khoản trước RESTORE_OK; OPS áp dụng mọi tài khoản còn được phép, giữ disabled. Chỉ thông báo/tài liệu, không đổi hành vi dữ liệu tài khoản.
+
+- RED: `target/r2-06-red.log`; GREEN: `target/r2-06-green.log`. Lệnh và hash log: [biên bản](verification/r2-06.txt).
+- `bash scripts/check.sh`: 136/0/0/0 (tests/failures/errors/skipped), build/static/gitleaks/dependency/migration OK. Phạm vi tự động cục bộ; không suy thành đạt pilot.

@@ -89,4 +89,6 @@ remaining_sessions="$("${sql[@]}" "$RESTORE_DB" -e 'SELECT COUNT(*) FROM SPRING_
 remaining_attributes="$("${sql[@]}" "$RESTORE_DB" -e 'SELECT COUNT(*) FROM SPRING_SESSION_ATTRIBUTES')"
 [[ "$remaining_sessions" == 0 && "$remaining_attributes" == 0 ]] || { echo 'Restored sessions were not cleared' >&2; exit 1; }
 echo 'SESSIONS_CLEARED (after snapshot comparison)'
+echo 'BẮT BUỘC: đặt lại mật khẩu từng tài khoản bằng ops reset-password trước khi mở lại web'
+echo 'Verify identity first; reset every account allowed to sign in; keep disabled accounts disabled. Verification does not authorize reopening web.'
 echo 'RESTORE_OK (keep isolated until post-snapshot account security review)'
