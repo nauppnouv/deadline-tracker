@@ -52,6 +52,9 @@ Caddyfile tối thiểu (thay bằng domain bạn sở hữu):
 
 ```caddyfile
 deadline.example.com {
+    request_body {
+        max_size 16384
+    }
     reverse_proxy 127.0.0.1:8080
 }
 ```
@@ -67,3 +70,5 @@ Theo [OPS](OPS.md): **backup + verify trước mỗi migration có dữ liệu t
 Theo dõi heap/OOM, disk/volume/backup dung lượng, DB connections, mã lỗi tham chiếu; không bật body/SQL DEBUG. Đặt cảnh báo chi phí/ngưỡng ngày theo ngân sách đã duyệt; dừng máy có thể vẫn bị tính disk/IP/snapshot.
 
 Kết thúc lab: xuất/verify backup cần giữ → người vận hành xác định đúng project/server → gỡ service và tài nguyên đã tạo. AWS kiểm tra instance, staticIP tách rời, snapshot, disk, DNS và billing; Hetzner kiểm tra server, PrimaryIP, volume/snapshot/backup và hóa đơn. Đóng tài nguyên phụ cũng cần người xác nhận. Không tự xóa volume dữ liệu; không dùng global prune. Agent chưa thực hiện các thao tác này.
+
+P7-04: app giới hạn body thực nhận 16.384 byte, kể cả chunked; body quá cỡ trả 413, content type ngoài form trả 415. Proxy Caddy áp cùng giới hạn theo [request_body](https://caddyserver.com/docs/caddyfile/directives/request_body). HTTP localhost đã có test; cấu hình proxy/HTTPS thật chưa được chạy, phải xác minh khi triển khai.

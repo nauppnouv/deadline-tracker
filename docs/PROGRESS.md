@@ -43,3 +43,5 @@ Cập nhật 18/10/2026. Đang sửa đúng năm phát hiện P7 trên nhánh `f
 - Các testcontainer tạm/demo đã đóng; hai Compose trial volume được giữ theo BLOCKERS, không chứa dữ liệu thật. Không dọn volume khác/global prune.
 
 D20 username nội bộ44ký tự; D21 disabled assignee; D22 vá Tomcat; D23 cảnh báo Flyway; D24 logout-all/compoundFK; D25 diễn giải credential không rò rỉ trong các luồng được phép. JDK25 .tools/java25; Maven .m2-local; NVD .tools/dependency-check. Docker/Git Bash đã có quyền chạy. Không tiếp tục P7 trong cùng chat này.
+
+- P7-04 RED 3 test/2 failure → GREEN 13 test (HTTP chunked thật, size biên, unsupported type, UTF-8/CSRF). Full check 75 test PASS, static/gitleaks/dependency/migration OK, không skip (target/p7-04-check.log). Chưa triển khai proxy; DEPLOY thêm giới hạn Caddy mẫu. Sau đó P7-05.
