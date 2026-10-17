@@ -89,3 +89,9 @@ D20 username nội bộ44ký tự; D21 disabled assignee; D22 vá Tomcat; D23 c�
 - UAT-10 SEC-02/03: Round2MatrixTest thường trực giữ 45 assertion HTTP, hai nhóm/bốn actor, forged fields và đổi cặp group/task; version từ HTML. Negative control tháo membership guard đỏ 404->200; khôi phục guard rồi GREEN.
 - RED → GREEN; `bash scripts/check.sh`: 137/0/0/0, mọi cổng OK. Bằng chứng: `docs/verification/r2-07.txt`.
 - Tiếp tục đúng thứ tự yêu cầu; không push/merge, không thay V1–V4, không thay phiên bản. Deploy/pilot thật chưa chạy.
+
+## Sửa review vòng 2 — mục 01-lock
+
+- R2-01 DATA-08 UAT-14 bổ sung ca retention đồng thời: RED hai lượt exit 0 nhưng còn 0 backup. Khóa mkdir nguyên tử chặn lượt chồng lấn trước file mới; GREEN còn 1 bộ tốt và lượt kế tiếp thành công. OPS ghi stale-lock; DEPLOY khớp quyền introspection.
+- RED → GREEN; `bash scripts/check.sh`: 138/0/0/0, mọi cổng OK. Bằng chứng: `docs/verification/r2-01-lock.txt`.
+- Tiếp tục đúng thứ tự yêu cầu; không push/merge, không thay V1–V4, không thay phiên bản. Deploy/pilot thật chưa chạy.

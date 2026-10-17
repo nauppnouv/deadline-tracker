@@ -18,16 +18,24 @@ verify_schema "$DB_NAME"
 # An assignment propagates the SQL exit status; process substitution does not.
 tables="$("${sql[@]}" "$DB_NAME" -e 'SHOW TABLES')"
 [[ -n "$tables" ]] || { echo 'No tables available for backup' >&2; exit 1; }
-file="$(mktemp "$BACKUP_DIR/deadline-$(date -u +%Y%m%dT%H%M%SZ).XXXXXX.sql.gz")"
-manifest="$file.tables.pending"
+# Atomic mkdir serializes publication and retention for this private directory.
+lock_dir="$BACKUP_DIR/.deadline-backup.lock"
+if ! mkdir -- "$lock_dir"; then
+  echo 'Backup already running or stale lock present; refusing publication/retention' >&2; exit 1
+fi
+file=''
+manifest=''
 complete=false
 cleanup() {
-  if [[ "$complete" != true ]]; then
+  if [[ "$complete" != true && -n "$file" ]]; then
     rm -f -- "$file" "$file.sha256" "$file.tables.tsv" "$manifest"
   fi
+  rmdir -- "$lock_dir"
 }
 trap cleanup EXIT
 trap 'echo "Backup interrupted; incomplete file is not verified" >&2' ERR
+file="$(mktemp "$BACKUP_DIR/deadline-$(date -u +%Y%m%dT%H%M%SZ).XXXXXX.sql.gz")"
+manifest="$file.tables.pending"
 mariadb-dump --host="$DB_HOST" --port="${DB_PORT:-3306}" --user="$DB_USER" --single-transaction --routines --triggers --hex-blob "$DB_NAME" | gzip > "$file"
 verify_dump_triggers "$file"
 # Stop application writes while generating this verification manifest.

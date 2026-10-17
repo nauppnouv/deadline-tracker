@@ -99,6 +99,30 @@ class Round2VariantsTest extends DatabaseTest {
         String latest=backup();
         assertEquals(0,shell("test -s '"+latest+"' && test -s '"+latest+".sha256' && test -s '"+latest+".tables.tsv'").getExitCode());
     }
+    @Test @DisplayName("UAT-14 DATA-08 R2-01 concurrent retention must never remove all verified backups")
+    void concurrentRetention()throws Exception {
+        String good=backup();assertEquals(0,shell("touch -d '2000-01-01' '"+good+"'").getExitCode());
+        // Hold both retention inventories at a barrier to reproduce cross-deletion.
+        // With serialization only one reaches find; bounded wait then allows it through.
+        wrapper("find","""
+            set -e
+            /usr/bin/find "$@" > "BARRIER/${BACKUP_JOB}.inventory"
+            touch "BARRIER/${BACKUP_JOB}.ready"
+            other=A; [[ "$BACKUP_JOB" == A ]] && other=B
+            for ((n=0;n<250;n++)); do
+              [[ -f "BARRIER/$other.ready" ]] && break
+              sleep 0.02
+            done
+            cat "BARRIER/${BACKUP_JOB}.inventory"
+            """.replace("BARRIER",dir));
+        var concurrent=shell("export PATH="+dir+"/bin:$PATH; BACKUP_JOB=A bash /deadline-project/scripts/backup.sh > "+dir+"/A.out 2> "+dir+"/A.err & a=$!; BACKUP_JOB=B bash /deadline-project/scripts/backup.sh > "+dir+"/B.out 2> "+dir+"/B.err & b=$!; wait $a; ra=$?; wait $b; rb=$?; printf 'A=%s B=%s\\n' $ra $rb; cat "+dir+"/A.out "+dir+"/B.out "+dir+"/A.err "+dir+"/B.err");
+        assertEquals(0,concurrent.getExitCode(),concurrent.getStderr());
+        var count=shell("/usr/bin/find "+dir+"/backups -maxdepth 1 -name 'deadline-*.sql.gz' -type f | wc -l");
+        int retained=Integer.parseInt(count.getStdout().strip());
+        System.out.println("R2 concurrent retention retained="+retained+" "+concurrent.getStdout());
+        assertTrue(retained>=1,"Concurrent retention removed every verified backup: "+concurrent.getStdout());
+        String next=backup();assertEquals(0,shell("test -s '"+next+"'").getExitCode(),"Lock must be released after successful backup");
+    }
     @ParameterizedTest @ValueSource(strings={"tr_group_create_owner","tr_member_owner_update"})
     @DisplayName("UAT-14 DATA-02/08 R2-01 inventory alone is insufficient: restore probes trigger behavior")
     void noopTriggerRestore(String trigger)throws Exception {

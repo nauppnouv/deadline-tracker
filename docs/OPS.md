@@ -38,6 +38,8 @@ bash scripts/backup.sh
 
 Script từ chối backup trong repo, umask077, thư mục700, dump/sha256/manifest600. Dump single-transaction, routines/triggers/hex-blob rồi gzip; checksum SHA-256; chỉ giữ N file dump theo mẫu tên script tạo, giữ nguyên file khác. Trả BACKUP_FILE, không in mật khẩu. Nếu bị ngắt, file chưa có đủ checksum/manifest không được dùng và cần người kiểm tra. Không có lệnh xóa thư mục đệ quy.
 
+Một thư mục backup chỉ chạy một lượt công bố/retention tại một thời điểm: khóa `.deadline-backup.lock` tạo bằng mkdir nguyên tử trước khi tạo file; lượt chồng lấn exit khác 0, không công bố hay retention. Khóa được gỡ khi thoát bình thường/lỗi có trap. Nếu máy chết hoặc SIGKILL để lại khóa, không tự phá khóa: người vận hành xác nhận không còn tiến trình backup, kiểm bộ dở rồi mới gỡ **thư mục khóa rỗng đó** bằng rmdir. Không xóa backup để giải quyết khóa. Test hai lượt song song đã tái hiện việc xóa chéo trước sửa và kiểm bản tốt còn sau sửa.
+
 **Dừng writes trong lúc tạo bộ backup dùng để verify** (stop app, gồm mọi instance; vẫn để DB chạy): dump nhất quán nhưng manifest count/checksum đọc sau dump. Khi writes tiếp tục, manifest có thể khác snapshot và restore test sẽ báo mismatch. Sau dump thành công có thể mở lại app. Không đổi schema giữa dump/manifest. Lưu cả ba file cùng nhau.
 
 Trước mỗi migrate trên môi trường có dữ liệu thật: ngừng app → backup → verify vào DB thử → ghi nhận kết quả → mới chạy jar mới/Flyway. Flyway không tự backup. Nếu migration lỗi, giữ nguyên bằng chứng, không sửa migration đã áp, không tự hạ schema hoặc chạy restore đè nguồn.

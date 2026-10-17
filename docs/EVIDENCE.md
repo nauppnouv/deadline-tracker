@@ -192,3 +192,10 @@ UAT-10 SEC-02/03: Round2MatrixTest thường trực giữ 45 assertion HTTP, hai
 
 - RED: `target/r2-07-red.log`; GREEN: `target/r2-07-green.log`. Lệnh và hash log: [biên bản](verification/r2-07.txt).
 - `bash scripts/check.sh`: 137/0/0/0 (tests/failures/errors/skipped), build/static/gitleaks/dependency/migration OK. Phạm vi tự động cục bộ; không suy thành đạt pilot.
+
+## Vòng 2 — mục 01-lock (18/10/2026)
+
+R2-01 DATA-08 UAT-14 bổ sung ca retention đồng thời: RED hai lượt exit 0 nhưng còn 0 backup. Khóa mkdir nguyên tử chặn lượt chồng lấn trước file mới; GREEN còn 1 bộ tốt và lượt kế tiếp thành công. OPS ghi stale-lock; DEPLOY khớp quyền introspection.
+
+- RED: `target/r2-01-lock-red.log`; GREEN: `target/r2-01-lock-green.log`. Lệnh và hash log: [biên bản](verification/r2-01-lock.txt).
+- `bash scripts/check.sh`: 138/0/0/0 (tests/failures/errors/skipped), build/static/gitleaks/dependency/migration OK. Phạm vi tự động cục bộ; không suy thành đạt pilot.
