@@ -17,6 +17,8 @@ Build tự chủ ban đầu ở `feat/w1-autonomous-build`, bản sửa P7 ở `
 
 PowerShell: gọi Bash bằng `& 'C:/Program Files/Git/bin/bash.exe' scripts/check.sh`. Docker pipe bị từ chối thì kiểm tra Docker Desktop/quyền terminal; không bỏ integration test để lấy build xanh.
 
+Cổng migration so `git diff --name-status` với `MIGRATION_BASELINE_REF` (mặc định `origin/main`), gồm cả sửa đã commit. File đã có ở baseline bị sửa/xóa/đổi tên thì FAIL; chỉ thêm migration mới. Thiếu Git/ref hoặc lỗi diff cũng FAIL, không tự tải ref hay coi là đạt. Có thể đặt ref release đã tin cậy để bảo vệ cả migration chưa có trên main, ví dụ `MIGRATION_BASELINE_REF=0ed3330 bash scripts/check.sh` cho vòng review này. `MIGRATION_BASELINE_REF=none` chỉ khi người chạy chủ động đặt, in **BỎ QUA**, không phải DATA-01 đạt. Test MigrationGuardTest dùng repo Git tạm, chỉ cô lập các cổng khác trong fixture; lượt check toàn repo vẫn chạy đủ.
+
 Sau khi build:
 
 1. Copy `.env.example` thành `.env`, thay hai mật khẩu DB bằng hai giá trị ngẫu nhiên khác nhau. Chỉ là mật khẩu DB cục bộ, không phải tài khoản ứng dụng. Không commit `.env`.

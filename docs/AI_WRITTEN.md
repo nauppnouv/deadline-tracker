@@ -20,3 +20,5 @@ Phạm vi do chủ dự án yêu cầu: sửa đúng năm phát hiện review, t
 | SchemaInvariantVerifier.java; scripts/schema-inventory.sql, schema-required.txt, schema.lib.sh; pom.xml; .gitattributes | Hợp đồng schema dùng chung, kiểm lúc khởi động prod/test và trước backup/sau restore, đóng gói tài nguyên LF | chưa đọc |
 | scripts/backup.sh, verify-restore.sh; docs/OPS.md | Chặn thiếu trigger/quyền trước công bố/retention; luôn giữ bộ mới đã kiểm; probe Owner trong transaction rollback; ghi GRANT/definer | chưa đọc |
 | SchemaStartupTest.java; Round2VariantsTest.java; DatabaseTest.java | Regression từ review và mở rộng mất trigger/constraint, trigger no-op, clock skew; quyền definer chỉ namespace DB thử trong container riêng | chưa đọc |
+
+| scripts/check.sh, check-migrations.sh; MigrationGuardTest.java; README.md | R2-03 baseline/ref/error/explicit skip gate; test repo Git tạm qua check.sh thật với build/audit cô lập trong fixture | chưa đọc |

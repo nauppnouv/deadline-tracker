@@ -25,8 +25,4 @@ if [[ "${RUN_DEPENDENCY_AUDIT:-1}" == 1 ]]; then
 else
   echo "BỎ QUA dependency audit: ${AUDIT_SKIP_REASON:-explicit opt-out, reason not provided}; not a passing SEC-13 result"
 fi
-tracked_migrations="$(git diff --name-only --diff-filter=MD HEAD -- src/main/resources/db/migration 2>/dev/null || true)"
-if [[ -n "$tracked_migrations" ]]; then
-  echo "FAIL committed migration changed: $tracked_migrations"; exit 1
-fi
-echo 'OK immutable committed migrations'
+bash scripts/check-migrations.sh

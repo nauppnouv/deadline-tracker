@@ -1,0 +1,84 @@
+18/10/2026 Asia/Saigon
+R2-03 DATA-01: migration so baseline origin/main hoặc MIGRATION_BASELINE_REF; M/D/R/T của file baseline bị chặn kể cả đã commit. Git/ref lỗi fail rõ; none tường minh in BỎ QUA. Repo Git tạm tái hiện đã chạy.
+Commands are run from repository root using Git Bash and scripts/mvn.sh (portable JDK25).
+All DBs are disposable MariaDB containers; no pilot data.
+
+target\r2-02-red.log
+SHA256=d3a4af91876428bf2216bacb191cc7a2d510d9874136865bcb37800c0b6f24e5
+OK secret scan
+OK immutable committed migrations
+OK build + tests
+OK template / SQL static checks
+OK secret scan
+OK immutable committed migrations
+OK build + tests
+OK template / SQL static checks
+OK secret scan
+OK immutable committed migrations
+OK build + tests
+OK template / SQL static checks
+OK secret scan
+OK immutable committed migrations
+OK build + tests
+OK template / SQL static checks
+OK secret scan
+OK immutable committed migrations
+OK build + tests
+OK template / SQL static checks
+OK secret scan
+OK immutable committed migrations
+OK build + tests
+OK template / SQL static checks
+OK secret scan
+OK immutable committed migrations
+OK build + tests
+OK template / SQL static checks
+OK secret scan
+OK immutable committed migrations
+[ERROR] Tests run: 10, Failures: 7, Errors: 0, Skipped: 0
+[INFO] BUILD FAILURE
+
+target\r2-02-green.log
+SHA256=23725653669814c4cbc39139daa943ff953e9962f663fe52e5ce78d0b6f6863c
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 13.58 s -- in vn.deadline.tracker.MigrationGuardTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+
+target\r2-02-check.log
+SHA256=0a14901fb1c3a3b6db4c5bcbe31c1890b6045147f95ee0edc42ceb12ee021465
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 22.79 s -- in vn.deadline.tracker.AuthWebTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 23.36 s -- in vn.deadline.tracker.BackupFailureTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 7.904 s -- in vn.deadline.tracker.BackupRestoreTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vn.deadline.tracker.BuildSmokeTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.700 s -- in vn.deadline.tracker.ChunkedRequestTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.018 s -- in vn.deadline.tracker.GroupDomainTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.988 s -- in vn.deadline.tracker.GroupInvitationWebTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.175 s -- in vn.deadline.tracker.GroupVersionWebTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.857 s -- in vn.deadline.tracker.InvitationTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 12.82 s -- in vn.deadline.tracker.MigrationGuardTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.618 s -- in vn.deadline.tracker.OpsWorkflowTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.430 s -- in vn.deadline.tracker.OwnerIntegrityTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.696 s -- in vn.deadline.tracker.PersistenceTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.868 s -- in vn.deadline.tracker.ProductionSecurityTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.002 s -- in vn.deadline.tracker.RateLimitTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 14.88 s -- in vn.deadline.tracker.RepresentativeLoadTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.054 s -- in vn.deadline.tracker.RestartPersistenceTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.798 s -- in vn.deadline.tracker.RestoredSessionTest
+R2 no TRIGGER privilege backup exit=1 stderr=WARNING: option --ssl-verify-server-cert is disabled, because of an insecure passwordless login.
+R2 missing triggers restore exit=1 output= stderr=WARNING: option --ssl-verify-server-cert is disabled, because of an insecure passwordless login.
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 20.84 s -- in vn.deadline.tracker.Round2VariantsTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.932 s -- in vn.deadline.tracker.SchemaStartupTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.020 s -- in vn.deadline.tracker.TaskDomainTest
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.243 s -- in vn.deadline.tracker.TaskWebTest
+[INFO] Tests run: 109, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+OK build + tests
+OK template / SQL static checks
+OK secret scan
+[INFO] BUILD SUCCESS
+OK dependency audit
+OK immutable committed migrations (baseline=origin/main)
+
+RED/GREEN command: bash scripts/mvn.sh test -Dtest=MigrationGuardTest
+CHECK command: bash scripts/check.sh
+Additional command: MIGRATION_BASELINE_REF=0ed3330 bash scripts/check-migrations.sh -> OK immutable committed migrations (baseline=0ed3330). This baseline contains V1-V4; origin/main currently predates the web schema.

@@ -150,3 +150,10 @@ R2-01: kiểm schema lúc startup prod/test; chặn backup thiếu quyền/trigg
 
 - RED: `target/r2-01-red.log`; GREEN: `target/r2-01-green.log`. Lệnh và hash log: [biên bản](verification/r2-01.txt).
 - `bash scripts/check.sh`: 99/0/0/0 (tests/failures/errors/skipped), build/static/gitleaks/dependency/migration OK. Phạm vi tự động cục bộ; không suy thành đạt pilot.
+
+## Vòng 2 — mục 02 (18/10/2026)
+
+R2-03 DATA-01: migration so baseline origin/main hoặc MIGRATION_BASELINE_REF; M/D/R/T của file baseline bị chặn kể cả đã commit. Git/ref lỗi fail rõ; none tường minh in BỎ QUA. Repo Git tạm tái hiện đã chạy.
+
+- RED: `target/r2-02-red.log`; GREEN: `target/r2-02-green.log`. Lệnh và hash log: [biên bản](verification/r2-02.txt).
+- `bash scripts/check.sh`: 109/0/0/0 (tests/failures/errors/skipped), build/static/gitleaks/dependency/migration OK. Phạm vi tự động cục bộ; không suy thành đạt pilot.
