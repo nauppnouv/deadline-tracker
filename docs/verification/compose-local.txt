@@ -1,0 +1,7 @@
+Compose disposable project=deadline-w1-7c56fed6
+No real credentials or user data. Volumes retained; no -v cleanup.
+PASS HTTP register/login/create group via packaged jar
+PASS restart app retains group and JDBC session
+PASS app user UID=10001
+PASS loopback port bindings specified by Compose
+Stopped/removed only this trial project's containers/network. Trial volume: deadline-w1-7c56fed6_database

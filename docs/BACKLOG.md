@@ -3,6 +3,18 @@
 **Phiên bản:** 0.1 · **Ngày:** 17/10/2026  
 **Căn cứ:** [Kế hoạch sản phẩm](PROJECT_PLAN.md) · [Lộ trình học](LEARNING_ROADMAP.md)
 
+## Cập nhật sau build P6 (17/10/2026)
+
+Bảng này cập nhật tình trạng; nhãn trong mô tả story bên dưới là snapshot đặc tả trước build. Không thay đổi tiêu chí chấp nhận.
+
+| Story | Tình trạng hiện tại |
+|---|---|
+| US01…18 | Chức năng và kiểm thử cục bộ đã có; xem EVIDENCE cho phạm vi từng cổng |
+| US19 | Hồi quy tự động, UAT01…18 trên dữ liệu giả; chưa review độc lập P7 |
+| US20 | Một phần: compose local và DEPLOY runbook; chưa máy chủ HTTPS/người dùng truy cập độc lập |
+| US21 | Một phần: scripts và restore drill thật trên DB thử; lịch hằng ngày/người vận hành/backup ngoài máy phải thiết lập khi deploy |
+| US22 | Chưa: pilot/người dùng thật do chủ dự án tổ chức |
+
 ## Cách sử dụng
 
 Một user story mô tả người cần tính năng, mục đích và kết quả phải đạt. Tiêu chí chấp nhận là điều kiện để biết tính năng hoạt động đúng, không phải danh sách tên phương thức cần viết.

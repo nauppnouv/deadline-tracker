@@ -1,0 +1,8 @@
+{
+  "reportDate": "2026-10-17T16:41:56.582922500Z",
+  "engine": "12.1.8",
+  "dependencyEntries": 54,
+  "findings": [],
+  "rawReportSHA256": "cb2ac2a4a82b45f3a647795231b0fb554fb992b45d3f330fe5ceb8701e414359",
+  "limitations": "OWASP dependency-check/NVD plus enabled analyzers at scan time; not a complete security review. OSS Index disabled because account credentials are not used."
+}

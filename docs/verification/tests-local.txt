@@ -1,0 +1,18 @@
+17/10/2026 UTC; p6-verified; Java25.0.4.1/Windows/DockerDesktop29.8.2/MariaDB11.8.9
+vn.deadline.tracker.AuthWebTest: tests=8, failures=0, errors=0, skipped=0
+vn.deadline.tracker.BackupRestoreTest: tests=1, failures=0, errors=0, skipped=0
+vn.deadline.tracker.BuildSmokeTest: tests=1, failures=0, errors=0, skipped=0
+vn.deadline.tracker.GroupDomainTest: tests=8, failures=0, errors=0, skipped=0
+vn.deadline.tracker.GroupInvitationWebTest: tests=2, failures=0, errors=0, skipped=0
+vn.deadline.tracker.InvitationTest: tests=4, failures=0, errors=0, skipped=0
+vn.deadline.tracker.OpsWorkflowTest: tests=4, failures=0, errors=0, skipped=0
+vn.deadline.tracker.PersistenceTest: tests=7, failures=0, errors=0, skipped=0
+vn.deadline.tracker.ProductionSecurityTest: tests=4, failures=0, errors=0, skipped=0
+vn.deadline.tracker.RateLimitTest: tests=1, failures=0, errors=0, skipped=0
+vn.deadline.tracker.RepresentativeLoadTest: tests=1, failures=0, errors=0, skipped=0
+vn.deadline.tracker.RestartPersistenceTest: tests=1, failures=0, errors=0, skipped=0
+vn.deadline.tracker.TaskDomainTest: tests=10, failures=0, errors=0, skipped=0
+vn.deadline.tracker.TaskWebTest: tests=6, failures=0, errors=0, skipped=0
+TOTAL 58 tests, 0 failures/errors/skips
+Full check: build/tests/static/gitleaks/OWASP/migration OK
+Successful log checked against 11 synthetic passphrase literals: no matches

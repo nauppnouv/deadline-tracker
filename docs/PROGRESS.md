@@ -27,8 +27,8 @@ Cập nhật17/10/2026. Nhánh feat/w1-autonomous-build, commit local, chưa pus
 
 ## Điểm tiếp tục
 
-1. Ops/hardening đã commit e2af9bf. US21 check58tests ở target/p6-backup-story.log xanh, có thời điểm/thời lượng restore thật; đang commit scripts/test/OPS.
-2. Đóng gói Docker/README/ARCHITECTURE/EXPLAIN/OPS/DEPLOY và evidence; chạy kiểm tra link/legacy.
+1. Ops/hardening đã commit e2af9bf. US21 check58tests ở target/p6-backup-story.log xanh, có thời điểm/thời lượng restore thật; đã commit b4a4867 scripts/test/OPS.
+2. Docker smoke lần cuối deadline-w1-7c56fed6 PASS từ jar sau check; tài liệu/ảnh/lock dependency đã có; links và console legacy đã chạy kiểm tra. Đang commit gói bàn giao.
 3. Clone local nhánh vào .tools/verification-UUID, dùng JDK25 và cache Maven/NVD ngoài clone, chạy scripts/check.sh thật từ clone. Chỉ sau kết quả mới đánh dấu P6 hoàn tất.
 4. Dừng P6. P7 cần chủ dự án mở chat mới chạy Reviewer; US20 chưa deploy thật, US21 chưa lịch backup thật, US22 chưa pilot. Không tự push/merge/tạo tài nguyên.
 

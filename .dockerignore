@@ -1,0 +1,5 @@
+**
+!Dockerfile
+!target/
+target/*
+!target/deadline-tracker-0.1.0-SNAPSHOT.jar
