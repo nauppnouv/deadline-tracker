@@ -12,3 +12,11 @@ Phạm vi do chủ dự án yêu cầu: sửa đúng năm phát hiện review, t
 | GroupVersionWebTest.java; Group.java; GroupAccess.java; WorkService.java; GroupController.java; templates/group-settings.html; TaskWebTest.java | P7-03 version từ lúc mở form, từ chối cũ 409, giữ bản nháp; test hai phiên và version sai | chưa đọc |
 | ChunkedRequestTest.java; RequestSizeFilter.java; docs/DEPLOY.md | P7-04 test HTTP chunked thật; giới hạn byte trước binding, tái đọc form bằng converter Spring, giới hạn proxy mẫu | chưa đọc |
 | V4__owner_membership_integrity.sql; WorkService.java (P7-05); OwnerIntegrityTest.java; BackupRestoreTest.java | Tạo/bảo vệ Owner bằng trigger InnoDB, kiểm dữ liệu trước migrate, test SQL/upgrade/restore; không thay migration cũ | chưa đọc |
+
+## Review vòng 2 — phạm vi được chủ dự án giao trực tiếp (18/10/2026)
+
+| Tệp | Mô tả | Trạng thái |
+|---|---|---|
+| SchemaInvariantVerifier.java; scripts/schema-inventory.sql, schema-required.txt, schema.lib.sh; pom.xml; .gitattributes | Hợp đồng schema dùng chung, kiểm lúc khởi động prod/test và trước backup/sau restore, đóng gói tài nguyên LF | chưa đọc |
+| scripts/backup.sh, verify-restore.sh; docs/OPS.md | Chặn thiếu trigger/quyền trước công bố/retention; luôn giữ bộ mới đã kiểm; probe Owner trong transaction rollback; ghi GRANT/definer | chưa đọc |
+| SchemaStartupTest.java; Round2VariantsTest.java; DatabaseTest.java | Regression từ review và mở rộng mất trigger/constraint, trigger no-op, clock skew; quyền definer chỉ namespace DB thử trong container riêng | chưa đọc |

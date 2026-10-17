@@ -9,9 +9,41 @@ expected="$(cat "$BACKUP_FILE.sha256")"
 export MYSQL_PWD="$DB_PASSWORD"
 sql=(mariadb --host="$DB_HOST" --port="${DB_PORT:-3306}" --user="$DB_USER" --batch --skip-column-names)
 source "$(dirname "$0")/checksum.lib.sh"
+source "$(dirname "$0")/schema.lib.sh"
 [[ "$("${sql[@]}" -e "SELECT COUNT(*) FROM information_schema.SCHEMATA WHERE SCHEMA_NAME='$RESTORE_DB'")" == 0 ]] || { echo 'Restore database already exists; refusing overwrite' >&2; exit 1; }
 "${sql[@]}" -e "CREATE DATABASE \`$RESTORE_DB\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
 gzip -dc -- "$BACKUP_FILE" | "${sql[@]}" "$RESTORE_DB"
+verify_schema "$RESTORE_DB"
+# Exercise both Owner invariants in one connection/transaction. The temporary
+# procedure handles only the expected SQLSTATE; any other SQL error fails closed.
+"${sql[@]}" "$RESTORE_DB" <<'SQL'
+DELIMITER //
+CREATE PROCEDURE deadline_verify_owner()
+BEGIN
+ DECLARE uid CHAR(36) DEFAULT UUID();
+ DECLARE gid CHAR(36) DEFAULT UUID();
+ DECLARE blocked BOOLEAN DEFAULT FALSE;
+ DECLARE owners INT;
+ DECLARE EXIT HANDLER FOR SQLEXCEPTION BEGIN ROLLBACK; RESIGNAL; END;
+ START TRANSACTION;
+ INSERT INTO app_user(id,username,display_name,password_hash,created_at)
+ VALUES(uid,CONCAT('probe.',LEFT(REPLACE(uid,'-',''),24)),'Restore probe','unusable',UTC_TIMESTAMP(6));
+ INSERT INTO project_group(id,name,description,owner_id,created_at)
+ VALUES(gid,'Restore probe','',uid,UTC_TIMESTAMP(6));
+ SELECT COUNT(*) INTO owners FROM group_member WHERE group_id=gid AND user_id=uid AND role='OWNER';
+ IF owners<>1 THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Restore probe: group must have Owner'; END IF;
+ BEGIN
+  DECLARE CONTINUE HANDLER FOR SQLSTATE '45000' SET blocked=TRUE;
+  UPDATE group_member SET role='MEMBER' WHERE group_id=gid AND user_id=uid;
+ END;
+ IF NOT blocked THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Restore probe: Owner demotion was allowed'; END IF;
+ ROLLBACK;
+END//
+DELIMITER ;
+CALL deadline_verify_owner();
+DROP PROCEDURE deadline_verify_owner;
+SQL
+echo 'OWNER_BEHAVIOR_OK (create Owner; demotion blocked; transaction rolled back)'
 actual_tables="$("${sql[@]}" "$RESTORE_DB" -e 'SHOW TABLES' | sort)"
 expected_tables="$(cut -f 1 "$BACKUP_FILE.tables.tsv" | sort)"
 [[ -n "$actual_tables" && "$actual_tables" == "$expected_tables" ]] || { echo 'Table inventory mismatch' >&2; exit 1; }

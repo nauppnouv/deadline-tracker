@@ -1,6 +1,6 @@
 # Tiến độ và điểm tiếp tục
 
-Cập nhật 18/10/2026. Đang sửa đúng năm phát hiện P7 trên nhánh `fix/p7-security-data-findings`; chưa push/merge.
+Cập nhật 18/10/2026. Đang sửa bảy mục review vòng 2 trên nhánh `fix/p7-security-data-findings`; chưa push/merge. Các mục P7 bên dưới là lịch sử vòng 1; trạng thái vòng 2 ghi cuối tệp.
 
 ## P7 — công việc hiện tại
 
@@ -47,3 +47,9 @@ Cập nhật 18/10/2026. Đang sửa đúng năm phát hiện P7 trên nhánh `f
 - Các testcontainer tạm/demo đã đóng; hai Compose trial volume được giữ theo BLOCKERS, không chứa dữ liệu thật. Không dọn volume khác/global prune.
 
 D20 username nội bộ44ký tự; D21 disabled assignee; D22 vá Tomcat; D23 cảnh báo Flyway; D24 logout-all/compoundFK; D25 diễn giải credential không rò rỉ trong các luồng được phép. JDK25 .tools/java25; Maven .m2-local; NVD .tools/dependency-check. Docker/Git Bash đã có quyền chạy. D-26/D-27 ghi quyết định checksum/restore và Owner trong P7.
+
+## Sửa review vòng 2 — mục 01
+
+- R2-01: kiểm schema lúc startup prod/test; chặn backup thiếu quyền/trigger trước retention; restore kiểm kê và probe Owner rồi rollback. GRANT sao lưu đã ghi OPS. UAT-02/14 DATA-02/08 đã chạy trên DB giả.
+- RED → GREEN; `bash scripts/check.sh`: 99/0/0/0, mọi cổng OK. Bằng chứng: `docs/verification/r2-01.txt`.
+- Tiếp tục đúng thứ tự yêu cầu; không push/merge, không thay V1–V4, không thay phiên bản. Deploy/pilot thật chưa chạy.

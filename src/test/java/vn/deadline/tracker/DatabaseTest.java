@@ -11,7 +11,19 @@ public abstract class DatabaseTest {
     protected static final MariaDBContainer DB = new MariaDBContainer(DockerImageName.parse("mariadb@sha256:f16d7a344413e519dff518f27bdb221388f84b0d274c97c4fb5f2cb0dc1b34fa").asCompatibleSubstituteFor("mariadb"))
         .withDatabaseName("deadline_test").withUsername("deadline_test")
         .withPassword(UUID.randomUUID().toString()).withCommand("--default-time-zone=+00:00");
-    static { DB.start(); }
+    static {
+        DB.start();
+        // Restored triggers retain their original DEFINER. In this disposable
+        // server only, prepare its rights on the isolated restore namespace.
+        try {
+            var grant=DB.execInContainer("bash","-lc","""
+                MYSQL_PWD="${MARIADB_ROOT_PASSWORD:-${MYSQL_ROOT_PASSWORD:-}}" mariadb -h127.0.0.1 -uroot <<'SQL'
+                GRANT ALL ON `deadline_restore_%`.* TO 'deadline_test'@'%';
+                SQL
+                """);
+            if(grant.getExitCode()!=0)throw new IllegalStateException(grant.getStderr());
+        } catch(Exception error) { throw new ExceptionInInitializerError(error); }
+    }
     @DynamicPropertySource static void database(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", DB::getJdbcUrl);
         registry.add("spring.datasource.username", DB::getUsername);

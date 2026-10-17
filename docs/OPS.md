@@ -21,6 +21,17 @@ Cần Bash, GNU coreutils/find, gzip, client `mariadb` và `mariadb-dump` tươn
 
 Đặt DB_HOST, DB_PORT (mặc định3306), DB_USER, DB_PASSWORD, DB_NAME bằng secret store/envfile ngoài repo quyền600. Dùng user backup có đủ quyền dump bảng/routines/triggers; ví dụ local có thể dùng root DB thử. Đặt BACKUP_DIR là đường dẫn tuyệt đối **ngoài repo**, BACKUP_KEEP=7. Không dùng volume DB làm nơi giữ bản sao duy nhất.
 
+Với MariaDB 11.8 đã pin, tài khoản sao lưu riêng (ví dụ `deadline_backup` từ host loopback) cần các GRANT sau; thay `deadline` bằng schema thật. Tạo tài khoản/mật khẩu ngoài repo trước, không chép bí mật vào SQL mẫu:
+
+```sql
+GRANT SELECT, SHOW VIEW, TRIGGER ON deadline.* TO 'deadline_backup'@'127.0.0.1';
+GRANT SELECT ON mysql.proc TO 'deadline_backup'@'127.0.0.1';
+```
+
+`SELECT mysql.proc` phục vụ `--routines` trên image đã pin; không cấp DML/DDL/root cho principal sao lưu. `--single-transaction` không cần LOCK TABLES. Tài khoản chỉ SELECT/SHOW VIEW không đủ: script đếm `information_schema.TRIGGERS`, kiểm đủ năm tên/bảng/thời điểm/sự kiện V4 và định nghĩa nhìn thấy, rồi kiểm đủ CREATE TRIGGER trong dump. Thiếu quyền/đối tượng hoặc query lỗi thì không công bố BACKUP_FILE, không chạy retention, giữ bộ tốt trước đó. Retention chỉ chạy sau khi bộ mới qua kiểm tra và giữ ít nhất một bộ tốt (BACKUP_KEEP ≥ 1).
+
+Hợp đồng `scripts/schema-required.txt` và `schema-inventory.sql` cũng đóng gói trong jar: profile prod/test từ chối khởi động khi mất trigger hoặc FK/CHECK/unique/NOT NULL/InnoDB then chốt. Runtime principal cần nhìn thấy metadata trigger (TRIGGER trên schema). Không sửa V1–V4; không cần migration mới. [Metadata trigger MariaDB](https://mariadb.com/docs/server/reference/system-tables/information-schema/information-schema-tables/information-schema-triggers-table).
+
 ```bash
 bash scripts/backup.sh
 ```
@@ -33,7 +44,7 @@ Trước mỗi migrate trên môi trường có dữ liệu thật: ngừng app 
 
 ## Thử phục hồi
 
-Giữ DB nguồn nguyên vẹn. Chọn RESTORE_DB mới có prefix `deadline_restore_`, khác DB_NAME, chưa tồn tại. User phục hồi phải có quyền tạo DB thử; không dùng quyền đó cho web app.
+Giữ DB nguồn nguyên vẹn. Chọn RESTORE_DB mới có prefix `deadline_restore_`, khác DB_NAME, chưa tồn tại. User phục hồi phải có quyền tạo DB thử, import DDL/trigger/routine và CREATE ROUTINE/EXECUTE/ALTER ROUTINE trên DB thử để chạy rồi gỡ procedure kiểm hành vi; không dùng quyền đó cho web app. Procedure chỉ chạy trên RESTORE_DB mới, mọi hàng probe đều rollback. Dump giữ DEFINER của trigger: tài khoản đó phải tồn tại và có quyền cần thiết trên đúng schema phục hồi (TRIGGER và DML mà trigger dùng) trước khi kiểm hành vi. Người vận hành chuẩn bị quyền trên DB cách ly; script không tự cấp quyền hay đổi definer. Thiếu quyền cũng phải fail, không bỏ phép thử.
 
 ```bash
 export RESTORE_DB=deadline_restore_trial_20261017
@@ -41,7 +52,7 @@ export BACKUP_FILE=/absolute/path/outside/repository/deadline-....sql.gz
 bash scripts/verify-restore.sh
 ```
 
-Script xác minh SHA trước import, không overwrite DB tồn tại. Import vào DB mới; so từng bảng với manifest count/checksum SHA-256 logic, kiểm tra orphan cho mọi FK. **Sau khi so snapshot**, script xóa mọi phiên Spring Session trong DB phục hồi (attributes xóa theo FK cascade), kiểm tra hai bảng phiên đều rỗng rồi in SESSIONS_CLEARED và RESTORE_OK. Dữ liệu nghiệp vụ giữ nguyên; mọi người phải đăng nhập lại. Tắt cleanup session khi so checksum. Không tự drop DB thử hay DB nguồn.
+Script xác minh SHA trước import, không overwrite DB tồn tại. Import vào DB mới; kiểm kê trigger/FK/CHECK/unique/NOT NULL/InnoDB theo hợp đồng, chạy phép thử tạo nhóm có Owner và hạ Owner bị chặn trong transaction rồi rollback; so từng bảng với manifest count/checksum SHA-256 logic, kiểm tra orphan cho mọi FK. **Sau khi so snapshot**, script xóa mọi phiên Spring Session trong DB phục hồi (attributes xóa theo FK cascade), kiểm tra hai bảng phiên đều rỗng rồi in SESSIONS_CLEARED và RESTORE_OK. Dữ liệu nghiệp vụ giữ nguyên; mọi người phải đăng nhập lại. Tắt cleanup session khi so checksum. Không tự drop DB thử hay DB nguồn.
 
 **RESTORE_OK chưa cho phép mở DB ra web.** Giữ ứng dụng cách ly, không phục vụ người dùng thật, rồi thực hiện:
 

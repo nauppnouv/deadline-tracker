@@ -143,3 +143,10 @@ Kết quả đạt trong bảng là kiểm chứng password thô/invitation raw 
 - `bash scripts/check.sh` từ clone:58 tests,0 failure/error/skip; build/static/gitleaks/OWASP/migration đều OK, **không bước nào bị bỏ qua**. Git status clone sạch. [Biên bản](verification/clean-clone.txt), [đo tải clone](verification/load-clean-clone.txt), [restore clone](verification/restore-clean-clone.txt).
 - Mã runtime ở8d06499 đã được kiểm chứng; commit biên bản cuối chỉ cập nhật docs, không sửa source/migration/dependency.
 - P6 kết thúc trong phạm vi xây dựng và kiểm chứng cục bộ. P7 chưa chạy theo yêu cầu dừng; US20 còn deploy thật, US21 còn lịch/backup ngoài máy, US22 còn pilot. Giới hạn D23/Flyway và D25/SEC05 vẫn công khai, không suy ra chứng nhận sản phẩm an toàn.
+
+## Vòng 2 — mục 01 (18/10/2026)
+
+R2-01: kiểm schema lúc startup prod/test; chặn backup thiếu quyền/trigger trước retention; restore kiểm kê và probe Owner rồi rollback. GRANT sao lưu đã ghi OPS. UAT-02/14 DATA-02/08 đã chạy trên DB giả.
+
+- RED: `target/r2-01-red.log`; GREEN: `target/r2-01-green.log`. Lệnh và hash log: [biên bản](verification/r2-01.txt).
+- `bash scripts/check.sh`: 99/0/0/0 (tests/failures/errors/skipped), build/static/gitleaks/dependency/migration OK. Phạm vi tự động cục bộ; không suy thành đạt pilot.

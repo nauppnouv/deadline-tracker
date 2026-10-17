@@ -21,7 +21,10 @@
     <dependency><groupId>org.testcontainers</groupId><artifactId>testcontainers-mariadb</artifactId><scope>test</scope></dependency>
     <dependency><groupId>org.testcontainers</groupId><artifactId>testcontainers-junit-jupiter</artifactId><scope>test</scope></dependency>
   </dependencies>
-  <build><plugins>
+  <build><resources>
+    <resource><directory>src/main/resources</directory></resource>
+    <resource><directory>scripts</directory><targetPath>db/invariants</targetPath><includes><include>schema-inventory.sql</include><include>schema-required.txt</include></includes></resource>
+  </resources><plugins>
     <plugin><groupId>org.springframework.boot</groupId><artifactId>spring-boot-maven-plugin</artifactId></plugin>
     <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-surefire-plugin</artifactId><configuration><argLine>-Duser.timezone=UTC -Duser.home="${project.basedir}/.tools/home"</argLine><trimStackTrace>false</trimStackTrace></configuration></plugin>
   </plugins></build>
