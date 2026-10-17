@@ -23,13 +23,13 @@ public class SecurityConfig {
         var row=accounts.findByUsername(name).filter(a->a.enabled).orElseThrow(()->new UsernameNotFoundException("Invalid credentials"));
         return new TrackerPrincipal(row.id,row.username,row.passwordHash,row.version);
     };}
-    @Bean SecurityFilterChain security(HttpSecurity http,UserDetailsService users,PasswordEncoder encoder,RateLimiter limiter,AccountRepository accounts,vn.deadline.tracker.service.GroupAccess groupAccess)throws Exception{
+    @Bean SecurityFilterChain security(HttpSecurity http,UserDetailsService users,PasswordEncoder encoder,RateLimiter limiter,AccountRepository accounts,vn.deadline.tracker.service.GroupAccess groupAccess,vn.deadline.tracker.service.SessionStore sessions)throws Exception{
         var provider=new DaoAuthenticationProvider(users);provider.setPasswordEncoder(encoder);http.authenticationProvider(provider);
         http.authorizeHttpRequests(a->a.requestMatchers("/login","/register","/error","/css/**","/js/**").permitAll().anyRequest().authenticated());
         http.formLogin(f->f.loginPage("/login").failureHandler((request,response,error)->response.sendRedirect(request.getContextPath()+ReturnPath.login(request.getParameter("next"),"error")))
             .successHandler((request,response,authentication)->{String next=ReturnPath.invitation(request.getParameter("next"));response.sendRedirect(request.getContextPath()+(next==null?"/groups":next));}).permitAll());
         http.requestCache(c->c.requestCache(new org.springframework.security.web.savedrequest.NullRequestCache()));
-        http.logout(l->l.logoutUrl("/logout").logoutSuccessUrl("/login?logout").invalidateHttpSession(true).clearAuthentication(true).deleteCookies("SESSION"));
+        http.logout(l->l.logoutUrl("/logout").addLogoutHandler((request,response,authentication)->{if(authentication!=null)sessions.invalidateAll(authentication.getName());}).logoutSuccessUrl("/login?logout").invalidateHttpSession(true).clearAuthentication(true).deleteCookies("SESSION"));
         http.exceptionHandling(e->e.authenticationEntryPoint((request,response,error)->{String path=request.getRequestURI().substring(request.getContextPath().length());
             if(path.startsWith("/groups/"))response.sendError(404);
             else response.sendRedirect(request.getContextPath()+(ReturnPath.invitation(path)==null?"/login":ReturnPath.login(path,"continue")));}));

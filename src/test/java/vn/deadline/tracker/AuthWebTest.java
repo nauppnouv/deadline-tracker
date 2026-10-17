@@ -49,6 +49,8 @@ class AuthWebTest extends DatabaseTest {
         mvc.perform(get("/account").cookie(a)).andExpect(status().isOk());
         mvc.perform(post("/logout").cookie(a).with(csrf())).andExpect(status().is3xxRedirection());
         mvc.perform(get("/account").cookie(a)).andExpect(status().is3xxRedirection());
+        mvc.perform(get("/account").cookie(b)).andExpect(status().is3xxRedirection());
+        b=login(username,PASSWORD);
         accounts.changePassword(id,PASSWORD,"Another long passphrase 456!");
         mvc.perform(get("/account").cookie(b)).andExpect(status().is3xxRedirection());
         login(username,"Another long passphrase 456!");

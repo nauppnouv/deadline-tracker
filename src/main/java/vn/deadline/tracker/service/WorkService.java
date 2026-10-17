@@ -31,7 +31,7 @@ public class WorkService {
         var row=groups.findById(groupId).orElseThrow(RuleViolation::missing);row.name=domain.getName();row.description=domain.getDescription();groups.flush();
     }
     public Task createTask(String actor,String groupId,String title,String description,String assignee,Instant due) {
-        var group=access.member(actor,groupId);var domain=Task.create(group,actor,title,description,assignee,due,clock);
+        var group=access.member(actor,groupId);access.assignable(groupId,assignee);var domain=Task.create(group,actor,title,description,assignee,due,clock);
         var row=new TaskEntity();copy(domain,row);tasks.saveAndFlush(row);event(actor,null,domain,Task.Change.CREATED);events.flush();return domain(row);
     }
     @Transactional(readOnly=true) public Task task(String actor,String groupId,String taskId) {access.member(actor,groupId);return domain(row(groupId,taskId));}
@@ -44,6 +44,7 @@ public class WorkService {
     }
     public Task editTask(String actor,String groupId,String taskId,String title,String description,String assignee,Instant due,long expectedVersion) {
         var group=access.member(actor,groupId);var row=row(groupId,taskId);version(row,expectedVersion);
+        if(!row.assigneeId.equals(assignee))access.assignable(groupId,assignee);
         var before=domain(row);var updated=domain(row);var change=updated.edit(group,actor,title,description,assignee,due,clock);
         if(change!=Task.Change.NONE) {copy(updated,row);event(actor,before,updated,change);tasks.flush();events.flush();}
         return domain(row);

@@ -8,7 +8,7 @@ import org.hibernate.type.SqlTypes;
 @Entity @Table(name="app_user")
 public class AccountEntity {
     @Id @Column(length=36) public String id;
-    @Column(length=30) public String username;
+    @Column(length=44) public String username;
     @Column(length=80) public String displayName;
     @Column(length=255) public String passwordHash;
     public boolean enabled;

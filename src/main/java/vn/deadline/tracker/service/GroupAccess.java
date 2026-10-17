@@ -13,6 +13,7 @@ public class GroupAccess {
     public GroupAccess(GroupRepository groups,MemberRepository members,AccountRepository accounts) {this.groups=groups;this.members=members;this.accounts=accounts;}
     public void active(String actor) { if(actor==null || accounts.findById(actor).filter(a->a.enabled).isEmpty()) throw RuleViolation.missing(); }
     public boolean hasMembership(String actor,String groupId) { active(actor); return members.existsByGroupIdAndUserId(groupId,actor); }
+    public void assignable(String groupId,String user) {if(user==null||!members.existsByGroupIdAndUserId(groupId,user)||accounts.findById(user).filter(a->a.enabled).isEmpty())throw RuleViolation.invalid("Người phụ trách phải là thành viên đang hoạt động trong nhóm.");}
     public Group member(String actor,String groupId) {
         active(actor);
         if(!members.existsByGroupIdAndUserId(groupId,actor)) throw RuleViolation.missing();

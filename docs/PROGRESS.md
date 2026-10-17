@@ -1,46 +1,35 @@
-# Tiến độ W1
+# Tiến độ và điểm tiếp tục
 
-Ngày 17/10/2026. Nhánh feat/w1-autonomous-build.
+Cập nhật17/10/2026. Nhánh feat/w1-autonomous-build, commit local, chưa push bản build này.
 
-- Đang làm P0: kiểm chứng công nghệ, bảo toàn legacy-console, dựng build/check và bảng bằng chứng.
-- P1–P6: chưa triển khai/chưa kiểm chứng.
-- Docker Desktop 29.8.2 đã kiểm tra được khi được quyền truy cập pipe. Trong sandbox: permission denied while trying to connect to the docker API at npipe:////./pipe/dockerDesktopLinuxEngine.
-- Java hệ thống 26 không phải LTS: đang tải JDK 25 portable trong .tools; không cài hệ thống.
-- Bước tiếp: hoàn thành build/check P0, test trước cho US-01/02 rồi cổng P1.
-- P7 và pilot M7 chưa thực hiện, thuộc phiên review/người dùng sau P6.
+| Pha | Kết quả chạy thật |
+|---|---|
+| P0 | Java25/Maven/check, giữ nguyên console trong legacy-console; commit52fb6fe |
+| P1 | Domain group/task/time/filter19 tests, test-first; commits20c563d/e027da9 |
+| P2 | MariaDB thật, migrations, atomic/event/conflict/restart27 tests; commit06ec09c |
+| P3 | Auth/session/CSRF/rate limit/authorization36 tests; commitb7cda3c |
+| P4 | Group/invitation atomic42 tests; commit9b82b70 |
+| P5 | Task UI/filter/errors/XSS48 tests; commitc559e9e |
+| P6 | Cổng kỹ thuật cục bộ đã qua58tests; chờ clone sạch trước chốt pha |
+| P7/M7 | Chưa chạy; reviewer chat mới/pilot người dùng do chủ dự án thực hiện |
 
-## P0 đã qua cổng build nền
+## Bằng chứng mới nhất
 
-- Build/check chạy thật thành công với JDK 25; đã có jar và test runtime 1/1.
-- P1 kế tiếp: test trước cho Group/Task/Filters; chưa triển khai nghiệp vụ W1.
-- Audit dependency chưa chạy; SEC-13 chưa kiểm chứng.
+- target/p6-verified.log: check58 tests,0 failure/error/skip; static/gitleaks/migration/OWASP audit đều OK. Evidence và artifacts ở docs/verification.
+- Tomcat11.0.24 audit High/Critical →vá11.0.27 →audit54entries/0findings; không suppress. OSSIndex tắt vì cần credential, NVD đã cập nhật thật.
+- Ops4tests: reset/anonymize nonweb, giữ references, hủy phiên, force-change; chặn giao mới cho disabled.
+- BackupRestoreTest chạy dump/restore/table inventory/count/checksum/compoundFK/file600/retention/guards; khởi động app trên DB phục hồi, owner đọc task và outsider404.
+- Unknown500 có reference, captured log không chứa message nhạy cảm; healthy-log scan11literal passphrase giả không match.
+- Browser IAB thật desktop/360px: login/create/status/filter, Tab/Enter, không tràn ngang/console warn/error. Ảnh trong docs/verification; demo đã dừng bằng marker, tab đã đóng.
+- Compose project deadline-w1-e9918b41 chạy jar thật register/login/create-group/restart/session/UID10001; container/network thử đã gỡ, giữ volume trial theo report.
+- NFR04 p95=169ms/max241ms,100request,5threads,3x5x200, MockMvc+MariaDB, không mạng/TLS/SLA.
+- Lỗi p6-full do hai build ghi target đã sửa bằng chạy tuần tự; lỗi fixture GRANT khi mở rộng restore đã sửa MYSQL_PWD. Không tính các lượt lỗi là đạt.
 
-- P1: US-01/02 domain Group đã có test RED→GREEN, check 9 tests PASS. Tiếp theo: Task create/status/edit/filter (US-03…06).
+## Điểm tiếp tục
 
-- P1 hoàn tất phần miền US-01…06: check 19 tests PASS. Chuyển P2 schema/JPA/giao dịch và test MariaDB thật. Không kết luận cổng web đã qua.
+1. Commit nhỏ P6 ops/hardening rồi backup/restore, sau check mỗi story. Code và docs đã có nhưng còn dirty trước commit.
+2. Đóng gói Docker/README/ARCHITECTURE/EXPLAIN/OPS/DEPLOY và evidence; chạy kiểm tra link/legacy.
+3. Clone local nhánh vào .tools/verification-UUID, dùng JDK25 và cache Maven/NVD ngoài clone, chạy scripts/check.sh thật từ clone. Chỉ sau kết quả mới đánh dấu P6 hoàn tất.
+4. Dừng P6. P7 cần chủ dự án mở chat mới chạy Reviewer; US20 chưa deploy thật, US21 chưa lịch backup thật, US22 chưa pilot. Không tự push/merge/tạo tài nguyên.
 
-## P2 đã qua cổng lưu trữ
-
-- Check cuối P2 27 tests PASS trên MariaDB thật; migrations V1/V2, atomic writes + events, optimistic conflicts, atomic invitation claim, restart overdue load.
-- Testcontainers image pinned by digest. Hibernate connection metadata logging suppressed to avoid JDBC credentials in INFO logs.
-- JUnit theo Boot BOM do JUnit 5 pin gây NoSuchMethodError (D-15); READ_COMMITTED cho pool (D-16).
-- Tiếp theo P3: tài khoản, phiên, rate limit, bảo vệ route và test ma trận quyền.
-
-## P3 đã qua cổng hiện tại
-
-- Account/session/CSRF/rate limit/central group access có test. 36 tests PASS; cookie flags/fixation/expiration và revoke all sessions đã kiểm chứng.
-- Maven/user home/Docker client config được cách ly trong repo; credential principal bị erase trước khi lưu session.
-- Tiếp P4: lời mời bằng token, hết hạn mốc biên, thu hồi, atomic join và luồng web.
-
-## P4 đã qua cổng
-
-- 42 tests PASS. Group create/settings, token invites, role checks, expiry/revoke/concurrent join có bằng chứng.
-- Màn hình nhóm/lời mời cơ bản đã chạy qua MVC; chưa đánh giá hình thức/responsive bằng trình duyệt.
-- Tiếp P5: task forms/details/status, dashboard/filter, XSS/headers và ma trận mọi route nhóm.
-
-## P5 đã qua kiểm tra chức năng
-
-- 48 tests PASS; UI task/filter/progress + XSS/object access đã kiểm chứng bằng MockMvc và MariaDB.
-- P6 đang bắt đầu: vá Tomcat theo audit, ops/backup/restore, tài liệu, browser/clean clone và chạy lại toàn bộ cổng.
-- SEC-13 hiện KHÔNG ĐẠT: Tomcat 11.0.24 theo dependency-check, report ở target/dependency-check-report.json.
-- Chưa có deploy thật, pilot hoặc review P7.
+D20 username nội bộ44ký tự; D21 disabled assignee; D22 vá Tomcat; D23 Flyway warning11.8 newer than verified11.7 (giữ cảnh báo, reviewer cần đánh giá); D24 logout all và restore compositeFK. JDK25 .tools/java25; Maven .m2-local; NVD .tools/dependency-check. Docker/Git Bash cần quyền pipe/process ngoài sandbox đã chạy được; không credential thật.

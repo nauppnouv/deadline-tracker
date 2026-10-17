@@ -17,11 +17,13 @@ else
   echo 'BỎ QUA gitleaks: tool missing; fallback credential pattern scan passed'
 fi
 echo 'OK secret scan'
-if [[ "${RUN_DEPENDENCY_AUDIT:-0}" == 1 ]]; then
-  bash scripts/mvn.sh -Paudit org.owasp:dependency-check-maven:check
+if [[ "${RUN_DEPENDENCY_AUDIT:-1}" == 1 ]]; then
+  audit_args=()
+  if [[ -n "${DEPENDENCY_CHECK_DATA:-}" ]]; then audit_args+=("-Ddependency.check.dataDirectory=$DEPENDENCY_CHECK_DATA"); fi
+  bash scripts/mvn.sh -Paudit "${audit_args[@]}" org.owasp:dependency-check-maven:check
   echo 'OK dependency audit'
 else
-  echo 'BỎ QUA dependency audit: enable RUN_DEPENDENCY_AUDIT=1; not a passing SEC-13 result'
+  echo "BỎ QUA dependency audit: ${AUDIT_SKIP_REASON:-explicit opt-out, reason not provided}; not a passing SEC-13 result"
 fi
 tracked_migrations="$(git diff --name-only --diff-filter=MD HEAD -- src/main/resources/db/migration 2>/dev/null || true)"
 if [[ -n "$tracked_migrations" ]]; then

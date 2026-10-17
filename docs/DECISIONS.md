@@ -47,3 +47,10 @@ Phiên bản khóa và checksum công cụ được bổ sung sau khi tải/reso
 - D-17: CookieSerializer khai báo HttpOnly=true, SameSite=Lax, Secure ở prod; không dựa vào default servlet context của môi trường.
 - D-18: Không dùng SavedRequestCache để tránh lưu URL token mời vào bảng phiên. P4 chỉ chuyển tiếp đường dẫn lời mời hợp lệ qua form đăng nhập, không lưu vào session/flash. Token phải được chuyển tới người nhận qua liên kết đúng luồng; cấm log và lưu rõ trong DB, không cấm chính phản hồi phân phối liên kết.
 - D-19: Maven settings, user home trong test và Docker client config nằm trong .tools/repo; Docker auths rỗng, không dùng credentials Docker/Maven của người dùng.
+
+- D-20: username public vẫn 3–30; deleted-<UUID> dài 44 nên V3 mở cột lên 44 và chỉ cho dạng dài này khi enabled=false. Giữ nguyên V1/V2 đã áp dụng. Đổi định danh không hứa xóa PII trong mô tả tự do/lịch sử.
+- D-21: Không giao mới/giao lại cho tài khoản đã bị vô hiệu hóa; giữ tham chiếu cũ để đọc/lưu lịch sử.
+- D-22: Dependency-check thực tế phát hiện Tomcat 11.0.24 có CVE High/Critical; khóa toàn bộ tomcat.version=11.0.27, bản ổn định mới nhất hiện có trong Maven Central. Nguồn vendor: https://tomcat.apache.org/security-11.html và https://tomcat.apache.org/whichversion.html. Không suppress finding; chạy lại SCA.
+
+- D-23: Flyway runtime cảnh báo MariaDB11.8 mới hơn mức đã verified11.7. Giữ image11.8.9 đã pin vì migrations/validate/restart/backup-restore đã kiểm chứng trên đúng image; không coi đây là vendor certification. Ghi giới hạn trong BLOCKERS/DEPLOY, reviewer P7 cần đánh giá trước môi trường thật. Nguồn upstream: https://github.com/flyway/flyway/issues/4247 và https://documentation.red-gate.com/flyway/reference/database-driver-reference/mariadb . Không suppress cảnh báo.
+- D-24: Logout hủy mọi session theo principal để tuân SEC-06 chặt hơn, không chỉ session hiện tại. Test RED p6-logout-red rồi GREEN p6-final-functional. Backup kiểm tra compound FK theo cả tuple và từ chối thiếu/thừa bảng; retention chỉ tính bộ backup đủ dump/hash/manifest.

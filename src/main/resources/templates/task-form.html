@@ -33,7 +33,7 @@
 <label for="assigneeId">Người phụ trách</label>
 <select id="assigneeId" th:field="*{assigneeId}" th:disabled="${completed}" required aria-describedby="assignee-error">
 <option value="">Chọn thành viên</option>
-<option th:each="person : ${members}" th:value="${person.id}" th:text="${person.displayName}">
+<option th:each="person : ${members}" th:value="${person.id}" th:text="${person.displayName}" th:disabled="${!person.active and person.id != form.assigneeId}">
 </option>
 </select>
 <input th:if="${completed}" type="hidden" name="assigneeId" th:value="${form.assigneeId}">
