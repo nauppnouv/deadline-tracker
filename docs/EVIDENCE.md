@@ -36,16 +36,16 @@ Ngày khởi tạo: 17/10/2026. Chỉ cập nhật khi đã chạy thật. Log l
 | SEC-12 | chưa chạy | — | — | Chưa có bằng chứng |
 | SEC-13 | chưa chạy | — | — | Chưa có bằng chứng |
 | SEC-14 | chưa chạy | — | — | Chưa có bằng chứng |
-| DATA-01 | chưa chạy | — | — | Chưa có bằng chứng |
-| DATA-02 | chưa chạy | — | — | Chưa có bằng chứng |
-| DATA-03 | chưa chạy | — | — | Chưa có bằng chứng |
-| DATA-04 | chưa chạy | — | — | Chưa có bằng chứng |
-| DATA-05 | chưa chạy | — | — | Chưa có bằng chứng |
-| DATA-06 | chưa chạy | — | — | Chưa có bằng chứng |
-| DATA-07 | chưa chạy | — | — | Chưa có bằng chứng |
+| DATA-01 | đạt | bash scripts/check.sh / P2 | 17/10/2026 | Flyway V1/V2, Hibernate validate; PersistenceTest.constraints; phạm vi build P2, kiểm tra lại sau web |
+| DATA-02 | đạt | bash scripts/check.sh / P2 | 17/10/2026 | PersistenceTest.constraints: FK/unique/owner/check rejects invalid writes; phạm vi build P2, kiểm tra lại sau web |
+| DATA-03 | đạt | bash scripts/check.sh / P2 | 17/10/2026 | PersistenceTest.groupRollback/eventAtomicity: forced rollback and event idempotency; phạm vi build P2, kiểm tra lại sau web |
+| DATA-04 | đạt | bash scripts/check.sh / P2 | 17/10/2026 | PersistenceTest.actualOptimisticLock/staleWrite: exactly one concurrent writer commits; phạm vi build P2, kiểm tra lại sau web |
+| DATA-05 | đạt | bash scripts/check.sh / P2 | 17/10/2026 | PersistenceTest.invitationClaimPrimitive: actual InvitationStore, one of two joins; phạm vi build P2, kiểm tra lại sau web |
+| DATA-06 | đạt | bash scripts/check.sh / P2 | 17/10/2026 | TaskDomainTest.deadlineBoundaries and MariaDB UTC persistence; phạm vi build P2, kiểm tra lại sau web |
+| DATA-07 | đạt | bash scripts/check.sh / P2 | 17/10/2026 | Source scan: no DeleteMapping/RequestMethod.DELETE/business delete calls in current production source; phạm vi build P2, kiểm tra lại sau web |
 | DATA-08 | chưa chạy | — | — | Chưa có bằng chứng |
 | DATA-09 | chưa chạy | — | — | Chưa có bằng chứng |
-| DATA-10 | chưa chạy | — | — | Chưa có bằng chứng |
+| DATA-10 | đạt | bash scripts/check.sh / P2 | 17/10/2026 | RestartPersistenceTest: close context, reopen, read same committed overdue task; phạm vi build P2, kiểm tra lại sau web |
 
 ## P0 — bằng chứng đã chạy
 
@@ -69,3 +69,12 @@ Ngày khởi tạo: 17/10/2026. Chỉ cập nhật khi đã chạy thật. Log l
 - US-05: chỉ assignee, chặn owner/creator/member/outsider khác, đủ chuyển trạng thái và gửi lại không thay đổi, completedAt đúng.
 - US-06: quyền sửa, giữ trạng thái khi cùng assignee, giao lại reset/revoke, DONE hạn chế sửa, nạp/sửa/giao lại việc quá hạn, so hạn cùng phút giữ thời điểm đã lưu.
 - Cổng P1 miền thuần đã qua; các UAT web/DB vẫn chưa coi là đạt chỉ từ domain tests.
+
+## P2 US-07/08 — bằng chứng
+
+- RED: target/p2-red.log báo thiếu persistence/WorkService.
+- GREEN cuối: bash scripts/check.sh, target/p2-final.log: 27 tests, 0 failure/error/skip, BUILD SUCCESS; gitleaks/static checks OK.
+- MariaDB thực tế 11.8.9, image digest sha256:f16d7a344413e519dff518f27bdb221388f84b0d274c97c4fb5f2cb0dc1b34fa. Testcontainers 2.0.5; JDK 25 portable.
+- DATA-05 kiểm tra primitive store trong DB thật; lời mời token/expiry/ủy quyền web sẽ kiểm chứng P4.
+- DATA-07 là scan source build hiện tại, không phải bằng chứng rằng giao diện W1 đã hoàn thành.
+- Cổng backup/ops và toàn bộ UAT web còn chưa chạy; SEC-13 audit đang tải NVD, chưa có kết quả.

@@ -18,3 +18,10 @@ Ngày 17/10/2026. Nhánh feat/w1-autonomous-build.
 - P1: US-01/02 domain Group đã có test RED→GREEN, check 9 tests PASS. Tiếp theo: Task create/status/edit/filter (US-03…06).
 
 - P1 hoàn tất phần miền US-01…06: check 19 tests PASS. Chuyển P2 schema/JPA/giao dịch và test MariaDB thật. Không kết luận cổng web đã qua.
+
+## P2 đã qua cổng lưu trữ
+
+- Check cuối P2 27 tests PASS trên MariaDB thật; migrations V1/V2, atomic writes + events, optimistic conflicts, atomic invitation claim, restart overdue load.
+- Testcontainers image pinned by digest. Hibernate connection metadata logging suppressed to avoid JDBC credentials in INFO logs.
+- JUnit theo Boot BOM do JUnit 5 pin gây NoSuchMethodError (D-15); READ_COMMITTED cho pool (D-16).
+- Tiếp theo P3: tài khoản, phiên, rate limit, bảo vệ route và test ma trận quyền.

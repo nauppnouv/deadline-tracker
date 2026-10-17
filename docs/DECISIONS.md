@@ -37,3 +37,9 @@ Phiên bản khóa và checksum công cụ được bổ sung sau khi tải/reso
 - Spring Boot 4.1.1 (stable trên tài liệu chính thức, artifact Maven Central resolve thành công). Không chọn release metadata 4.2.0-M2 vì đó là milestone.
 - Maven hệ thống 3.9.15; dependency cache riêng .m2-local. JUnit Jupiter 5.14.4 override BOM để đúng yêu cầu JUnit 5.
 - P0 check: JDK 25 runtime test 1/1 PASS; jar đóng gói được; gitleaks không phát hiện rò rỉ trong working tree. Audit phụ thuộc chưa chạy, không đánh dấu SEC-13 đạt.
+
+- D-15 (P2, bằng chứng): Spring Test của Boot 4.1.1 gọi ExtensionContext.Store.computeIfAbsent, không có trong JUnit 5.14.4; lần chạy P2 thực tế lỗi NoSuchMethodError. Dùng JUnit Jupiter do Boot BOM quản lý (6.x) thay ghim 5 để bảo đảm bộ kiểm thử chạy với Spring hiện hành; không hạ Spring hoặc giấu lỗi. API test vẫn là org.junit.jupiter. Quyết định này thay pin JUnit ở P0.
+- Testcontainers dùng các module 2.0.5 do Boot BOM quản lý, theo tài liệu chính thức https://java.testcontainers.org/modules/databases/mariadb/; tránh trộn module 1.x với core 2.x.
+- Cascade chỉ dùng cho bảng phiên framework; FK nghiệp vụ đều RESTRICT. Xóa phiên không đồng nghĩa xóa dữ liệu công việc.
+
+- D-16: Pool dùng READ_COMMITTED; test hai giao dịch đồng thời ở default REPEATABLE_READ của MariaDB 11.8.9 trả lỗi record-changed thay vì số hàng 0 cho optimistic version. READ_COMMITTED cùng @Version giúp báo xung đột rõ; không thay đổi server DB chung. Các thao tác quan trọng vẫn có predicate nguyên tử/unique/FK và giao dịch.
