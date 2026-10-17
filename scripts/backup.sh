@@ -12,6 +12,7 @@ case "$BACKUP_DIR/" in "$repo/"*) echo 'Backups must be outside repository' >&2;
 chmod 700 "$BACKUP_DIR"
 export MYSQL_PWD="$DB_PASSWORD"
 sql=(mariadb --host="$DB_HOST" --port="${DB_PORT:-3306}" --user="$DB_USER" --batch --skip-column-names)
+source "$(dirname "$0")/checksum.lib.sh"
 # An assignment propagates the SQL exit status; process substitution does not.
 tables="$("${sql[@]}" "$DB_NAME" -e 'SHOW TABLES')"
 [[ -n "$tables" ]] || { echo 'No tables available for backup' >&2; exit 1; }
@@ -30,9 +31,9 @@ mariadb-dump --host="$DB_HOST" --port="${DB_PORT:-3306}" --user="$DB_USER" --sin
 while IFS= read -r table; do
   [[ "$table" =~ ^[a-zA-Z0-9_]+$ ]] || exit 1
   count="$("${sql[@]}" "$DB_NAME" -e "SELECT COUNT(*) FROM \`$table\`")"
-  checksum="$("${sql[@]}" "$DB_NAME" -e "CHECKSUM TABLE \`$table\` EXTENDED" | cut -f 2)"
-  [[ "$count" =~ ^[0-9]+$ && "$checksum" =~ ^[0-9]+$ ]] || { echo 'Invalid table verification data' >&2; exit 1; }
-  printf '%s\t%s\t%s\n' "$table" "$count" "$checksum"
+  checksum="$(table_checksum "$DB_NAME" "$table")"
+  [[ "$count" =~ ^[0-9]+$ && "$checksum" =~ ^[a-f0-9]{64}$ ]] || { echo 'Invalid table verification data' >&2; exit 1; }
+  printf '%s\t%s\tsha256:%s\n' "$table" "$count" "$checksum"
 done <<< "$tables" > "$manifest"
 [[ -s "$manifest" ]] || { echo 'Empty backup manifest' >&2; exit 1; }
 mv -- "$manifest" "$file.tables.tsv"

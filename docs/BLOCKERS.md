@@ -1,6 +1,6 @@
 # Trở ngại, giới hạn và việc người làm
 
-Cập nhật17/10/2026. Không có build/test blocker đang mở ở mốc check58tests. Clone sạch đã chạy58tests/check đầy đủ thành công, xem verification/clean-clone.txt.
+Cập nhật 18/10/2026. Các kết quả 58 test phía dưới là mốc P6 cũ. P7 đang sửa năm phát hiện review, trạng thái hiện tại xem PROGRESS.md và đầu EVIDENCE.md.
 
 | Việc | Trạng thái / bằng chứng | Hành động |
 |---|---|---|
@@ -17,3 +17,5 @@ Cập nhật17/10/2026. Không có build/test blocker đang mở ở mốc check
 | Volume thử Compose | Cố ý giữ deadline-w1-e9918b41_database và deadline-w1-7c56fed6_database, chỉ dữ liệu giả; container/network đã gỡ | Chủ máy có thể xem report và quyết định dọn riêng volume thử; không global prune |
 
 Không có cloud/account/email/domain/resource tính phí nào được agent tạo, không dùng credential thật. AWS2GB dự toán vượt50k/tuần; lựa chọn rẻ hơn vẫn cần xác nhận tổng phí và tình trạng còn hàng.
+
+P7-02: full check đầu phiên tái hiện `Mismatch: group_member`. So 16 hàng/cột xác nhận dữ liệu nguồn/restored giống nhau; thay checksum native bằng SHA-256 logic cho manifest mới, giữ đếm hàng/FK và từ chối dữ liệu thay đổi. Full check bản sửa 70 test PASS, static/gitleaks/dependency/migration OK (target/p7-02-final-check.log); lỗi test này đã giải quyết.

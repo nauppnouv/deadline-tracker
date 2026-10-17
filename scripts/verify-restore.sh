@@ -8,6 +8,7 @@ expected="$(cat "$BACKUP_FILE.sha256")"
 [[ "$expected" =~ ^[a-f0-9]{64}$ && "$(sha256sum "$BACKUP_FILE" | cut -d ' ' -f 1)" == "$expected" ]] || { echo 'Backup checksum mismatch' >&2; exit 1; }
 export MYSQL_PWD="$DB_PASSWORD"
 sql=(mariadb --host="$DB_HOST" --port="${DB_PORT:-3306}" --user="$DB_USER" --batch --skip-column-names)
+source "$(dirname "$0")/checksum.lib.sh"
 [[ "$("${sql[@]}" -e "SELECT COUNT(*) FROM information_schema.SCHEMATA WHERE SCHEMA_NAME='$RESTORE_DB'")" == 0 ]] || { echo 'Restore database already exists; refusing overwrite' >&2; exit 1; }
 "${sql[@]}" -e "CREATE DATABASE \`$RESTORE_DB\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
 gzip -dc -- "$BACKUP_FILE" | "${sql[@]}" "$RESTORE_DB"
@@ -15,9 +16,16 @@ actual_tables="$("${sql[@]}" "$RESTORE_DB" -e 'SHOW TABLES' | sort)"
 expected_tables="$(cut -f 1 "$BACKUP_FILE.tables.tsv" | sort)"
 [[ -n "$actual_tables" && "$actual_tables" == "$expected_tables" ]] || { echo 'Table inventory mismatch' >&2; exit 1; }
 while IFS=$'\t' read -r table expected_count expected_checksum; do
-  [[ "$table" =~ ^[a-zA-Z0-9_]+$ && "$expected_count" =~ ^[0-9]+$ && "$expected_checksum" =~ ^[0-9]+$ ]] || exit 1
+  [[ "$table" =~ ^[a-zA-Z0-9_]+$ && "$expected_count" =~ ^[0-9]+$ ]] || exit 1
   count="$("${sql[@]}" "$RESTORE_DB" -e "SELECT COUNT(*) FROM \`$table\`")"
-  checksum="$("${sql[@]}" "$RESTORE_DB" -e "CHECKSUM TABLE \`$table\` EXTENDED" | cut -f 2)"
+  if [[ "$expected_checksum" =~ ^sha256:[a-f0-9]{64}$ ]]; then
+    checksum="sha256:$(table_checksum "$RESTORE_DB" "$table")"
+  elif [[ "$expected_checksum" =~ ^[0-9]+$ ]]; then
+    # Existing backup manifests still use the original MariaDB checksum.
+    checksum="$("${sql[@]}" "$RESTORE_DB" -e "CHECKSUM TABLE \`$table\` EXTENDED" | cut -f 2)"
+  else
+    echo 'Invalid checksum format' >&2; exit 1
+  fi
   [[ "$count" == "$expected_count" && "$checksum" == "$expected_checksum" ]] || { echo "Mismatch: $table" >&2; exit 1; }
   printf 'TABLE_OK %s rows=%s checksum=%s\n' "$table" "$count" "$checksum"
 done < "$BACKUP_FILE.tables.tsv"
@@ -43,4 +51,10 @@ while IFS=$'\t' read -r table constraint column parent parent_column; do
   fi
 done <<< "$foreign_keys"
 verify_fk
-echo 'RESTORE_OK (trial database retained for inspection)'
+# Snapshot sessions predate later logouts/password changes. Never reuse them.
+"${sql[@]}" "$RESTORE_DB" -e 'DELETE FROM SPRING_SESSION'
+remaining_sessions="$("${sql[@]}" "$RESTORE_DB" -e 'SELECT COUNT(*) FROM SPRING_SESSION')"
+remaining_attributes="$("${sql[@]}" "$RESTORE_DB" -e 'SELECT COUNT(*) FROM SPRING_SESSION_ATTRIBUTES')"
+[[ "$remaining_sessions" == 0 && "$remaining_attributes" == 0 ]] || { echo 'Restored sessions were not cleared' >&2; exit 1; }
+echo 'SESSIONS_CLEARED (after snapshot comparison)'
+echo 'RESTORE_OK (keep isolated until post-snapshot account security review)'

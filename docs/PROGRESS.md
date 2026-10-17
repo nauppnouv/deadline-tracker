@@ -6,7 +6,9 @@ Cập nhật 18/10/2026. Đang sửa đúng năm phát hiện P7 trên nhánh `f
 
 - Chấp nhận cả năm phát hiện review; xử lý ba Chặn pilot trước hai Nên sửa.
 - P7-01 hoàn tất phần sửa: RED thật 8 test/2 failure → GREEN 9 test; full `scripts/check.sh` 66 test PASS, static/gitleaks/dependency/migration OK, không bỏ qua. Logs `target/p7-01-{red,green,check}.log`.
-- Tiếp theo: P7-02 cookie sau restore → P7-03 form nhóm cũ → P7-04 chunked → P7-05 Owner DB. Mỗi mục phải RED → GREEN → full check → cập nhật bằng chứng.
+- Đã tiếp tục theo yêu cầu mới của chủ dự án; gói handoff cũ là snapshot, không cập nhật bằng trạng thái phiên này.
+- P7-02 hoàn tất phần sửa: RED cookie HTTP 200 → GREEN HTTP 302; native checksum lệch đã điều tra bằng dữ liệu hàng giống hệt. Manifest mới SHA-256 logic, giữ count/FK, tamper bị chặn. Full `scripts/check.sh` 70 test PASS, static/gitleaks/dependency/migration OK, không skip (`target/p7-02-final-check.log`). OPS giữ cổng credential/quyền sau snapshot cho người vận hành.
+- Tiếp theo: P7-03 form nhóm cũ → P7-04 chunked → P7-05 Owner DB. Mỗi mục phải RED → GREEN → full check → cập nhật bằng chứng.
 - Không thay phiên bản thư viện/JDK, không chạy tài nguyên trả phí hoặc dữ liệu thật. Các mục P0–P6 phía dưới là lịch sử trước review; chưa có pilot.
 
 | Pha | Kết quả chạy thật |
