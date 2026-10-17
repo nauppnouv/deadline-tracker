@@ -1,0 +1,63 @@
+18/10/2026 Asia/Saigon
+R2-02 DATA-04 UAT-04/07/11: version mọi form lấy từ HTML đúng action, gồm validation/conflict/reload; status lỗi dùng GET tải lại; chunked và load cũng đọc HTML. Ba mutation bỏ hidden input đều đỏ; không đổi mã ứng dụng.
+Commands are run from repository root using Git Bash and scripts/mvn.sh (portable JDK25).
+All DBs are disposable MariaDB containers; no pilot data.
+
+target\r2-03-red-1.log
+SHA256=62e8b82f738679fff7d4a214d7e5691d5a16ff7893dd3f31972fd64ce6791616
+[ERROR] Tests run: 3, Failures: 2, Errors: 0, Skipped: 0, Time elapsed: 16.16 s <<< FAILURE! -- in vn.deadline.tracker.GroupVersionWebTest
+[ERROR] Tests run: 3, Failures: 2, Errors: 0, Skipped: 0
+[INFO] BUILD FAILURE
+
+target\r2-03-green.log
+SHA256=835b547c88b694f44609acaf27080e772038a166975438b94a77400ffd9e1226
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 18.58 s -- in vn.deadline.tracker.ChunkedRequestTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.622 s -- in vn.deadline.tracker.GroupVersionWebTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 17.24 s -- in vn.deadline.tracker.RepresentativeLoadTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 14.41 s -- in vn.deadline.tracker.TaskWebTest
+[INFO] Tests run: 15, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+
+target\r2-03-check.log
+SHA256=8d6a128cf4cf757eb07d52ec13c7f0a8b14237bdbb9dd5eaf001f275a0de6bf7
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 18.38 s -- in vn.deadline.tracker.AuthWebTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 20.20 s -- in vn.deadline.tracker.BackupFailureTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 7.723 s -- in vn.deadline.tracker.BackupRestoreTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.001 s -- in vn.deadline.tracker.BuildSmokeTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.890 s -- in vn.deadline.tracker.ChunkedRequestTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.017 s -- in vn.deadline.tracker.GroupDomainTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.155 s -- in vn.deadline.tracker.GroupInvitationWebTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.193 s -- in vn.deadline.tracker.GroupVersionWebTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.354 s -- in vn.deadline.tracker.InvitationTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 10.51 s -- in vn.deadline.tracker.MigrationGuardTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.227 s -- in vn.deadline.tracker.OpsWorkflowTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.206 s -- in vn.deadline.tracker.OwnerIntegrityTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.435 s -- in vn.deadline.tracker.PersistenceTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.607 s -- in vn.deadline.tracker.ProductionSecurityTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.003 s -- in vn.deadline.tracker.RateLimitTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 11.63 s -- in vn.deadline.tracker.RepresentativeLoadTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.944 s -- in vn.deadline.tracker.RestartPersistenceTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.072 s -- in vn.deadline.tracker.RestoredSessionTest
+R2 no TRIGGER privilege backup exit=1 stderr=WARNING: option --ssl-verify-server-cert is disabled, because of an insecure passwordless login.
+R2 missing triggers restore exit=1 output= stderr=WARNING: option --ssl-verify-server-cert is disabled, because of an insecure passwordless login.
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 20.47 s -- in vn.deadline.tracker.Round2VariantsTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 9.542 s -- in vn.deadline.tracker.SchemaStartupTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.015 s -- in vn.deadline.tracker.TaskDomainTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.149 s -- in vn.deadline.tracker.TaskWebTest
+[INFO] Tests run: 112, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+OK build + tests
+OK template / SQL static checks
+OK secret scan
+[INFO] BUILD SUCCESS
+OK dependency audit
+OK immutable committed migrations (baseline=origin/main)
+
+RED: remove only hidden version input, test, restore exact template bytes in finally.
+Group template: bash scripts/mvn.sh test -Dtest=GroupVersionWebTest
+Task form/status templates (separate mutations): bash scripts/mvn.sh test -Dtest=TaskWebTest
+GREEN: bash scripts/mvn.sh test -Dtest=GroupVersionWebTest,TaskWebTest,ChunkedRequestTest,RepresentativeLoadTest
+CHECK: bash scripts/check.sh
+target\r2-03-red-2.log: Tests run: 8, Failures: 4, Errors: 0, Skipped: 0; SHA256=05e98765f42d8706cf690f0e1b6e890242f6715c53a14d2af73aaa2801b3282a
+target\r2-03-red-3.log: Tests run: 8, Failures: 3, Errors: 0, Skipped: 0; SHA256=306abd573c6cb50c6c0f449c66e6b4235a358f781db725eb6222bf740b342ad5
+Missing/invalid version test deliberately corrupts a rendered form; no fallback version is supplied. Load report counts 25 extra form GETs outside measured request timings.

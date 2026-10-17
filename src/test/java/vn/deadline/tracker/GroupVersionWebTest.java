@@ -25,16 +25,31 @@ class GroupVersionWebTest extends DatabaseTest {
     }
     @Test @DisplayName("P7-03 DATA-04 two old group forms cannot silently overwrite, conflict preserves draft")
     void staleGroupForm()throws Exception {
-        assertEquals(200,mvc.perform(get(path).cookie(first)).andReturn().getResponse().getStatus());
-        assertEquals(200,mvc.perform(get(path).cookie(second)).andReturn().getResponse().getStatus());
-        assertEquals(302,mvc.perform(post(path).cookie(first).with(csrf()).param("name","Saved new name").param("description","Original description").param("version","0")).andReturn().getResponse().getStatus());
-        var stale=mvc.perform(post(path).cookie(second).with(csrf()).param("name","Original name").param("description","Keep this unsaved draft").param("version","0")).andReturn().getResponse();
+        String a=version(first),b=version(second);
+        assertEquals(302,mvc.perform(post(path).cookie(first).with(csrf()).param("name","Saved new name").param("description","Original description").param("version",a)).andReturn().getResponse().getStatus());
+        var stale=mvc.perform(post(path).cookie(second).with(csrf()).param("name","Original name").param("description","Keep this unsaved draft").param("version",b)).andReturn().getResponse();
         assertAll(()->assertEquals(409,stale.getStatus()),()->assertTrue(stale.getContentAsString().contains("Keep this unsaved draft")),
             ()->assertEquals("Saved new name",work.group(actor,path.split("/")[2]).getName()));
-        assertEquals(302,mvc.perform(post(path).cookie(second).with(csrf()).param("name","Saved new name").param("description","Draft after reload").param("version","1")).andReturn().getResponse().getStatus());
+        String conflictVersion=HtmlForms.version(stale.getContentAsString(),path);assertEquals(b,conflictVersion);
+        assertEquals(409,mvc.perform(post(path).cookie(second).with(csrf()).param("name","Retry stale draft").param("description","").param("version",conflictVersion)).andReturn().getResponse().getStatus());
+        String reloaded=version(second);assertNotEquals(b,reloaded);
+        assertEquals(302,mvc.perform(post(path).cookie(second).with(csrf()).param("name","Saved new name").param("description","Draft after reload").param("version",reloaded)).andReturn().getResponse().getStatus());
+    }
+    String version(Cookie cookie)throws Exception {
+        var response=mvc.perform(get(path).cookie(cookie)).andReturn().getResponse();assertEquals(200,response.getStatus());
+        return HtmlForms.version(response.getContentAsString(),path);
+    }
+    @Test @DisplayName("UAT-11 DATA-04 R2-02 group validation returns a usable rendered version")
+    void validationVersion()throws Exception {
+        String opened=version(first);
+        var invalid=mvc.perform(post(path).cookie(first).with(csrf()).param("name"," ").param("description","Keep validation draft").param("version",opened)).andReturn().getResponse();
+        assertEquals(400,invalid.getStatus());
+        String returned=HtmlForms.version(invalid.getContentAsString(),path);assertEquals(opened,returned);
+        assertEquals(302,mvc.perform(post(path).cookie(first).with(csrf()).param("name","Corrected").param("description","Keep validation draft").param("version",returned)).andReturn().getResponse().getStatus());
     }
     @Test @DisplayName("P7-03 DATA-04 group update requires nonnegative form version")
     void versionRequired()throws Exception {
+        version(first); // Verify the real form before deliberately corrupting its version.
         for(String version:new String[]{null,"-1","not-a-version"}) {
             var request=post(path).cookie(first).with(csrf()).param("name","Should not save").param("description","");
             if(version!=null)request.param("version",version);

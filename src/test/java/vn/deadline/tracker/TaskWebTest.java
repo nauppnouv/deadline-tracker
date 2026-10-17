@@ -22,13 +22,20 @@ class TaskWebTest extends DatabaseTest {
     String date(Instant i){return DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm").withZone(ZoneId.of("Asia/Ho_Chi_Minh")).format(i);}
     Task task(){return work.createTask(creator.id(),group,"Original","",worker.id(),Instant.now().plusSeconds(7200));}
     String url(Task t){return "/groups/"+group+"/tasks/"+t.getId();}
+    String formVersion(User actor,Task task,boolean edit)throws Exception {
+        String page=url(task)+(edit?"/edit":"");
+        var response=mvc.perform(get(page).cookie(actor.cookie())).andExpect(status().isOk()).andReturn().getResponse();
+        return HtmlForms.version(response.getContentAsString(),url(task)+(edit?"/edit":"/status"));
+    }
     @Test @DisplayName("US-16 UAT-04 create form validates fields, preserves values, ignores forged creator/status")
     void createAndValidation()throws Exception{
-        mvc.perform(get("/groups/"+group+"/tasks/new").cookie(creator.cookie())).andExpect(status().isOk());
-        mvc.perform(post("/groups/"+group+"/tasks").cookie(creator.cookie()).with(csrf()).param("title"," ").param("description","Keep my description").param("assigneeId",worker.id()).param("dueAt",date(Instant.now().plusSeconds(3600))).param("version","0"))
-            .andExpect(status().isBadRequest()).andExpect(content().string(org.hamcrest.Matchers.containsString("Keep my description")));
+        var opened=mvc.perform(get("/groups/"+group+"/tasks/new").cookie(creator.cookie())).andExpect(status().isOk()).andReturn().getResponse();
+        String createVersion=HtmlForms.version(opened.getContentAsString(),"/groups/"+group+"/tasks");
+        var invalid=mvc.perform(post("/groups/"+group+"/tasks").cookie(creator.cookie()).with(csrf()).param("title"," ").param("description","Keep my description").param("assigneeId",worker.id()).param("dueAt",date(Instant.now().plusSeconds(3600))).param("version",createVersion))
+            .andExpect(status().isBadRequest()).andExpect(content().string(org.hamcrest.Matchers.containsString("Keep my description"))).andReturn().getResponse();
+        String retryVersion=HtmlForms.version(invalid.getContentAsString(),"/groups/"+group+"/tasks");
         assertEquals(0,work.tasks(owner.id(),group).size());
-        var r=mvc.perform(post("/groups/"+group+"/tasks").cookie(creator.cookie()).with(csrf()).param("title","Created through web").param("description","").param("assigneeId",worker.id()).param("dueAt",date(Instant.now().plusSeconds(3600))).param("version","0").param("createdBy",foreign.id()).param("actorId",owner.id()).param("status","DONE").param("role","OWNER"))
+        var r=mvc.perform(post("/groups/"+group+"/tasks").cookie(creator.cookie()).with(csrf()).param("title","Created through web").param("description","").param("assigneeId",worker.id()).param("dueAt",date(Instant.now().plusSeconds(3600))).param("version",retryVersion).param("createdBy",foreign.id()).param("actorId",owner.id()).param("status","DONE").param("role","OWNER"))
             .andExpect(status().is3xxRedirection()).andReturn();
         String id=r.getResponse().getRedirectedUrl().substring(r.getResponse().getRedirectedUrl().lastIndexOf('/')+1);var t=work.task(owner.id(),group,id);
         assertEquals(creator.id(),t.getCreatedBy());assertEquals(TaskStatus.TODO,t.getStatus());
@@ -36,22 +43,26 @@ class TaskWebTest extends DatabaseTest {
     }
     @Test @DisplayName("US-16 UAT-05/07 only assignee changes status; creator alone is not assignee")
     void statusPermission()throws Exception{
-        var t=task();
-        for(User u:List.of(owner,creator))mvc.perform(post(url(t)+"/status").cookie(u.cookie()).with(csrf()).param("status","DONE").param("version","0")).andExpect(status().isForbidden());
+        var t=task();String statusVersion=formVersion(worker,t,false);
+        for(User u:List.of(owner,creator))mvc.perform(post(url(t)+"/status").cookie(u.cookie()).with(csrf()).param("status","DONE").param("version",statusVersion)).andExpect(status().isForbidden());
         mvc.perform(get(url(t)+"/edit").cookie(worker.cookie())).andExpect(status().isForbidden());
-        mvc.perform(post(url(t)+"/status").cookie(worker.cookie()).with(csrf()).param("status","DONE").param("version","0")).andExpect(redirectedUrl(url(t)));
+        mvc.perform(post(url(t)+"/status").cookie(worker.cookie()).with(csrf()).param("status","DONE").param("version",statusVersion)).andExpect(redirectedUrl(url(t)));
         var completed=work.task(owner.id(),group,t.getId());assertNotNull(completed.getCompletedAt());long before=events.count();
-        mvc.perform(post(url(t)+"/status").cookie(worker.cookie()).with(csrf()).param("status","DONE").param("version",Long.toString(completed.getVersion()))).andExpect(redirectedUrl(url(t)));assertEquals(before,events.count());
+        mvc.perform(post(url(t)+"/status").cookie(worker.cookie()).with(csrf()).param("status","DONE").param("version",formVersion(worker,t,false))).andExpect(redirectedUrl(url(t)));assertEquals(before,events.count());
     }
     @Test @DisplayName("US-16 UAT-06/11 reassign resets task and stale edit preserves submitted values")
     void editAndConflict()throws Exception{
-        var t=task();mvc.perform(get(url(t)+"/edit").cookie(creator.cookie())).andExpect(status().isOk());
-        mvc.perform(post(url(t)+"/edit").cookie(owner.cookie()).with(csrf()).param("title","Reassigned").param("description","").param("assigneeId",owner.id()).param("dueAt",date(t.getDueAt())).param("version","0")).andExpect(redirectedUrl(url(t)));
+        var t=task();String oldVersion=formVersion(creator,t,true),ownerVersion=formVersion(owner,t,true);
+        mvc.perform(post(url(t)+"/edit").cookie(owner.cookie()).with(csrf()).param("title","Reassigned").param("description","").param("assigneeId",owner.id()).param("dueAt",date(t.getDueAt())).param("version",ownerVersion)).andExpect(redirectedUrl(url(t)));
         var updated=work.task(owner.id(),group,t.getId());assertEquals(owner.id(),updated.getAssigneeId());assertEquals(TaskStatus.TODO,updated.getStatus());
-        mvc.perform(post(url(t)+"/status").cookie(worker.cookie()).with(csrf()).param("status","DONE").param("version",Long.toString(updated.getVersion()))).andExpect(status().isForbidden());
-        mvc.perform(post(url(t)+"/edit").cookie(creator.cookie()).with(csrf()).param("title","My unsaved changes").param("description","Do not discard").param("assigneeId",worker.id()).param("dueAt",date(t.getDueAt())).param("version","0"))
-            .andExpect(status().isConflict()).andExpect(content().string(org.hamcrest.Matchers.containsString("My unsaved changes")));
+        mvc.perform(post(url(t)+"/status").cookie(worker.cookie()).with(csrf()).param("status","DONE").param("version",formVersion(owner,t,false))).andExpect(status().isForbidden());
+        var conflict=mvc.perform(post(url(t)+"/edit").cookie(creator.cookie()).with(csrf()).param("title","My unsaved changes").param("description","Do not discard").param("assigneeId",worker.id()).param("dueAt",date(t.getDueAt())).param("version",oldVersion))
+            .andExpect(status().isConflict()).andExpect(content().string(org.hamcrest.Matchers.containsString("My unsaved changes"))).andReturn().getResponse();
+        String returned=HtmlForms.version(conflict.getContentAsString(),url(t)+"/edit");assertEquals(oldVersion,returned);
+        mvc.perform(post(url(t)+"/edit").cookie(creator.cookie()).with(csrf()).param("title","Retry stale").param("description","").param("assigneeId",owner.id()).param("dueAt",date(t.getDueAt())).param("version",returned)).andExpect(status().isConflict());
         assertEquals("Reassigned",work.task(owner.id(),group,t.getId()).getTitle());
+        String reloaded=formVersion(creator,t,true);assertNotEquals(oldVersion,reloaded);
+        mvc.perform(post(url(t)+"/edit").cookie(creator.cookie()).with(csrf()).param("title","After reload").param("description","Draft kept").param("assigneeId",owner.id()).param("dueAt",date(t.getDueAt())).param("version",reloaded)).andExpect(redirectedUrl(url(t)));
     }
     @Test @DisplayName("US-17 UAT-08/09/12/18 filters keep group totals and overdue metadata remains editable")
     void filtersAndPastDue()throws Exception{
@@ -60,8 +71,26 @@ class TaskWebTest extends DatabaseTest {
         var result=mvc.perform(get("/groups/"+group).cookie(owner.cookie()).param("due","OVERDUE")).andExpect(status().isOk()).andExpect(model().attribute("tasks",org.hamcrest.Matchers.hasSize(1))).andReturn();
         assertEquals(2,((Progress)result.getModelAndView().getModel().get("progress")).total());
         var old=work.task(owner.id(),group,t.getId());
-        mvc.perform(post(url(t)+"/edit").cookie(owner.cookie()).with(csrf()).param("title","Overdue renamed").param("description","").param("assigneeId",owner.id()).param("dueAt",date(old.getDueAt())).param("version",Long.toString(old.getVersion()))).andExpect(redirectedUrl(url(t)));
+        mvc.perform(post(url(t)+"/edit").cookie(owner.cookie()).with(csrf()).param("title","Overdue renamed").param("description","").param("assigneeId",owner.id()).param("dueAt",date(old.getDueAt())).param("version",formVersion(owner,t,true))).andExpect(redirectedUrl(url(t)));
         assertEquals(old.getDueAt(),work.task(owner.id(),group,t.getId()).getDueAt());
+    }
+    @Test @DisplayName("UAT-04/11 DATA-04 R2-02 task edit validation returns version for corrected resubmission")
+    void editValidationVersion()throws Exception {
+        var t=task();String opened=formVersion(creator,t,true);
+        var invalid=mvc.perform(post(url(t)+"/edit").cookie(creator.cookie()).with(csrf()).param("title"," ").param("description","Validation draft").param("assigneeId",worker.id()).param("dueAt",date(t.getDueAt())).param("version",opened)).andExpect(status().isBadRequest()).andReturn().getResponse();
+        String returned=HtmlForms.version(invalid.getContentAsString(),url(t)+"/edit");assertEquals(opened,returned);
+        mvc.perform(post(url(t)+"/edit").cookie(creator.cookie()).with(csrf()).param("title","Corrected title").param("description","Validation draft").param("assigneeId",worker.id()).param("dueAt",date(t.getDueAt())).param("version",returned)).andExpect(redirectedUrl(url(t)));
+    }
+    @Test @DisplayName("UAT-07/11 DATA-04 R2-02 status errors require reload and fresh HTML version")
+    void statusValidationConflict()throws Exception {
+        var t=task();String a=formVersion(worker,t,false),b=formVersion(worker,t,false);
+        mvc.perform(post(url(t)+"/status").cookie(worker.cookie()).with(csrf()).param("status","INVALID").param("version",a)).andExpect(status().isBadRequest());
+        String afterValidation=formVersion(worker,t,false);assertEquals(a,afterValidation);
+        mvc.perform(post(url(t)+"/status").cookie(worker.cookie()).with(csrf()).param("status","DONE").param("version",afterValidation)).andExpect(redirectedUrl(url(t)));
+        mvc.perform(post(url(t)+"/status").cookie(worker.cookie()).with(csrf()).param("status","TODO").param("version",b)).andExpect(status().isConflict());
+        String afterConflict=formVersion(worker,t,false);assertNotEquals(b,afterConflict);
+        mvc.perform(post(url(t)+"/status").cookie(worker.cookie()).with(csrf()).param("status","TODO").param("version",afterConflict)).andExpect(redirectedUrl(url(t)));
+        assertNull(work.task(owner.id(),group,t.getId()).getCompletedAt());
     }
     @Test @DisplayName("SEC-03/02 UAT-10 every task endpoint rejects foreign owner and anonymous, including malformed input")
     void everyEndpointIsolation()throws Exception{

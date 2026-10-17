@@ -23,6 +23,10 @@ class ChunkedRequestTest extends DatabaseTest {
         var matcher=Pattern.compile("name=\"_csrf\"[^>]*value=\"([^\"]+)\"").matcher(html);assertTrue(matcher.find(),"CSRF input required");
         return org.springframework.web.util.HtmlUtils.htmlUnescape(matcher.group(1));
     }
+    String version()throws Exception {
+        var response=client.send(HttpRequest.newBuilder(URI.create("http://127.0.0.1:"+port+path)).GET().build(),HttpResponse.BodyHandlers.ofString());
+        assertEquals(200,response.statusCode());return HtmlForms.version(response.body(),path);
+    }
     int send(String path,String body,String type)throws Exception {
         byte[] bytes=body.getBytes(StandardCharsets.UTF_8);
         var publisher=HttpRequest.BodyPublishers.ofInputStream(()->new ByteArrayInputStream(bytes));
@@ -37,24 +41,24 @@ class ChunkedRequestTest extends DatabaseTest {
     }
     @Test @DisplayName("P7-04 SEC-14 actual chunked oversized body with valid query parameters cannot update group")
     void oversizedBinary()throws Exception {
-        String query="?name=Should-not-save&description=&version=0&_csrf="+encode(token(path));
+        String query="?name=Should-not-save&description=&version="+version()+"&_csrf="+encode(token(path));
         assertEquals(413,send(path+query,"x".repeat(17000),"application/octet-stream"));
         assertEquals("Chunked original",work.group(actor,path.split("/")[2]).getName());
     }
     @Test @DisplayName("P7-04 SEC-14 chunked forms at 16383/16384 accepted, 16385 rejected; UTF-8 and CSRF preserved")
     void formBoundaries()throws Exception {
         for(int size:new int[]{16383,16384,16385}) {
-            String body="name="+encode("Nhóm thử")+"&description="+encode("Mô tả có dấu")+"&version="+(size==16383?0:1)+"&_csrf="+encode(token(path))+"&padding=";
+            String body="name="+encode("Nhóm thử")+"&description="+encode("Mô tả có dấu")+"&version="+version()+"&_csrf="+encode(token(path))+"&padding=";
             body+="x".repeat(size-body.getBytes(StandardCharsets.UTF_8).length);
             assertEquals(size<=16384?302:413,send(path,body,"application/x-www-form-urlencoded; charset=UTF-8"),"body bytes="+size);
         }
         assertEquals("Nhóm thử",work.group(actor,path.split("/")[2]).getName());
-        assertEquals(403,send(path,"name=x&description=&version=1","application/x-www-form-urlencoded"));
-        assertEquals(403,send(path,"name=x&description=&version=1&_csrf=invalid","application/x-www-form-urlencoded"));
+        assertEquals(403,send(path,"name=x&description=&version="+version(),"application/x-www-form-urlencoded"));
+        assertEquals(403,send(path,"name=x&description=&version="+version()+"&_csrf=invalid","application/x-www-form-urlencoded"));
     }
     @Test @DisplayName("P7-04 SEC-14 unsupported small request content type is rejected before mutation")
     void unsupportedType()throws Exception {
-        String query="?name=Should-not-save&description=&version=0&_csrf="+encode(token(path));
+        String query="?name=Should-not-save&description=&version="+version()+"&_csrf="+encode(token(path));
         assertEquals(415,send(path+query,"x","application/octet-stream"));
         assertEquals("Chunked original",work.group(actor,path.split("/")[2]).getName());
     }

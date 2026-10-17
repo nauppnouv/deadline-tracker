@@ -157,3 +157,10 @@ R2-03 DATA-01: migration so baseline origin/main hoặc MIGRATION_BASELINE_REF; 
 
 - RED: `target/r2-02-red.log`; GREEN: `target/r2-02-green.log`. Lệnh và hash log: [biên bản](verification/r2-02.txt).
 - `bash scripts/check.sh`: 109/0/0/0 (tests/failures/errors/skipped), build/static/gitleaks/dependency/migration OK. Phạm vi tự động cục bộ; không suy thành đạt pilot.
+
+## Vòng 2 — mục 03 (18/10/2026)
+
+R2-02 DATA-04 UAT-04/07/11: version mọi form lấy từ HTML đúng action, gồm validation/conflict/reload; status lỗi dùng GET tải lại; chunked và load cũng đọc HTML. Ba mutation bỏ hidden input đều đỏ; không đổi mã ứng dụng.
+
+- RED: `target/r2-03-red-1.log`; GREEN: `target/r2-03-green.log`. Lệnh và hash log: [biên bản](verification/r2-03.txt).
+- `bash scripts/check.sh`: 112/0/0/0 (tests/failures/errors/skipped), build/static/gitleaks/dependency/migration OK. Phạm vi tự động cục bộ; không suy thành đạt pilot.

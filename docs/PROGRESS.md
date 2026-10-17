@@ -59,3 +59,9 @@ D20 username nội bộ44ký tự; D21 disabled assignee; D22 vá Tomcat; D23 c�
 - R2-03 DATA-01: migration so baseline origin/main hoặc MIGRATION_BASELINE_REF; M/D/R/T của file baseline bị chặn kể cả đã commit. Git/ref lỗi fail rõ; none tường minh in BỎ QUA. Repo Git tạm tái hiện đã chạy.
 - RED → GREEN; `bash scripts/check.sh`: 109/0/0/0, mọi cổng OK. Bằng chứng: `docs/verification/r2-02.txt`.
 - Tiếp tục đúng thứ tự yêu cầu; không push/merge, không thay V1–V4, không thay phiên bản. Deploy/pilot thật chưa chạy.
+
+## Sửa review vòng 2 — mục 03
+
+- R2-02 DATA-04 UAT-04/07/11: version mọi form lấy từ HTML đúng action, gồm validation/conflict/reload; status lỗi dùng GET tải lại; chunked và load cũng đọc HTML. Ba mutation bỏ hidden input đều đỏ; không đổi mã ứng dụng.
+- RED → GREEN; `bash scripts/check.sh`: 112/0/0/0, mọi cổng OK. Bằng chứng: `docs/verification/r2-03.txt`.
+- Tiếp tục đúng thứ tự yêu cầu; không push/merge, không thay V1–V4, không thay phiên bản. Deploy/pilot thật chưa chạy.

@@ -34,13 +34,13 @@ class RepresentativeLoadTest extends DatabaseTest {
                 for(int n=0;n<20;n++){
                     var v=visitors.get((index+(n%3)*5)%visitors.size());String url="/groups/"+v.group();long start=System.nanoTime();
                     int status;
-                    if(n%4==0){var task=work.task(v.id(),v.group(),v.task());start=System.nanoTime();status=mvc.perform(post(url+"/tasks/"+v.task()+"/status").cookie(v.session()).with(csrf()).param("status",n%8==0?"IN_PROGRESS":"TODO").param("version",Long.toString(task.getVersion()))).andReturn().getResponse().getStatus();assertEquals(302,status);}
+                    if(n%4==0){String formUrl=url+"/tasks/"+v.task();var form=mvc.perform(get(formUrl).cookie(v.session())).andReturn().getResponse();assertEquals(200,form.getStatus());String version=HtmlForms.version(form.getContentAsString(),formUrl+"/status");start=System.nanoTime();status=mvc.perform(post(url+"/tasks/"+v.task()+"/status").cookie(v.session()).with(csrf()).param("status",n%8==0?"IN_PROGRESS":"TODO").param("version",version)).andReturn().getResponse().getStatus();assertEquals(302,status);}
                     else{status=mvc.perform(get(url).cookie(v.session()).param("due",n%2==0?"SOON":"ALL")).andReturn().getResponse().getStatus();assertEquals(200,status);}
                     timings.add((System.nanoTime()-start)/1_000_000);
                 }return null;});}
             for(var result:pool.invokeAll(jobs))result.get();
         }
-        timings.sort(Long::compareTo);long p95=timings.get(94);String report="NFR-04 local Windows, Docker Desktop MariaDB 11.8.9, Java "+System.getProperty("java.version")+"; MockMvc (no network/TLS/browser); 3 groups x 5 users x 200 tasks, 5 concurrent threads, 100 warm requests (75 views/25 saves), p95="+p95+"ms, max="+timings.getLast()+"ms; CPU="+Runtime.getRuntime().availableProcessors()+"; not a cloud SLA.\n";
+        timings.sort(Long::compareTo);long p95=timings.get(94);String report="NFR-04 local Windows, Docker Desktop MariaDB 11.8.9, Java "+System.getProperty("java.version")+"; MockMvc (no network/TLS/browser); 3 groups x 5 users x 200 tasks, 5 concurrent threads, 100 measured warm requests (75 views/25 saves), plus 25 form GETs outside timings, p95="+p95+"ms, max="+timings.getLast()+"ms; CPU="+Runtime.getRuntime().availableProcessors()+"; not a cloud SLA.\n";
         Files.writeString(Path.of("target/load-result.txt"),report);assertTrue(p95<2000,report);
     }
 }
