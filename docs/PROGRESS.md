@@ -71,3 +71,9 @@ D20 username nội bộ44ký tự; D21 disabled assignee; D22 vá Tomcat; D23 c�
 - Triển khai fail-closed SEC-06/09/12: preflight prod trước context/DB; từ chối secret mẫu/ngắn/trùng, thiếu hoặc non-loopback bind, forwarded headers khác native. Mặc định prod loopback; compose DEV ONLY, placeholder CHANGE_ME, một khối cấu hình proxy.
 - RED → GREEN; `bash scripts/check.sh`: 134/0/0/0, mọi cổng OK. Bằng chứng: `docs/verification/r2-04.txt`.
 - Tiếp tục đúng thứ tự yêu cầu; không push/merge, không thay V1–V4, không thay phiên bản. Deploy/pilot thật chưa chạy.
+
+## Sửa review vòng 2 — mục 05
+
+- R2-04 SEC-14: HTTP thật application/* và */* trả 400, nhóm không đổi. Sửa kỳ vọng test và DEPLOY; không sửa RequestSizeFilter hay mã ứng dụng.
+- RED → GREEN; `bash scripts/check.sh`: 136/0/0/0, mọi cổng OK. Bằng chứng: `docs/verification/r2-05.txt`.
+- Tiếp tục đúng thứ tự yêu cầu; không push/merge, không thay V1–V4, không thay phiên bản. Deploy/pilot thật chưa chạy.

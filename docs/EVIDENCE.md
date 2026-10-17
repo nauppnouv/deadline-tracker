@@ -171,3 +171,10 @@ Triển khai fail-closed SEC-06/09/12: preflight prod trước context/DB; từ 
 
 - RED: `target/r2-04-red.log`; GREEN: `target/r2-04-green.log`. Lệnh và hash log: [biên bản](verification/r2-04.txt).
 - `bash scripts/check.sh`: 134/0/0/0 (tests/failures/errors/skipped), build/static/gitleaks/dependency/migration OK. Phạm vi tự động cục bộ; không suy thành đạt pilot.
+
+## Vòng 2 — mục 05 (18/10/2026)
+
+R2-04 SEC-14: HTTP thật application/* và */* trả 400, nhóm không đổi. Sửa kỳ vọng test và DEPLOY; không sửa RequestSizeFilter hay mã ứng dụng.
+
+- RED: `target/r2-05-red.log`; GREEN: `target/r2-05-green.log`. Lệnh và hash log: [biên bản](verification/r2-05.txt).
+- `bash scripts/check.sh`: 136/0/0/0 (tests/failures/errors/skipped), build/static/gitleaks/dependency/migration OK. Phạm vi tự động cục bộ; không suy thành đạt pilot.

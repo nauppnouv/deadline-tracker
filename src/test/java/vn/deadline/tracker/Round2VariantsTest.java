@@ -121,4 +121,19 @@ class Round2VariantsTest extends DatabaseTest {
         assertNotEquals(0,result.getExitCode());assertFalse(result.getStdout().contains("RESTORE_OK"));
         assertTrue(result.getStderr().contains(constraint),result.getStderr());
     }
+    @ParameterizedTest @ValueSource(strings={"application/*","*/*"})
+    @DisplayName("SEC-14 R2-04 wildcard Content-Type is rejected without mutating data")
+    void wildcardType(String type)throws Exception {
+        var client=HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).followRedirects(HttpClient.Redirect.NEVER).build();
+        var page=client.send(HttpRequest.newBuilder(URI.create("http://127.0.0.1:"+port+path)).header("Cookie","SESSION="+cookie.getValue()).GET().build(),HttpResponse.BodyHandlers.ofString());
+        assertEquals(200,page.statusCode());
+        String version=HtmlForms.version(page.body(),path);
+        var csrf=Pattern.compile("name=\"_csrf\"[^>]*value=\"([^\"]+)\"").matcher(page.body());assertTrue(csrf.find());
+        String token=org.springframework.web.util.HtmlUtils.htmlUnescape(csrf.group(1));
+        String body="name=Wildcard-mutated&description=&version="+version+"&_csrf="+URLEncoder.encode(token,StandardCharsets.UTF_8);
+        var response=client.send(HttpRequest.newBuilder(URI.create("http://127.0.0.1:"+port+path)).header("Cookie","SESSION="+cookie.getValue()).header("Content-Type",type).POST(HttpRequest.BodyPublishers.ofString(body)).build(),HttpResponse.BodyHandlers.ofString());
+        assertEquals("Round two group",work.group(actor,group).getName());
+        System.out.println("R2 wildcard="+type+" status="+response.statusCode()+" data unchanged");
+        assertEquals(400,response.statusCode());
+    }
 }

@@ -24,3 +24,4 @@ Phạm vi do chủ dự án yêu cầu: sửa đúng năm phát hiện review, t
 | HtmlForms.java; GroupVersionWebTest.java; TaskWebTest.java; ChunkedRequestTest.java; RepresentativeLoadTest.java | R2-02 đọc version từ HTML, kiểm validation/conflict/reload; mutation ba hidden input; số đo tải ghi rõ GET ngoài thời gian đo | chưa đọc |
 | ProductionPreflight.java; META-INF/spring.factories; application-prod.properties; .env.example; docker-compose.yml; docs/DEPLOY.md | Mục 4: preflight môi trường prod trước context, bind loopback, ví dụ không hợp lệ, một cấu hình forwarded headers có quote đúng | chưa đọc |
 | ProductionPreflightTest.java; ProductionSecurityTest.java; SchemaStartupTest.java | Mục 4: từng điều kiện bị từ chối, cấu hình tốt vẫn boot; fixture prod được nạp sớm trước preflight, giữ kiểm schema | chưa đọc |
+| Round2VariantsTest.java (wildcardType); docs/DEPLOY.md | R2-04: test HTTP thật theo 400 và dữ liệu không đổi; sửa mô tả mã lỗi, không đổi mã xử lý | chưa đọc |

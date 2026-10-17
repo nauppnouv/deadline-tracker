@@ -1,0 +1,55 @@
+18/10/2026 Asia/Saigon
+R2-04 SEC-14: HTTP thật application/* và */* trả 400, nhóm không đổi. Sửa kỳ vọng test và DEPLOY; không sửa RequestSizeFilter hay mã ứng dụng.
+Commands are run from repository root using Git Bash and scripts/mvn.sh (portable JDK25).
+All DBs are disposable MariaDB containers; no pilot data.
+
+target\r2-05-red.log
+SHA256=d81bc518b116d7ee2bf88d1bf702bd088d7b4c58a61e6e9aff70580f7424cc0f
+[ERROR] Tests run: 2, Failures: 2, Errors: 0, Skipped: 0, Time elapsed: 17.55 s <<< FAILURE! -- in vn.deadline.tracker.Round2VariantsTest
+[ERROR] Tests run: 2, Failures: 2, Errors: 0, Skipped: 0
+[INFO] BUILD FAILURE
+
+target\r2-05-green.log
+SHA256=51ac9d33d339ab434e7e9ba8271483e21b40ac1c846d36c833048532cf4cfde5
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 26.16 s -- in vn.deadline.tracker.Round2VariantsTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+
+target\r2-05-check.log
+SHA256=bd5064be141e26b0df388a862bbdb2a9144cf38bbb806f8d745fd256289766c6
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 23.56 s -- in vn.deadline.tracker.BackupFailureTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.794 s -- in vn.deadline.tracker.BackupRestoreTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.005 s -- in vn.deadline.tracker.BuildSmokeTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.720 s -- in vn.deadline.tracker.ChunkedRequestTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.033 s -- in vn.deadline.tracker.GroupDomainTest
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.866 s -- in vn.deadline.tracker.GroupInvitationWebTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.753 s -- in vn.deadline.tracker.GroupVersionWebTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.477 s -- in vn.deadline.tracker.InvitationTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 13.18 s -- in vn.deadline.tracker.MigrationGuardTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.697 s -- in vn.deadline.tracker.OpsWorkflowTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.646 s -- in vn.deadline.tracker.OwnerIntegrityTest
+[INFO] Tests run: 7, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.597 s -- in vn.deadline.tracker.PersistenceTest
+[INFO] Tests run: 22, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.603 s -- in vn.deadline.tracker.ProductionPreflightTest
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.272 s -- in vn.deadline.tracker.ProductionSecurityTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.007 s -- in vn.deadline.tracker.RateLimitTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 16.45 s -- in vn.deadline.tracker.RepresentativeLoadTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.813 s -- in vn.deadline.tracker.RestartPersistenceTest
+[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.675 s -- in vn.deadline.tracker.RestoredSessionTest
+R2 no TRIGGER privilege backup exit=1 stderr=WARNING: option --ssl-verify-server-cert is disabled, because of an insecure passwordless login.
+R2 missing triggers restore exit=1 output= stderr=WARNING: option --ssl-verify-server-cert is disabled, because of an insecure passwordless login.
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 23.85 s -- in vn.deadline.tracker.Round2VariantsTest
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 13.23 s -- in vn.deadline.tracker.SchemaStartupTest
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.046 s -- in vn.deadline.tracker.TaskDomainTest
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.149 s -- in vn.deadline.tracker.TaskWebTest
+[INFO] Tests run: 136, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+OK build + tests
+OK template / SQL static checks
+OK secret scan
+[INFO] BUILD SUCCESS
+OK dependency audit
+OK immutable committed migrations (baseline=origin/main)
+
+RED/GREEN: bash scripts/mvn.sh test -Dtest=Round2VariantsTest#wildcardType
+CHECK: bash scripts/check.sh
+RED 2 tests/2 failures/0 errors: expected 415, actual 400. GREEN expects observed 400 and asserts unchanged group data, with version/CSRF read from actual HTML. No HTTP status implementation changed.
