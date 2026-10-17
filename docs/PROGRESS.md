@@ -25,3 +25,9 @@ Ngày 17/10/2026. Nhánh feat/w1-autonomous-build.
 - Testcontainers image pinned by digest. Hibernate connection metadata logging suppressed to avoid JDBC credentials in INFO logs.
 - JUnit theo Boot BOM do JUnit 5 pin gây NoSuchMethodError (D-15); READ_COMMITTED cho pool (D-16).
 - Tiếp theo P3: tài khoản, phiên, rate limit, bảo vệ route và test ma trận quyền.
+
+## P3 đã qua cổng hiện tại
+
+- Account/session/CSRF/rate limit/central group access có test. 36 tests PASS; cookie flags/fixation/expiration và revoke all sessions đã kiểm chứng.
+- Maven/user home/Docker client config được cách ly trong repo; credential principal bị erase trước khi lưu session.
+- Tiếp P4: lời mời bằng token, hết hạn mốc biên, thu hồi, atomic join và luồng web.

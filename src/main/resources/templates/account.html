@@ -1,0 +1,4 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Tài khoản')}"></head>
+<body><header th:replace="~{fragments :: header}"></header><main class="auth-shell"><section class="card"><h1>Tài khoản của bạn</h1><dl><dt>Tên hiển thị</dt><dd th:text="${displayName}"></dd><dt>Tên tài khoản</dt><dd th:text="${username}"></dd></dl><a class="button" th:href="@{/password}">Đổi mật khẩu</a><p>Nếu quên mật khẩu trong đợt thử, hãy liên hệ người vận hành để được xác nhận và hỗ trợ.</p></section></main></body></html>

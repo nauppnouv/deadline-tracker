@@ -1,0 +1,4 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Thông báo')}"></head>
+<body><main class="auth-shell"><section class="card"><p class="eyebrow" th:text="${status}">Thông báo</p><h1>Chưa thể thực hiện thao tác</h1><p role="alert" th:text="${message ?: 'Không thể thực hiện yêu cầu. Vui lòng kiểm tra hoặc thử lại.'}"></p><a th:href="@{/groups}">Về nhóm của tôi</a></section></main></body></html>

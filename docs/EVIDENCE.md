@@ -22,12 +22,12 @@ Ngày khởi tạo: 17/10/2026. Chỉ cập nhật khi đã chạy thật. Log l
 | UAT-16 | chưa chạy | — | — | Chưa có bằng chứng |
 | UAT-17 | chưa chạy | — | — | Chưa có bằng chứng |
 | UAT-18 | chưa chạy | — | — | Chưa có bằng chứng |
-| SEC-01 | chưa chạy | — | — | Chưa có bằng chứng |
-| SEC-02 | chưa chạy | — | — | Chưa có bằng chứng |
-| SEC-03 | chưa chạy | — | — | Chưa có bằng chứng |
-| SEC-04 | chưa chạy | — | — | Chưa có bằng chứng |
-| SEC-05 | chưa chạy | — | — | Chưa có bằng chứng |
-| SEC-06 | chưa chạy | — | — | Chưa có bằng chứng |
+| SEC-01 | đạt | bash scripts/check.sh; AuthWebTest/RateLimitTest | 17/10/2026 | AuthWebTest.mappingInventory enumerates current MVC routes; re-run after new routes; phạm vi build P3 |
+| SEC-02 | đạt | bash scripts/check.sh; AuthWebTest/RateLimitTest | 17/10/2026 | Explicit auth form parameters ignore forged actorId/role; task create binding rechecked P5; phạm vi build P3 |
+| SEC-03 | đạt | bash scripts/check.sh; AuthWebTest/RateLimitTest | 17/10/2026 | AuthWebTest.accessMatrix: Owner A, Member A, Owner B, anonymous against protected group probe; phạm vi build P3 |
+| SEC-04 | đạt | bash scripts/check.sh; AuthWebTest/RateLimitTest | 17/10/2026 | AuthWebTest.csrfProtection rejects missing/invalid token; valid registration succeeds; phạm vi build P3 |
+| SEC-05 | đạt | bash scripts/check.sh; AuthWebTest/RateLimitTest | 17/10/2026 | AuthWebTest.registrationRules: Argon2, lengths, Unicode; successful-run log scan no plain test password; phạm vi build P3 |
+| SEC-06 | đạt | bash scripts/check.sh; AuthWebTest/RateLimitTest | 17/10/2026 | AuthWebTest.sessionLifecycle/fixationAndExpiry/rateLimit: JDBC cookies, rotation, expiration, logout/change; RateLimitTest injected Clock; phạm vi build P3 |
 | SEC-07 | chưa chạy | — | — | Chưa có bằng chứng |
 | SEC-08 | chưa chạy | — | — | Chưa có bằng chứng |
 | SEC-09 | chưa chạy | — | — | Chưa có bằng chứng |
@@ -35,7 +35,7 @@ Ngày khởi tạo: 17/10/2026. Chỉ cập nhật khi đã chạy thật. Log l
 | SEC-11 | chưa chạy | — | — | Chưa có bằng chứng |
 | SEC-12 | chưa chạy | — | — | Chưa có bằng chứng |
 | SEC-13 | chưa chạy | — | — | Chưa có bằng chứng |
-| SEC-14 | chưa chạy | — | — | Chưa có bằng chứng |
+| SEC-14 | đạt | bash scripts/check.sh; AuthWebTest/RateLimitTest | 17/10/2026 | Registration validation, server domain bounds, RequestSizeFilter rejects 17KB; phạm vi build P3 |
 | DATA-01 | đạt | bash scripts/check.sh / P2 | 17/10/2026 | Flyway V1/V2, Hibernate validate; PersistenceTest.constraints; phạm vi build P2, kiểm tra lại sau web |
 | DATA-02 | đạt | bash scripts/check.sh / P2 | 17/10/2026 | PersistenceTest.constraints: FK/unique/owner/check rejects invalid writes; phạm vi build P2, kiểm tra lại sau web |
 | DATA-03 | đạt | bash scripts/check.sh / P2 | 17/10/2026 | PersistenceTest.groupRollback/eventAtomicity: forced rollback and event idempotency; phạm vi build P2, kiểm tra lại sau web |
@@ -78,3 +78,11 @@ Ngày khởi tạo: 17/10/2026. Chỉ cập nhật khi đã chạy thật. Log l
 - DATA-05 kiểm tra primitive store trong DB thật; lời mời token/expiry/ủy quyền web sẽ kiểm chứng P4.
 - DATA-07 là scan source build hiện tại, không phải bằng chứng rằng giao diện W1 đã hoàn thành.
 - Cổng backup/ops và toàn bộ UAT web còn chưa chạy; SEC-13 audit đang tải NVD, chưa có kết quả.
+
+## P3 US-09…11 — tài khoản và quyền
+
+- RED: target/p3-red.log thiếu AccountService/security.
+- GREEN cuối target/p3-gates-final.log: 36 tests, 0 failures/errors/skips; check/gitleaks/static checks OK.
+- Test bổ sung đã phát hiện và sửa cookie thiếu HttpOnly/SameSite trong mock servlet context; CookieSerializer khai báo rõ, prod Secure.
+- Expiration test dùng LAST_ACCESS_TIME và EXPIRY_TIME đúng cơ chế Spring Session; kiểm tra cookie cũ không vào account được.
+- Chưa có toàn bộ routes W1; SEC mapping/object matrix được chạy lại sau P5. SEC-13 còn chờ NVD scan.

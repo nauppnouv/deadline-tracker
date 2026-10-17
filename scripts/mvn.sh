@@ -11,4 +11,11 @@ if [[ -d "$ROOT/.tools/java25" ]]; then
   done
 fi
 cd "$ROOT"
-exec mvn -B -ntp "-Dmaven.repo.local=$ROOT/.m2-local" "$@"
+mkdir -p .tools/home .tools/docker-client
+if [[ ! -f .tools/docker-client/config.json ]]; then printf '{"auths":{}}\n' > .tools/docker-client/config.json; fi
+TOOLS_HOME="$ROOT/.tools/home"
+DOCKER_CLIENT="$ROOT/.tools/docker-client"
+if command -v cygpath >/dev/null 2>&1; then TOOLS_HOME="$(cygpath -m "$TOOLS_HOME")"; DOCKER_CLIENT="$(cygpath -m "$DOCKER_CLIENT")"; fi
+export DOCKER_CONFIG="$DOCKER_CLIENT"
+export MAVEN_OPTS="${MAVEN_OPTS:-} -Duser.home=$TOOLS_HOME -Duser.timezone=UTC"
+exec mvn -B -ntp -s scripts/maven-settings.xml "-Dmaven.repo.local=$ROOT/.m2-local" "$@"

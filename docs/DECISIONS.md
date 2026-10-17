@@ -43,3 +43,7 @@ Phiên bản khóa và checksum công cụ được bổ sung sau khi tải/reso
 - Cascade chỉ dùng cho bảng phiên framework; FK nghiệp vụ đều RESTRICT. Xóa phiên không đồng nghĩa xóa dữ liệu công việc.
 
 - D-16: Pool dùng READ_COMMITTED; test hai giao dịch đồng thời ở default REPEATABLE_READ của MariaDB 11.8.9 trả lỗi record-changed thay vì số hàng 0 cho optimistic version. READ_COMMITTED cùng @Version giúp báo xung đột rõ; không thay đổi server DB chung. Các thao tác quan trọng vẫn có predicate nguyên tử/unique/FK và giao dịch.
+
+- D-17: CookieSerializer khai báo HttpOnly=true, SameSite=Lax, Secure ở prod; không dựa vào default servlet context của môi trường.
+- D-18: Không dùng SavedRequestCache để tránh lưu URL token mời vào bảng phiên. P4 chỉ chuyển tiếp đường dẫn lời mời hợp lệ qua form đăng nhập, không lưu vào session/flash. Token phải được chuyển tới người nhận qua liên kết đúng luồng; cấm log và lưu rõ trong DB, không cấm chính phản hồi phân phối liên kết.
+- D-19: Maven settings, user home trong test và Docker client config nằm trong .tools/repo; Docker auths rỗng, không dùng credentials Docker/Maven của người dùng.
