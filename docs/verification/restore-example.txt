@@ -1,0 +1,25 @@
+RESTORE_STARTED_UTC=2026-10-17T16:41:08.466769Z
+RESTORE_ELAPSED_MS=1302 (trial data only; excludes application boot)
+TABLE_OK SPRING_SESSION rows=8 checksum=3018465408
+TABLE_OK SPRING_SESSION_ATTRIBUTES rows=8 checksum=2411104506
+TABLE_OK app_user rows=10 checksum=3476761231
+TABLE_OK flyway_schema_history rows=3 checksum=285537711
+TABLE_OK group_member rows=4 checksum=170420090
+TABLE_OK invitation rows=0 checksum=0
+TABLE_OK project_group rows=3 checksum=481803432
+TABLE_OK task rows=2 checksum=3066595071
+TABLE_OK task_event rows=2 checksum=1697961641
+FK_OK group_member.fk_member_group
+FK_OK group_member.fk_member_user
+FK_OK invitation.fk_invite_creator
+FK_OK invitation.fk_invite_group
+FK_OK invitation.fk_invite_used_by
+FK_OK project_group.fk_group_owner
+FK_OK SPRING_SESSION_ATTRIBUTES.SPRING_SESSION_ATTRIBUTES_FK
+FK_OK task.fk_task_assignee
+FK_OK task.fk_task_creator
+FK_OK task.fk_task_group
+FK_OK task_event.fk_event_actor
+FK_OK task_event.fk_event_task
+RESTORE_OK (trial database retained for inspection)
+APP_RESTORED_OK owner reads task; outsider rejected NOT_FOUND

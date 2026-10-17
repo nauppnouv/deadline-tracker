@@ -114,3 +114,9 @@ Ngày khởi tạo: 17/10/2026. Chỉ cập nhật khi đã chạy thật. Log l
 - Compose thật [smoke](verification/compose-local.txt): packaged jar HTTP register/login/create group, restart còn group+session, UID10001; loopbackports. Chỉ dừng/gỡ container/network project thử, giữ volume trial được ghi trong report.
 - Flyway vẫn cảnh báo DB11.8 mới hơn mức verified11.7; chức năng trên pinned11.8.9 đã test, không coi là chứng nhận vendor. Xem D23/BLOCKERS.
 - Chưa chạy clean-clone check tại mốc ghi này; chưa deploy HTTPS thật, chưa lịch backup thật, chưa pilot/P7.
+
+### Giới hạn diễn giải SEC-05 (D25)
+
+Kết quả đạt trong bảng là kiểm chứng password thô/invitation raw token không lưu DB, principal credential bị erase và không log bí mật ở các luồng đã thử. Spring Session JDBC vẫn lưu session ID/CSRF/attributes và trả session cookie cho browser; token lời mời phải xuất trong phản hồi phân phối cho Owner. **Chưa/không tuyên bố đạt nghĩa đen cấm mọi token/session ID trong mọi phản hồi và DB**, vì mâu thuẫn công nghệ/luồng được yêu cầu. Không tự triển khai session thay framework. Reviewer P7 cần xác nhận diễn giải này; không coi đây là gate bị âm thầm bỏ qua.
+
+- Chốt US21: target/p6-backup-story.log check58tests/0failure/error/skip, SCA/gitleaks/migration OK. Restore artifact có UTC bắt đầu và elapsed milliseconds thực đo (không gồm app boot); không suy RTO môi trường thật.
