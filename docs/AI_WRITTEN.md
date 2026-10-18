@@ -1,5 +1,14 @@
 # Phần AI viết — sửa phát hiện P7
 
+## Sửa D-28 theo D-33 sau review Phase A — 18–19/10/2026
+
+| Tệp | Mô tả | Trạng thái |
+|---|---|---|
+| scripts/schema-inventory.sql; scripts/schema-required.txt; .gitattributes | Hợp đồng định nghĩa 10 CHECK / 1 cột sinh dẫn xuất từ schema V1→V4 trên image MariaDB đã pin, SHA-256 nguyên biểu thức metadata; giữ dòng inventory cũ; ghim LF biên bản mới | chưa đọc |
+| scripts/schema.lib.sh; src/main/java/vn/deadline/tracker/service/SchemaInvariantVerifier.java | Hai nơi đọc cùng hợp đồng từ chối cả thiếu/sai và thừa CHECK/cột sinh; lỗi có tên bảng.đối_tượng; không ghi DB ở startup | chưa đọc |
+| src/test/java/vn/deadline/tracker/D28SchemaDefinitionTest.java | 29 ca test mới: prod/test, CHECK noop/gần giống, cột sinh khác/cùng giá trị/kiểu/lưu trữ, đối tượng thừa, completeness, backup/restore, tái tạo đúng và đích có sẵn | chưa đọc |
+| docs/DECISIONS.md; docs/OPS.md; docs/EVIDENCE.md; docs/PROGRESS.md; docs/verification/d28-remediation.txt; docs/AI_WRITTEN.md | Quyết định D-33, giới hạn/hướng dẫn chuẩn hóa MariaDB, bằng chứng RED/GREEN/mutation/full check và trạng thái chờ review độc lập | chưa đọc |
+
 Phạm vi do chủ dự án yêu cầu: sửa đúng năm phát hiện review, test FAIL trước sửa, PASS sau sửa và kiểm tra đầy đủ. Chưa tính các phần này là kỹ năng người học.
 
 | Tệp | Mô tả | Trạng thái |

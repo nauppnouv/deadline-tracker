@@ -1,6 +1,15 @@
 # Tiến độ và điểm tiếp tục
 
-## Hai bản sửa pha A chờ kiểm lại độc lập — 18/10/2026
+## D-28 đã sửa cục bộ theo D-33, chờ review độc lập — 19/10/2026
+
+- Theo trạng thái chủ dự án cung cấp: review Phase A 18/10 đạt REV-01…08 trong phạm vi thử, nhưng chưa ký Gate A vì D-28; chọn đường sửa, không chấp nhận rủi ro. Không sửa hồ sơ review ngoài repo hay các dòng UAT/SEC/DATA lịch sử.
+- Baseline chạy lại thật tại HEAD6250637: full check 148 test/25 lớp, exit0. D-28 test-first RED29/25 failure -> GREEN29/0; mutation tắt kiểm mới đỏ lại29/25, 0 error/skip, khôi phục đúng byte và Git diff hai file exit0,0. Logs `target/d28-{baseline,red,green,mutation}.log`.
+- Full `MIGRATION_BASELINE_REF=0ed33309821c1fdd55cbd551246b89f1cd78d324 bash scripts/check.sh` exit0: **177 test/26 lớp**, 0 failure/error/skip, mọi bước OK; 403,661 giây, kết thúc 19/10 00:08:42 Asia/Saigon. RestoreOwnerGuardsTest7, MigrationGuardTest13, Round2MatrixTest1 và45 HTTP assertions giữ nguyên. [Biên bản](verification/d28-remediation.txt), `target/d28-full.log` / receipt / summary.
+- Hợp đồng chung so 10 CHECK và1 cột sinh theo hash metadata chuẩn sau V1→V4 trên MariaDB11.8.9 đã pin; so cả thiếu/sai/thừa đối tượng ở startup prod/test, trước backup và restore. Biến thể generated cùng checksum vẫn bị chặn bởi định nghĩa; tái tạo đúng biểu thức vẫn qua. Không sửa V1–V4, không V5 hoặc đổi dependency/image/JDK/Flyway. Mọi phần AI viết ghi `chưa đọc`.
+- Giới hạn D-33: khác chuẩn hóa MariaDB có thể fail closed; kiểu/độ dài/default cột thường, hai index thường, body trigger ở startup còn ngoài phạm vi. Body năm trigger khi restore, probe Owner, reset phiên, checksum/FK, lock/retention giữ nguyên. DB thử restore lỗi được giữ cách ly theo xác nhận của chủ dự án; nguồn/đích có sẵn không đổi.
+- Bước tiếp theo: reviewer độc lập chạy lại harness CHECK/generated ở startup cả hai profile và restore, gồm `+0` có dữ liệu giống hệt, trên commit sửa mới. **Gate A chưa qua**, chưa push/merge/deploy; không mở Phase B. SEC-05/D-25 chỉ đề xuất diff ngoại lệ session ID/cookie để chủ dự án duyệt; AGENTS.md/PROJECT_PLAN.md giữ nguyên.
+
+## Lịch sử hai bản sửa pha A chờ kiểm lại độc lập — 18/10/2026
 
 - REV-01 commit `dac7663007d6bbdd86828a6e65515a9cdaba686d`: RED6/3 + literal1/1 -> GREEN21/full145; body V4 nguyên văn khi restore, probe rollback đổi/xóa Owner.
 - REV-02: RED13/3 -> GREEN13/full148; kiểm cả Git index và working tree. EVIDENCE/AI_WRITTEN và verification/rev02-remediation.txt ghi bằng chứng. Bản sửa này lưu commit riêng; full SHA và clean-clone receipt trong handoff packet.

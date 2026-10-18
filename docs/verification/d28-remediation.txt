@@ -1,0 +1,94 @@
+D-28 remediation under D-33, session 18-19/10/2026 (Asia/Saigon).
+Base=6250637baf3fb30fcb13ab564af18fac8126455a; branch=fix/p7-security-data-findings.
+This is implementation evidence, not independent Gate A approval.
+All paths below are relative to D:/Documents/coding/deadline-tracker.
+
+baseline: MIGRATION_BASELINE_REF=0ed33309821c1fdd55cbd551246b89f1cd78d324 bash scripts/check.sh
+exit=0; tests=148; classes=25; failures=0; errors=0; skipped=0.
+Build/static/gitleaks/dependency audit/migration worktree+index all OK.
+log=target/d28-baseline.log; SHA256=dea61fa7412e1658889b34de659f3d2ce6615004c5342364cf18fea4896ea929.
+The first attempt used the Windows default bash launcher and returned Bash/E_ACCESSDENIED before any check.
+The actual baseline and all following commands used C:/Program Files/Git/bin/bash.exe; no test was skipped.
+
+RED: bash scripts/mvn.sh test -Dtest=D28SchemaDefinitionTest
+exit=1; tests=29; failures=25; errors=0; skipped=0; wall=153.5542801 seconds.
+16 startup mutation cases accepted; 4 backup mutation cases accepted/published/pruned;
+3 restore mutations accepted, while the changed-value generated case failed only on data checksum;
+completeness found no definition contract rows. Four positive/existing-target cases passed.
+log=target/d28-red.log; SHA256=7f1720903f6bd8cfc2c1f773b0656cded8f7558383c16c2c14d89c88c3c42101.
+xml=target/d28-red.xml; receipt=target/d28-red.receipt.
+After this RED, failure assertions were clarified to expect table.column labels and to report
+successful startup directly as absence of an exception (no inner fail); fixtures/count unchanged.
+
+GREEN: bash scripts/mvn.sh test -Dtest=D28SchemaDefinitionTest
+exit=0; tests=29; failures=0; errors=0; skipped=0; wall=77.3308841 seconds.
+log=target/d28-green.log; SHA256=fae1f1877f0de197f81b4d2f112559316febfb77e23938e0173ed86d4b5bdbe0.
+xml=target/d28-green.xml; receipt=target/d28-green.receipt.
+Startup test/prod each reject CHECK(1=1), status list plus INVALID, changed generated values,
+same-value +0 expression, generated type/storage changes, and uncontracted CHECK/generated objects.
+Diagnostics contain object names; startup exception/log assertions exclude datasource secret.
+Recreating the original CHECK/generated expressions starts both profiles and permits backup/restore.
+Restore rejects both CHECK mutations and both generated mutations before data checksum comparison;
+stderr identifies ck_task_status or group_member.owner_marker, no Mismatch: and no RESTORE_OK.
+The +0 case independently compares source/restored logical group_member checksums: identical.
+All good backup files and source data checksums stay unchanged; an existing target sentinel stays 28.
+Backup rejects changed CHECK/generated and new uncontracted objects before publication/retention.
+
+MUTATION: temporarily suppress only CHECKDEF/GENERATEDDEF SQL branches and required rows.
+Both Java and shell still use the same mutated contract; old inventory/trigger/body/probe code stays intact.
+command=bash scripts/mvn.sh test -Dtest=D28SchemaDefinitionTest
+exit=1; tests=29; failures=25; errors=0; skipped=0; wall=82.1669811 seconds.
+log=target/d28-mutation.log; SHA256=fa464838f59ee5bf7ee18eee79c5553ee228f11d5472a1607e7cfe8d5ddfc160.
+xml=target/d28-mutation.xml; receipt=target/d28-mutation.receipt.
+Restored both files in finally; git diff --no-index --exit-code against saved originals returned 0,0.
+receipt=target/d28-mutation-restored.txt; hashes=target/d28-mutation-before.json / d28-mutation-after.json.
+schema-inventory.sql SHA256 before=after=e946a8dbe7e199a72d0e91a687d07375c9298f0979e15cc563313a0b4272f8d3.
+schema-required.txt SHA256 before=after=6740a9b19f4640213091bbccd3e77d0a28c3db86f062cd442cf02185abfa17b3.
+Refreshed target/classes/db/invariants from the restored originals before the final full check.
+
+Trusted derivation: fresh Flyway V1->V4 using DatabaseTest pinned image
+mariadb@sha256:f16d7a344413e519dff518f27bdb221388f84b0d274c97c4fb5f2cb0dc1b34fa.
+SELECT VERSION()=11.8.9-MariaDB-ubu2404; all 10 CHECK and 1 generated column independently queried.
+owner_marker: COLUMN_TYPE=int(11); EXTRA=VIRTUAL GENERATED;
+GENERATION_EXPRESSION=case when `role` = 'OWNER' then 1 else NULL end.
+ck_username hash includes the V3 replacement, not the V1 expression.
+Contract rows=target/d28-derived-contract.txt; metadata=target/d28-metadata.txt.
+The test compares exact sets with no missing/surplus CHECKDEF/GENERATEDDEF rows.
+
+FULL: MIGRATION_BASELINE_REF=0ed33309821c1fdd55cbd551246b89f1cd78d324 bash scripts/check.sh
+exit=0; tests=177; classes=26; failures=0; errors=0; skipped=0; wall=403.6609069 seconds.
+started=2026-10-19T00:01:58.5934183+07:00; finished=2026-10-19T00:08:42.2590232+07:00.
+Build/static/gitleaks/dependency audit/migration worktree+index all OK, no opt-out.
+log=target/d28-full.log; SHA256=db61da0b3e830f95ddb233a1d77ff7916ae5d481f766c842dbd11f110c09e61d.
+receipt=target/d28-full.receipt; summary=target/d28-full-summary.json; XML=target/surefire-reports/TEST-*.xml.
+Baseline -> final: RestoreOwnerGuardsTest 7->7; MigrationGuardTest 13->13;
+Round2MatrixTest 1->1 and 45->45 HTTP assertions; D28SchemaDefinitionTest new 29.
+Old test files are unchanged; no skips/disabling/deletion. Total 148->177, classes 25->26.
+This full run followed mutation restoration and passed the same 29 new tests again.
+
+Changed files (all new AI-written parts recorded as chua doc in docs/AI_WRITTEN.md):
+.gitattributes
+scripts/schema-inventory.sql
+scripts/schema-required.txt
+scripts/schema.lib.sh
+src/main/java/vn/deadline/tracker/service/SchemaInvariantVerifier.java
+src/test/java/vn/deadline/tracker/D28SchemaDefinitionTest.java
+docs/DECISIONS.md
+docs/OPS.md
+docs/EVIDENCE.md
+docs/PROGRESS.md
+docs/AI_WRITTEN.md
+docs/verification/d28-remediation.txt
+
+Limits: exact MariaDB metadata hashes depend on normalization/version, not SQL semantic equivalence.
+Ordinary column types/length/defaults, ix_task_group_due/ix_event_task, and startup trigger bodies
+remain outside this fix. Five trigger body hashes are still checked at restore; Owner rollback probe,
+session clearing, checksum/FK checks, backup lock/retention remain unchanged. No optional CHECK INSERT probe added.
+As explicitly confirmed by the owner, failed newly imported restore DBs remain isolated for investigation;
+source/existing targets stay unchanged. No failed restore DB is silently dropped.
+No V1-V4 edits, V5, dependency/image/JDK/Flyway change, push/merge or deployment.
+No actions in the external review packet or on its named container/volume/databases.
+All DB tests used disposable Testcontainers; no manual DB/container was created.
+External harness expectation: CHECK and generated expression variants now fail in both startup profiles
+and restore, including same-row-checksum generated variants; rerun independently on this new commit.
+Gate A remains unsigned; SEC-05/D-25 wording still requires owner approval.

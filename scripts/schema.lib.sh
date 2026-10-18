@@ -1,20 +1,39 @@
 #!/usr/bin/env bash
 # Shared schema contract is also packaged in the application by Maven.
 schema_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+schema_invariant_label() {
+  local row="$1" kind table object rest
+  case "$row" in
+    CHECKDEF\|*|GENERATEDDEF\|*)
+      IFS='|' read -r kind table object rest <<< "$row"
+      printf '%s.%s [%s]' "$table" "$object" "$row" ;;
+    *) printf '%s' "$row" ;;
+  esac
+}
 verify_schema() {
-  local database="$1" inventory required missing=false count
+  local database="$1" inventory required actual missing=false count
   count="$("${sql[@]}" "$database" -e 'SELECT COUNT(*) FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA=DATABASE() AND ACTION_STATEMENT IS NOT NULL')"
   [[ "$count" =~ ^[0-9]+$ ]] || { echo 'Invalid trigger inventory count' >&2; return 1; }
   inventory="$("${sql[@]}" "$database" < "$schema_dir/schema-inventory.sql")"
   while IFS= read -r required; do
     [[ -n "$required" && "$required" != \#* ]] || continue
     if ! grep -Fxq -- "$required" <<< "$inventory"; then
-      echo "Missing schema invariant: $required (visible triggers=$count)" >&2
+      echo "Missing schema invariant: $(schema_invariant_label "$required") (visible triggers=$count)" >&2
       missing=true
     fi
   done < "$schema_dir/schema-required.txt"
+  # New CHECK/generated objects must be reviewed, not silently admitted.
+  while IFS= read -r actual; do
+    case "$actual" in
+      CHECKDEF\|*|GENERATEDDEF\|*)
+        if ! grep -Fxq -- "$actual" "$schema_dir/schema-required.txt"; then
+          echo "Unexpected schema invariant: $(schema_invariant_label "$actual")" >&2
+          missing=true
+        fi ;;
+    esac
+  done <<< "$inventory"
   [[ "$missing" == false ]] || return 1
-  echo "SCHEMA_OK triggers=$count (V4 required=5); FK/CHECK/unique/NOT NULL/InnoDB inventory verified"
+  echo "SCHEMA_OK triggers=$count (V4 required=5); FK/unique/NOT NULL/InnoDB inventory and exact CHECK/generated definitions verified"
 }
 
 verify_dump_triggers() {
