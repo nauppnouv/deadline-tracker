@@ -1,0 +1,7 @@
+# F-04 — exact column definition contract (19/10/2026)
+
+- Phạm vi: thêm `COLDEF` cho 63 cột trên 8 bảng nghiệp vụ/session. Mỗi dòng ghi kiểu đầy đủ, loại dữ liệu, độ dài, precision/scale, precision thời gian, nullable, default và EXTRA. Dùng cùng exact-set ở startup prod/test, backup, restore; cột thêm hoặc thuộc tính khác chuẩn đều fail closed. Không sửa V1–V4.
+- RED: `mvn -q -Dtest=D28SchemaDefinitionTest test`, 43 test, 9 failure/0 error/skip. Hai profile nhận đổi `task.title` từ VARCHAR(150) sang VARCHAR(200) và `task.version` thêm DEFAULT 1; backup/restore cũng nhận hai mutation. Completeness cho thấy hợp đồng chưa có 63 định nghĩa cột.
+- GREEN mục tiêu: cùng lệnh, 43 test, 0 failure/error/skip. Hai profile, backup và restore từ chối cả hai mutation với tên cột; kiểm tra completeness so độc lập toàn bộ 63 dòng; schema gốc và luồng backup/restore đúng vẫn qua. Log RED: `target/f04-red.log`, SHA-256 `B88174A5AB22A89872D09AC859FF4140E8D4F6C0035F7C7A71AF7C06CD4D4616`. Log GREEN: `target/f04-green-targeted.log`, SHA-256 `A4A0DFA0C883F76A436395873033BCB89B98E7AA25B907B595F3029C130FF04B`.
+- Full: `MIGRATION_BASELINE_REF=0ed33309821c1fdd55cbd551246b89f1cd78d324 bash scripts/check.sh`, exit 0; 191 test/26 lớp, 0 failure/error/skip; build, static, secret, dependency, migration baseline đều OK. Log `target/f04-full.log`, SHA-256 `22DE6B548EB567454450CCC209D4421B8E50B7C9286C1EFD2BC3C6E507596306`.
+- Giới hạn: chuẩn là metadata trên MariaDB image đã pin; server khác có thể fail closed. Chưa có review độc lập cho commit mới; đây không phải xác nhận Gate A.

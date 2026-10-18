@@ -96,3 +96,9 @@ Câu chữ mới được chủ dự án duyệt:
 - Chọn từ chối schema có charset/collation khác chuẩn thay vì chỉ kiểm dữ liệu hiện có. Thêm TEXTDEF cho mọi cột văn bản trong 8 bảng nghiệp vụ/session và dùng chung lúc startup prod/test, trước backup, sau restore. Chuẩn lấy từ schema V1–V4 mới migrate trên MariaDB image đã pin; migration cũ giữ nguyên.
 - Kiểm tra exact-set chặn khác biệt collation dù dữ liệu hiện tại và checksum chưa đổi, đồng thời chặn cột văn bản chưa có hợp đồng. Metadata khác chuẩn server có thể fail closed; khi đổi phiên bản phải dẫn xuất chuẩn mới từ schema tin cậy rồi review.
 - Bằng chứng cục bộ ở `docs/verification/f01-remediation.txt`. Chưa có review độc lập; không ký Gate A.
+
+## D-36 — hợp đồng kiểu và thuộc tính cột F-04 (19/10/2026)
+
+- Bổ sung exact-set cho toàn bộ cột của 8 bảng nghiệp vụ/session: COLUMN_TYPE/DATA_TYPE, độ dài, numeric và datetime precision, NULL, default và EXTRA. Cùng contract dùng tại startup prod/test, trước backup và sau import restore.
+- Metadata chuẩn được dẫn xuất độc lập từ schema V1–V4 mới migrate trên MariaDB image đã pin. Thay đổi độ dài/default vẫn bị từ chối dù không đổi dữ liệu; cột mới ngoài chuẩn cũng bị từ chối. Không sửa migration cũ hoặc dùng JPA validate làm chuẩn schema.
+- Kết quả cục bộ trong `docs/verification/f04-remediation.txt`; chưa có review độc lập cho commit này, không ký Gate A.

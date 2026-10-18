@@ -1,5 +1,11 @@
 # Tiến độ và điểm tiếp tục
 
+## F-04 — hợp đồng kiểu và thuộc tính cột — 19/10/2026
+
+- Bổ sung COLDEF cho 63 cột của 8 bảng nghiệp vụ/session: kiểu, độ dài, precision, nullable, default, EXTRA. Dùng chung ở startup, backup, restore; không sửa V1–V4. RED 43/9; GREEN 43/0; full check 191 test/26 lớp, không failure/error/skip.
+- Bằng chứng: `docs/verification/f04-remediation.txt`; chưa có review độc lập cho commit mới, Gate A chưa ký.
+- Bước tiếp theo: F-02, xác thực body năm trigger V4 ngay tại startup và trước khi công bố backup, dùng cùng allowlist tin cậy.
+
 ## F-01 — sửa hợp đồng charset/collation — 19/10/2026
 
 - Thêm TEXTDEF cho mọi cột văn bản của 8 bảng nghiệp vụ/session vào hợp đồng dùng chung; startup prod/test, backup, restore đều từ chối thiếu/sai/thừa. Không sửa V1–V4. RED tái hiện startup chấp nhận task.status đổi collation; GREEN 34 test; full check 182/26, 0 failure/error/skip.

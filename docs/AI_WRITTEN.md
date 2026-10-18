@@ -1,5 +1,13 @@
 # Phần AI viết — sửa phát hiện P7
 
+## F-04 — hợp đồng kiểu và thuộc tính cột — 19/10/2026
+
+| Tệp | Mô tả | Trạng thái |
+|---|---|---|
+| scripts/schema-inventory.sql; scripts/schema-required.txt; scripts/schema.lib.sh; SchemaInvariantVerifier.java | COLDEF exact-set cho 63 cột: kiểu, độ dài/precision, nullable, default, EXTRA; kiểm startup, backup, restore | chưa đọc |
+| D28SchemaDefinitionTest.java | Kiểm độc lập 63 cột; mutation độ dài/default tại startup prod/test, backup, restore | chưa đọc |
+| docs/verification/f04-remediation.txt; docs/EVIDENCE.md; docs/PROGRESS.md; docs/DECISIONS.md; docs/AI_WRITTEN.md | Ghi RED/GREEN/full-check, hash log và giới hạn F-04 | chưa đọc |
+
 ## F-01 — hợp đồng charset/collation — 19/10/2026
 
 | Tệp | Mô tả | Trạng thái |

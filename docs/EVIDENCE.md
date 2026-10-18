@@ -1,5 +1,9 @@
 # Bằng chứng kiểm chứng W1
 
+## F-04 — hợp đồng định nghĩa cột (19/10/2026)
+
+- RED 43 test/9 failure xác nhận thay đổi type/length/default được startup, backup và restore nhận; GREEN 43 test PASS, completeness exact-set 63 cột. Full `MIGRATION_BASELINE_REF=0ed33309821c1fdd55cbd551246b89f1cd78d324 bash scripts/check.sh`: 191 test/26 lớp, 0 failure/error/skip, mọi bước OK. Log hashes và giới hạn: [F-04 remediation](verification/f04-remediation.txt). Chưa có review độc lập; Gate A chưa ký.
+
 ## F-01 — hợp đồng charset/collation (19/10/2026)
 
 - RED: D28SchemaDefinitionTest trước sửa cho thấy startup prod/test nhận `task.status` với collation `utf8mb4_general_ci`; completeness không có TEXTDEF. Sau sửa, 34 test PASS, gồm startup, backup, restore, schema chuẩn và kiểm tra đủ 8 bảng. Full `MIGRATION_BASELINE_REF=0ed33309821c1fdd55cbd551246b89f1cd78d324 bash scripts/check.sh`: 182 test/26 lớp, 0 failure/error/skip; mọi bước OK. Chi tiết lệnh, thời gian, log hash và giới hạn: [F-01 remediation](verification/f01-remediation.txt). Chưa có review độc lập cho commit này; Gate A chưa ký.

@@ -4,7 +4,7 @@ schema_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 schema_invariant_label() {
   local row="$1" kind table object rest
   case "$row" in
-    CHECKDEF\|*|GENERATEDDEF\|*|TEXTDEF\|*)
+    CHECKDEF\|*|GENERATEDDEF\|*|TEXTDEF\|*|COLDEF\|*)
       IFS='|' read -r kind table object rest <<< "$row"
       printf '%s.%s [%s]' "$table" "$object" "$row" ;;
     *) printf '%s' "$row" ;;
@@ -25,7 +25,7 @@ verify_schema() {
   # New CHECK/generated/text definitions must be reviewed, not silently admitted.
   while IFS= read -r actual; do
     case "$actual" in
-      CHECKDEF\|*|GENERATEDDEF\|*|TEXTDEF\|*)
+      CHECKDEF\|*|GENERATEDDEF\|*|TEXTDEF\|*|COLDEF\|*)
         if ! grep -Fxq -- "$actual" "$schema_dir/schema-required.txt"; then
           echo "Unexpected schema invariant: $(schema_invariant_label "$actual")" >&2
           missing=true
@@ -33,7 +33,7 @@ verify_schema() {
     esac
   done <<< "$inventory"
   [[ "$missing" == false ]] || return 1
-  echo "SCHEMA_OK triggers=$count (V4 required=5); FK/unique/NOT NULL/InnoDB inventory and exact CHECK/generated/text definitions verified"
+  echo "SCHEMA_OK triggers=$count (V4 required=5); FK/unique/NOT NULL/InnoDB inventory and exact CHECK/generated/text/column definitions verified"
 }
 
 verify_dump_triggers() {

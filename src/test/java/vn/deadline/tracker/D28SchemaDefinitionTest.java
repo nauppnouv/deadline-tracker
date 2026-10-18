@@ -50,6 +50,8 @@ class D28SchemaDefinitionTest extends DatabaseTest {
             case "newCheck" -> "ALTER TABLE task ADD CONSTRAINT ck_d28_unreviewed CHECK(1=1);";
             case "newGenerated" -> "ALTER TABLE task ADD codex_d28_unreviewed INT GENERATED ALWAYS AS (1) VIRTUAL;";
             case "collation" -> "ALTER TABLE task MODIFY status VARCHAR(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;";
+            case "length" -> "ALTER TABLE task MODIFY title VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL;";
+            case "default" -> "ALTER TABLE task ALTER COLUMN version SET DEFAULT 1;";
             default -> throw new IllegalArgumentException(kind);
         };
     }
@@ -59,6 +61,8 @@ class D28SchemaDefinitionTest extends DatabaseTest {
             case "newCheck" -> "ck_d28_unreviewed";
             case "newGenerated" -> "task.codex_d28_unreviewed";
             case "collation" -> "task.status";
+            case "length" -> "task.title";
+            case "default" -> "task.version";
             default -> "group_member.owner_marker";
         };
     }
@@ -72,7 +76,7 @@ class D28SchemaDefinitionTest extends DatabaseTest {
     }
     @ParameterizedTest @CsvSource({
         "test,noop","prod,noop","test,near","prod,near",
-        "test,values","prod,values","test,same","prod,same","test,collation","prod,collation",
+        "test,values","prod,values","test,same","prod,same","test,collation","prod,collation","test,length","prod,length","test,default","prod,default",
         "test,stored","prod,stored","test,type","prod,type",
         "test,newCheck","prod,newCheck","test,newGenerated","prod,newGenerated"})
     @DisplayName("D-28 DATA-02 SEC-11 startup rejects changed or uncontracted definitions in both profiles")
@@ -111,6 +115,14 @@ class D28SchemaDefinitionTest extends DatabaseTest {
         assertFalse(actual.isEmpty());
         assertEquals(actual,expected,"Missing or surplus text charset/collation contracts");
     }
+    @Test @DisplayName("F-04 DATA-02 exact contract covers type, length, precision, nullability, default and extra for all columns")
+    void completeColumnContract() throws Exception {
+        var actual=new TreeSet<>(jdbc.queryForList("SELECT CONCAT('COLDEF|',TABLE_NAME,'|',COLUMN_NAME,'|',COLUMN_TYPE,'|',DATA_TYPE,'|',COALESCE(CAST(CHARACTER_MAXIMUM_LENGTH AS CHAR),'<NULL>'),'|',COALESCE(CAST(NUMERIC_PRECISION AS CHAR),'<NULL>'),'|',COALESCE(CAST(NUMERIC_SCALE AS CHAR),'<NULL>'),'|',COALESCE(CAST(DATETIME_PRECISION AS CHAR),'<NULL>'),'|',IS_NULLABLE,'|',REPLACE(COALESCE(COLUMN_DEFAULT,'<NULL>'),'|','<PIPE>'),'|',EXTRA) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN ('app_user','project_group','group_member','task','invitation','task_event','SPRING_SESSION','SPRING_SESSION_ATTRIBUTES')",String.class));
+        Files.write(Path.of("target/f04-column-contract-derived.txt"),actual,StandardCharsets.UTF_8);
+        var expected=Files.readAllLines(Path.of("scripts/schema-required.txt")).stream().filter(s->s.startsWith("COLDEF|")).collect(Collectors.toCollection(TreeSet::new));
+        assertEquals(63,actual.size());
+        assertEquals(actual,expected,"Missing or surplus column definitions");
+    }
     ExecResult shell(String command) throws Exception {
         return DB.execInContainer("bash","-lc","set -euo pipefail; export DB_HOST=127.0.0.1 DB_USER=root DB_NAME="+source+" DB_PASSWORD=\"${MARIADB_ROOT_PASSWORD:-${MYSQL_ROOT_PASSWORD:-}}\" BACKUP_DIR="+directory+"/backups BACKUP_KEEP=1; "+command);
     }
@@ -138,7 +150,7 @@ class D28SchemaDefinitionTest extends DatabaseTest {
     ExecResult restore(String file,String db) throws Exception {
         return shell("export BACKUP_FILE='"+file+"' RESTORE_DB="+db+"; "+script("verify-restore"));
     }
-    @ParameterizedTest @ValueSource(strings={"noop","near","values","same","collation"})
+    @ParameterizedTest @ValueSource(strings={"noop","near","values","same","collation","length","default"})
     @DisplayName("D-28 DATA-08 UAT-14 restore rejects definition drift before row checksums; source and good backup unchanged")
     void restoreRejects(String kind) throws Exception {
         String file=backup(),beforeArtifacts=artifacts(),beforeRows=snapshot();
@@ -155,7 +167,7 @@ class D28SchemaDefinitionTest extends DatabaseTest {
             assertEquals(0,resultSame.getExitCode(),"+0 fixture must have identical logical data: "+resultSame.getStderr());
         }
     }
-    @ParameterizedTest @ValueSource(strings={"noop","same","newCheck","newGenerated","collation"})
+    @ParameterizedTest @ValueSource(strings={"noop","same","newCheck","newGenerated","collation","length","default"})
     @DisplayName("D-28 DATA-08 backup refuses drift or unknown definitions without publication or retention")
     void backupRejects(String kind) throws Exception {
         backup();String before=artifacts();jdbc.execute(mutation(kind));
