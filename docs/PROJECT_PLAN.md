@@ -330,6 +330,8 @@ Yêu cầu trải nghiệm: dùng tiếng Việt; ngày giờ ghi rõ giờ Vi�
 | NFR-07 | Lỗi có thông báo dễ hiểu và mã tham chiếu; log đủ tìm nguyên nhân nhưng không chứa bí mật. Lỗi hệ thống không hiển thị stack trace cho người dùng. |
 | NFR-08 | Có hướng dẫn cài/chạy, schema/migration, dữ liệu mẫu không nhạy cảm, kiểm tra hồi quy nghiệp vụ/quyền và tài liệu triển khai/khôi phục. Một người khác có thể làm theo để chạy bản mẫu. |
 
+- **SEC-05** Mật khẩu theo BR-24, không strip, chỉ lưu bản băm. Mật khẩu, token và ID phiên không xuất hiện trong log (test quét log). DB không lưu mật khẩu hay token lời mời thô (chỉ hash). Ngoại lệ có chủ đích theo D-25: (a) Spring Session JDBC lưu ID phiên và thuộc tính phiên, gồm CSRF token, trong bảng SPRING_SESSION*; (b) cookie phiên và CSRF token do framework phát cho browser; (c) token lời mời thô chỉ xuất hiện một lần trong phản hồi phân phối cho Owner; (d) mật khẩu tạm chỉ hiện trên console ops, không qua web. Không ngoại lệ nào áp dụng cho log.
+
 Nguyên tắc kiểm tra quyền ở máy chủ, mặc định từ chối và kiểm tra từng yêu cầu tham khảo [OWASP Authorization Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html). Chính sách mật khẩu và xử lý đăng nhập tham khảo [OWASP Authentication Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html). Các con số về tải, dung lượng, thời gian sao lưu/phục hồi ở trên là mục tiêu nội bộ đề xuất, không phải kết quả đã đo.
 
 ## 11. Nghiệm thu bản dùng thử

@@ -182,6 +182,8 @@ Clone sạch commit `83dbb34b5fce2276b0a2553f45d70bbb6eb01f50`: `bash scripts/ch
 
 ### Giới hạn diễn giải SEC-05 (D25)
 
+Ghi chú 19/10/2026: câu chữ cổng đã được làm rõ bởi D-34 theo phê duyệt của chủ dự án; bằng chứng test và dòng trạng thái SEC-05 trong bảng không đổi. Câu chữ mới chưa có review độc lập; không suy thành đạt nghĩa đen hay Gate A đã qua.
+
 Kết quả đạt trong bảng là kiểm chứng password thô/invitation raw token không lưu DB, principal credential bị erase và không log bí mật ở các luồng đã thử. Spring Session JDBC vẫn lưu session ID/CSRF/attributes và trả session cookie cho browser; token lời mời phải xuất trong phản hồi phân phối cho Owner. **Chưa/không tuyên bố đạt nghĩa đen cấm mọi token/session ID trong mọi phản hồi và DB**, vì mâu thuẫn công nghệ/luồng được yêu cầu. Không tự triển khai session thay framework. Reviewer P7 cần xác nhận diễn giải này; không coi đây là gate bị âm thầm bỏ qua.
 
 - Chốt US21: target/p6-backup-story.log check58tests/0failure/error/skip, SCA/gitleaks/migration OK. Restore artifact có UTC bắt đầu và elapsed milliseconds thực đo (không gồm app boot); không suy RTO môi trường thật.

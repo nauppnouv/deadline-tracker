@@ -1,5 +1,12 @@
 # Tiến độ và điểm tiếp tục
 
+## D-34 — làm rõ câu chữ SEC-05, chờ review độc lập — 19/10/2026
+
+- Chủ dự án đã duyệt câu SEC-05 theo D-25. Đã thay định nghĩa ở AGENTS.md §6 và bổ sung cùng câu vào PROJECT_PLAN §10 (trước phiên chưa có SEC-05 tại kế hoạch). Chỉ sửa Markdown; D-25/D-28/D-33 và dòng trạng thái SEC-05 trong EVIDENCE giữ nguyên.
+- EVIDENCE chỉ thêm ghi chú tại mục giới hạn diễn giải D25; mọi tệp phiên này ghi AI_WRITTEN là `chưa đọc`. Bằng chứng test SEC-05 không đổi; câu chữ mới chưa có review độc lập, không tuyên bố đạt câu cấm theo nghĩa đen.
+- Kiểm tra phiên D-34: 15 tệp Markdown / 58 link nội bộ, 0 link gãy; hai định nghĩa khớp đúng câu đã duyệt; DECISIONS chỉ thêm cuối, EVIDENCE chỉ thêm ghi chú; `git diff --check` exit 0, diff chỉ 6 tệp .md. Full `MIGRATION_BASELINE_REF=0ed33309821c1fdd55cbd551246b89f1cd78d324 bash scripts/check.sh` exit 0: **177 test / 26 lớp**, 0 failure/error/skip; build/static/gitleaks/dependency/migration worktree+index đều OK, không bỏ bước. Chạy bằng Git Bash sau khi sandbox chặn lần đầu trước check (`NtCreateDirectoryObject … 0xC0000022`); hoàn tất 19/10/2026 00:30:25 Asia/Saigon, 344,415 giây. Log `target/d34-full.log`, receipt `target/d34-full.receipt`, summary `target/d34-full-summary.json`; SHA-256 log `f5ba95eab302bd3a03324054e8753ea053b0c1723e4b1f0ff1c8aee0fde9b559`.
+- Bước tiếp theo: reviewer độc lập đối chiếu câu chữ D-34 và kiểm lại D-28/D-33 trên commit mới. **Gate A chưa qua**, không mở Phase B; không push/merge/deploy. Khối D-33 dưới đây là lịch sử trước khi câu chữ được duyệt.
+
 ## D-28 đã sửa cục bộ theo D-33, chờ review độc lập — 19/10/2026
 
 - Theo trạng thái chủ dự án cung cấp: review Phase A 18/10 đạt REV-01…08 trong phạm vi thử, nhưng chưa ký Gate A vì D-28; chọn đường sửa, không chấp nhận rủi ro. Không sửa hồ sơ review ngoài repo hay các dòng UAT/SEC/DATA lịch sử.

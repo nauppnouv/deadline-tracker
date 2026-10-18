@@ -78,3 +78,15 @@ Phiên bản khóa và checksum công cụ được bổ sung sau khi tải/reso
 - Giới hạn còn lại ngoài D-33: kiểu/độ dài/default cột thường, index thường `ix_task_group_due` / `ix_event_task`, body trigger ở startup (body chỉ so khi restore). Owner còn phòng thủ chồng bằng trigger V4 và uq_group_member; không coi checksum dữ liệu tình cờ lệch là kiểm biểu thức cột sinh. Giữ hash body năm trigger, probe Owner rollback, reset phiên sau so snapshot, retention và lock. Không thêm probe INSERT CHECK tùy chọn: kiểm định nghĩa dùng chung là lớp chặn của phạm vi này.
 - Chủ dự án đã xác nhận trong phiên: restore lỗi giữ DB thử mới đã import để điều tra; DB nguồn và đích có sẵn không đổi. Không tự drop DB lỗi, không staging/pilot/triển khai. Test riêng kiểm nguồn/bộ backup tốt không đổi và từ chối overwrite đích có sentinel.
 - Chưa có review độc lập cho commit D-33. Bằng chứng RED/GREEN/mutation/full check được ghi riêng; không tự ký Gate A hay sửa dòng UAT/SEC/DATA lịch sử. SEC-05/D-25 chỉ đề xuất ngoại lệ câu chữ cho chủ dự án duyệt, không sửa AGENTS.md/PROJECT_PLAN.md.
+
+## D-34 — làm rõ câu chữ cổng SEC-05 theo D-25 (19/10/2026)
+
+- Vấn đề: review độc lập 18/10/2026 chỉ ra câu cũ có thể cấm cả session ID trong DB/phản hồi, trong khi Spring Session JDBC phải lưu phiên và browser cần cookie. D-25 là diễn giải đã ghi, không phải bằng chứng đạt câu cấm theo nghĩa đen. Chủ dự án đã duyệt câu chữ dưới đây; chỉ sửa tài liệu, không tự viết lại session/mật mã hay thay đổi hành vi ứng dụng.
+- Đối chiếu trước sửa: `AGENTS.md` §6 có định nghĩa SEC-05 cũ; `docs/PROJECT_PLAN.md` chưa có mục SEC-05, chỉ có BR-24/NFR-03 liên quan. Thay câu cũ ở AGENTS và bổ sung cùng câu đã duyệt tại PROJECT_PLAN §10 để đồng bộ nguồn đặc tả. D-09/D-25/D-28/D-33 giữ nguyên làm lịch sử. Chọn chặt hơn khi đọc các giới hạn: mọi ngoại lệ chỉ trong kênh được nêu, không có ngoại lệ cho log; không mở rộng phạm vi phân phối token.
+
+Câu chữ mới được chủ dự án duyệt:
+
+> SEC-05 Mật khẩu theo BR-24, không strip, chỉ lưu bản băm. Mật khẩu, token và ID phiên không xuất hiện trong log (test quét log). DB không lưu mật khẩu hay token lời mời thô (chỉ hash). Ngoại lệ có chủ đích theo D-25: (a) Spring Session JDBC lưu ID phiên và thuộc tính phiên, gồm CSRF token, trong bảng SPRING_SESSION*; (b) cookie phiên và CSRF token do framework phát cho browser; (c) token lời mời thô chỉ xuất hiện một lần trong phản hồi phân phối cho Owner; (d) mật khẩu tạm chỉ hiện trên console ops, không qua web. Không ngoại lệ nào áp dụng cho log.
+
+- Ảnh hưởng/công sức: cập nhật câu chữ, ghi chú giới hạn và hồ sơ tiến độ/AI; chạy lại toàn bộ check theo baseline được giao, không đổi source/test/migration/scripts/dependency/JDK/image. Bằng chứng test SEC-05 và dòng trạng thái lịch sử không đổi; không suy kết quả check thành đạt SEC-05 theo nghĩa đen.
+- **câu chữ này chưa có review độc lập**. Reviewer cần đối chiếu câu chữ mới và bằng chứng trong phiên riêng. Gate A chưa qua; không mở Phase B, không push/merge/deploy. Quyết định này thay trạng thái chờ duyệt câu chữ được ghi ở cuối D-33, không sửa nội dung lịch sử D-33.

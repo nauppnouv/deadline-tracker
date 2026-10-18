@@ -1,5 +1,16 @@
 # Phần AI viết — sửa phát hiện P7
 
+## D-34 — chỉ tài liệu, câu chữ SEC-05 đã được chủ dự án duyệt — 19/10/2026
+
+| Tệp | Mô tả | Trạng thái |
+|---|---|---|
+| AGENTS.md | Thay đúng định nghĩa SEC-05 §6 bằng câu đã duyệt, giữ nguyên cấm ghi log | chưa đọc |
+| docs/PROJECT_PLAN.md | Bổ sung cùng định nghĩa SEC-05 tại §10 vì trước phiên chưa có mục này | chưa đọc |
+| docs/DECISIONS.md | Thêm D-34 cuối file: lý do, chênh lệch trước sửa, câu chữ mới và giới hạn chưa review độc lập; giữ nguyên D-25/D-28/D-33 | chưa đọc |
+| docs/EVIDENCE.md | Chỉ thêm ghi chú ngắn ở giới hạn diễn giải D25; không đổi dòng SEC-05/trạng thái/bằng chứng test | chưa đọc |
+| docs/PROGRESS.md | Khối tiếp tục D-34, kết quả kiểm tra thực và trạng thái Gate A chưa qua | chưa đọc |
+| docs/AI_WRITTEN.md | Ghi phạm vi tài liệu phiên D-34; mọi tệp ở trạng thái chưa đọc | chưa đọc |
+
 ## Sửa D-28 theo D-33 sau review Phase A — 18–19/10/2026
 
 | Tệp | Mô tả | Trạng thái |
