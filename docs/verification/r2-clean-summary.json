@@ -1,0 +1,200 @@
+{
+  "date": "2026-10-18 Asia/Saigon",
+  "testedCommit": "c3364fbf2d8504cf8d3a0c0df5c6a8c7b25ff9a5",
+  "baseline": "0ed33309821c1fdd55cbd551246b89f1cd78d324",
+  "clone": "D:\\Documents\\coding\\deadline-tracker\\.tools\\r2-clean-c3364fb",
+  "counts": {
+    "tests": 138,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "classes": 24,
+  "logSha256": "4b9527a7e5433ce2988f6f8862c6586d8a02a8f3c0af409c7334f91c125acb89",
+  "dependencyAudit": {
+    "engine": "12.1.8",
+    "reportDate": "2026-10-18T01:15:42.356736700Z",
+    "entries": 54,
+    "findings": 0,
+    "dataSources": [
+      {
+        "name": "NVD API Last Checked",
+        "timestamp": "2026-10-18T01:15:29Z"
+      },
+      {
+        "name": "NVD API Last Modified",
+        "timestamp": "2026-10-18T01:10:00Z"
+      }
+    ]
+  },
+  "tests": [
+    {
+      "name": "vn.deadline.tracker.AuthWebTest",
+      "tests": "8",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "vn.deadline.tracker.BackupFailureTest",
+      "tests": "11",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "vn.deadline.tracker.BackupRestoreTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "vn.deadline.tracker.BuildSmokeTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "vn.deadline.tracker.ChunkedRequestTest",
+      "tests": "3",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "vn.deadline.tracker.GroupDomainTest",
+      "tests": "8",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "vn.deadline.tracker.GroupInvitationWebTest",
+      "tests": "2",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "vn.deadline.tracker.GroupVersionWebTest",
+      "tests": "3",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "vn.deadline.tracker.InvitationTest",
+      "tests": "4",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "vn.deadline.tracker.MigrationGuardTest",
+      "tests": "10",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "vn.deadline.tracker.OpsWorkflowTest",
+      "tests": "4",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "vn.deadline.tracker.OwnerIntegrityTest",
+      "tests": "4",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "vn.deadline.tracker.PersistenceTest",
+      "tests": "7",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "vn.deadline.tracker.ProductionPreflightTest",
+      "tests": "22",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "vn.deadline.tracker.ProductionSecurityTest",
+      "tests": "4",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "vn.deadline.tracker.RateLimitTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "vn.deadline.tracker.RepresentativeLoadTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "vn.deadline.tracker.RestartPersistenceTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "vn.deadline.tracker.RestoredSessionTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "vn.deadline.tracker.Round2MatrixTest",
+      "tests": "1",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "vn.deadline.tracker.Round2VariantsTest",
+      "tests": "12",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "vn.deadline.tracker.SchemaStartupTest",
+      "tests": "11",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "vn.deadline.tracker.TaskDomainTest",
+      "tests": "10",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "vn.deadline.tracker.TaskWebTest",
+      "tests": "8",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    }
+  ]
+}

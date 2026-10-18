@@ -1,6 +1,6 @@
 # Trở ngại, giới hạn và việc người làm
 
-Cập nhật 18/10/2026. Các kết quả 58 test phía dưới là mốc P6 cũ. Năm phát hiện P7 đã có RED → GREEN và cổng đầy đủ cuối 79 test PASS; trạng thái bàn giao xem PROGRESS.md và đầu EVIDENCE.md.
+Cập nhật 18/10/2026. Bảy mục review vòng2 đã có RED → GREEN, commit riêng và clone sạch138 test PASS/0 failure/error/skip, mọi cổng OK (verification/r2-final.txt). Không còn bước sửa cục bộ nào bị chặn. Các kết quả58/79 test phía dưới là lịch sử P6/vòng1; giới hạn vận hành thật vẫn còn như PROGRESS/EVIDENCE và danh sách này. Không push/merge hoặc tạo tài nguyên thật.
 
 | Việc | Trạng thái / bằng chứng | Hành động |
 |---|---|---|

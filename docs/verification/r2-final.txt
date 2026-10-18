@@ -1,0 +1,68 @@
+Review vòng 2 — biên bản clone sạch, 18/10/2026 (Asia/Saigon)
+Tested runtime/code commit: c3364fbf2d8504cf8d3a0c0df5c6a8c7b25ff9a5
+Branch: fix/p7-security-data-findings; không push/merge.
+Clone: D:\Documents\coding\deadline-tracker\.tools\r2-clean-c3364fb
+Clone command: git clone --no-hardlinks --branch fix/p7-security-data-findings . .tools/r2-clean-c3364fb
+Command from clone: MIGRATION_BASELINE_REF=0ed3330 bash scripts/check.sh
+JAVA_HOME=D:/Documents/coding/deadline-tracker/.tools/java25/jdk-25.0.4.1+1; PATH prepends JAVA_HOME/bin.
+MAVEN_REPO_LOCAL=D:/Documents/coding/deadline-tracker/.m2-local
+DEPENDENCY_CHECK_DATA=D:/Documents/coding/deadline-tracker/.tools/dependency-check
+Chỉ tái dùng cache tải/công cụ; không copy target/classes, DB, session hay user-home/credential vào clone.
+138 test, 24 lớp, 0 failure/error/skip. MariaDB 11.8.9 disposable và target mới.
+Build/static/gitleaks/dependency/migration đều OK; không bỏ qua cổng nào.
+Raw log: target/r2-clean-check.log (repo nguồn, không theo dõi bởi Git).
+SHA256=4b9527a7e5433ce2988f6f8862c6586d8a02a8f3c0af409c7334f91c125acb89
+Clone git status --porcelain=v1: empty after full check.
+V1–V4 git diff 0ed3330 HEAD -- src/main/resources/db/migration: empty; không có V5 vì không đổi schema.
+Baseline mặc định origin/main còn nguyên; lượt này dùng ref 0ed3330 để bảo vệ đủ V1–V4. Test repo Git tạm đã kiểm mặc định origin/main, sửa đã commit, dirty/staged/delete/rename, thiếu ref, lỗi Git và explicit none.
+OWASP 12.1.8: 54 dependency entries; 0 vulnerability findings; reportDate=2026-10-18T01:15:42.356736700Z
+OSS Index tắt theo pom hiện có (cần credential); không quét image/OS. Trạng thái NVD từng nguồn ghi trong r2-clean-summary.json; cache không đồng nghĩa đã tải mới mọi dữ liệu.
+
+Từng mục, theo đúng thứ tự yêu cầu:
+1. R2-01 aa74117: RED 12 test/11 failure/0 error -> GREEN 19; full check 99. Startup prod/test kiểm trigger + FK/CHECK/unique/NOT NULL/InnoDB; missing trigger/context refused. Backup principal SELECT/SHOW VIEW thiếu TRIGGER exit khác 0, giữ bộ cũ; cấp TRIGGER thì backup thành công. Dump skip triggers bị chặn trước công bố. Restore thiếu trigger/FK/CHECK/unique và trigger no-op bị chặn trước RESTORE_OK; probes Owner transaction rollback. OPS ghi GRANT và yêu cầu quyền definer. Biên bản r2-01.txt.
+   R2-01 bổ sung c3364fb: clock skew retention RED; hai backup đồng thời RED retained=0 -> khóa mkdir GREEN retained=1, lượt sau chạy được; full check 138. Biên bản r2-01-lock.txt. Không sửa nghiệp vụ/migration.
+2. R2-03 9568982: RED 10 test/7 failure -> GREEN 10; full check 109. So baseline, fail closed khi ref/Git lỗi, explicit none in BỎ QUA. Biên bản r2-02.txt.
+3. R2-02 17b4d92: bỏ hidden input nhóm/task-form/status riêng -> đỏ 2/4/3 failure, 0 error. Khôi phục -> GREEN 15; full check 112. Version đọc từ HTML đúng action, validation/conflict/reload; không thay mã ứng dụng. Biên bản r2-03.txt.
+4. Prod fail-closed 8a2d065: RED 21 test/20 failure -> GREEN 37; full check 134. Từng điều kiện mật khẩu/bind/forwarded và trường hợp tốt. Một khối EnvironmentFile có quote regex; test kiểm giá trị regex, chưa chạy systemd thật. Biên bản r2-04.txt.
+5. R2-04 be02058: kỳ vọng 415 -> đỏ 2 test/2 failure vì actual 400; chỉnh kỳ vọng/DEPLOY -> GREEN 2, full check 136. Dữ liệu không đổi; RequestSizeFilter giữ nguyên. Biên bản r2-05.txt.
+6. Recovery credential 763db53: RED 1 test/1 failure vì thiếu thông báo -> GREEN 1; full check 136. Echo bắt buộc reset từng tài khoản trước RESTORE_OK và OPS; không đổi hash/enabled/must_change_password. Biên bản r2-06.txt.
+7. Round2MatrixTest cdd2a47: negative control tháo membership guard -> RED 404 thành 200; khôi phục guard -> GREEN đủ 45 assertion HTTP, UAT-10/SEC-02/03; full check 137. Biên bản r2-07.txt.
+
+Giới hạn chưa kiểm chứng:
+- HTTPS/certificate/Caddy/forwarded headers/IP/firewall/port trên máy triển khai Internet; mới có HTTP localhost và secure request mô phỏng.
+- Lịch/alert backup thật, offsite/mã hóa/quyền nơi nhận, phục hồi sau mất máy và RPO/RTO vận hành; chỉ DB giả trong container.
+- Danh tính, consent, sổ vận hành và reset/anonymize từng tài khoản thật sau phục hồi; script chỉ thông báo, người vận hành phải thực hiện trước mở web.
+- Pilot/người dùng thật; browser/responsive/keyboard/Compose smoke không chạy lại trong vòng sửa này; image/OS scan chưa chạy.
+- Cảnh báo Flyway MariaDB11.8 mới hơn verified11.7 còn nguyên; test đúng pinned11.8.9 không phải chứng nhận vendor.
+- Runtime cần metadata TRIGGER; quyền này cũng cho sửa trigger. Đây là giới hạn đã ghi DEPLOY, không thiết kế thêm principal riêng trong phạm vi này.
+- Crash/SIGKILL có thể để lại khóa backup; OPS yêu cầu kiểm tiến trình và gỡ khóa rỗng thủ công, script không tự phá khóa.
+
+No finding silently dismissed. R2-04 follows the explicitly requested documentation/status expectation correction, with actual HTTP evidence.
+Phần AI viết ghi docs/AI_WRITTEN.md, trạng thái chưa đọc. Không thay phiên bản dependency/JDK.
+Commit lưu biên bản sau lượt này chỉ sửa docs; mã runtime và test đã kiểm ở commit nêu đầu biên bản.
+
+Migration blob IDs (same at baseline/tested HEAD):
+src/main/resources/db/migration/V1__business_schema.sql 7e5a744c5f8d863856528c05712774d9fbd4abf7
+src/main/resources/db/migration/V2__jdbc_sessions.sql f97c34893f93fd2cba62d68d0e89207513b2e19a
+src/main/resources/db/migration/V3__internal_disabled_usernames.sql e231ebcb023c5f4ebfccb720aa8fc761a8935aec
+src/main/resources/db/migration/V4__owner_membership_integrity.sql 77c22cae1d411031f10f09ba204c436ae8e5f724
+
+Selected clean-clone log evidence:
+R2 SEC-03 matrix PASS: 45 HTTP permission assertions across four actors and two groups
+R2 wildcard=application/* status=400 data unchanged
+R2 wildcard=*/* status=400 data unchanged
+R2 no TRIGGER privilege backup exit=1 stderr=WARNING: option --ssl-verify-server-cert is disabled, because of an insecure passwordless login.
+R2 missing triggers restore exit=1 output= stderr=WARNING: option --ssl-verify-server-cert is disabled, because of an insecure passwordless login.
+R2 concurrent retention retained=1 A=0 B=1
+[INFO] Tests run: 138, Failures: 0, Errors: 0, Skipped: 0
+[INFO] Finished at: 2026-10-18T01:14:42Z
+OK build + tests
+OK template / SQL static checks
+8:14AM INF no leaks found
+OK secret scan
+[INFO] Finished at: 2026-10-18T01:15:42Z
+OK dependency audit
+OK immutable committed migrations (baseline=0ed3330)
+
+Additional executed gate in clean clone: bash scripts/check-migrations.sh -> OK immutable committed migrations (baseline=origin/main).
+NVD refresh actually downloaded 5,049/5,049 records (100%), processed 3 batches; API retries recovered. NVD last checked 2026-10-18T01:15:29Z; last modified 2026-10-18T01:10:00Z. KEV update reused its less-than-24-hour cache; OSS Index disabled as documented. Audit completed 18/10/2026 08:15:42 +07. No dependency versions changed.

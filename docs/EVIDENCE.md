@@ -2,7 +2,27 @@
 
 Ngày khởi tạo: 17/10/2026. Chỉ cập nhật khi đã chạy thật. Log local trong target/; kết quả có thể tái hiện bằng lệnh và tên test.
 
-## P7 — sửa năm phát hiện review (18/10/2026)
+## Chốt review vòng 2 — 18/10/2026
+
+Đã thực hiện bảy mục theo thứ tự yêu cầu trên `fix/p7-security-data-findings`, không push/merge. Mỗi mục có RED thật → GREEN → `bash scripts/check.sh`, EVIDENCE/PROGRESS và commit riêng. R2-01 có thêm một commit sửa race retention phát hiện trong lúc kiểm cuối; ca hai backup đồng thời đã đỏ (còn 0 bộ tốt) rồi xanh (còn 1). Không sửa V1–V4, không cần V5, không thay phiên bản JDK/dependency.
+
+Clone sạch commit `c3364fbf2d8504cf8d3a0c0df5c6a8c7b25ff9a5`: `MIGRATION_BASELINE_REF=0ed3330 bash scripts/check.sh` **138 test, 24 lớp, 0 failure/error/skip**, build/static/gitleaks/dependency/migration đều OK, không bỏ qua cổng nào. Chạy riêng baseline mặc định `origin/main` cũng OK. NVD cập nhật thật 5.049 bản ghi; OWASP12.1.8 quét 54 dependency/0 finding; KEV còn cache dưới 24h, OSS Index tắt theo pom. Git status clone sạch sau check; chỉ tái dùng cache tải/công cụ, DB và target mới.
+
+| Mục yêu cầu | Commit | Bằng chứng RED/GREEN và full check tại mục đó |
+|---|---|---|
+| 1. R2-01 schema startup, backup/restore, quyền TRIGGER và GRANT | aa74117; c3364fb bổ sung retention đồng thời | [r2-01](verification/r2-01.txt), [retention](verification/r2-01-lock.txt); full99 rồi138 test |
+| 2. R2-03 migration baseline bất biến | 9568982 | [r2-02](verification/r2-02.txt); full109 test |
+| 3. R2-02 version từ HTML mọi form | 17b4d92 | [r2-03](verification/r2-03.txt); bỏ hidden nhóm/task-form/status đỏ 2/4/3 failure; full112 test |
+| 4. Prod fail-closed và cấu hình triển khai | 8a2d065 | [r2-04](verification/r2-04.txt); 18 cấu hình sai bị chặn trước tạo bean; full134 test |
+| 5. R2-04 wildcard Content-Type 400 | be02058 | [r2-05](verification/r2-05.txt); actual400, dữ liệu không đổi, không đổi mã ứng dụng; full136 test |
+| 6. Reset từng tài khoản sau restore trước mở web | 763db53 | [r2-06](verification/r2-06.txt); thông báo trước RESTORE_OK, không đổi dữ liệu tài khoản; full136 test |
+| 7. Round2MatrixTest thường trực | cdd2a47 | [r2-07](verification/r2-07.txt); giữ45 assertion HTTP, negative control tháo membership guard đỏ; full137 test |
+
+[Biên bản cuối](verification/r2-final.txt) ghi lệnh, mã commit, hash log, blob V1–V4 và giới hạn; [kết quả máy đọc](verification/r2-clean-summary.json) ghi từng lớp test và nguồn dữ liệu audit. Raw log cục bộ: `target/r2-clean-check.log`. Hash SHA256: `4b9527a7e5433ce2988f6f8862c6586d8a02a8f3c0af409c7334f91c125acb89`.
+
+**Chưa kiểm chứng:** HTTPS/Caddy/forwarded IP/firewall trên Internet; lịch/alert/offsite/mã hóa backup và RPO/RTO thật; xác minh/reset tài khoản thật sau restore; pilot; browser/Compose smoke không chạy lại và image/OS chưa quét. Cảnh báo Flyway11.8/verified11.7 còn nguyên. Runtime cần quyền metadata TRIGGER (cũng cho sửa trigger); dump giữ DEFINER cần quyền trên schema phục hồi. OPS ghi cả hai và khóa backup còn lại sau crash/SIGKILL. Không suy từ test xanh thành được phép mở pilot/web. Phần AI viết ghi `docs/AI_WRITTEN.md`, trạng thái `chưa đọc`.
+
+## Lịch sử P7 vòng 1 — sửa năm phát hiện review (18/10/2026)
 
 Các kết quả P0–P6 bên dưới là lịch sử kiểm tra 58 test cũ. Review đã tái hiện lỗ hổng ngoài phạm vi các test đó. Các dòng P7 ghi RED thật và kết quả sau sửa; cổng đầy đủ cuối P7 đã chạy 79 test PASS, chưa thay thế kiểm chứng vận hành thật.
 
@@ -28,10 +48,10 @@ Clone sạch commit `83dbb34b5fce2276b0a2553f45d70bbb6eb01f50`: `bash scripts/ch
 | UAT-08 | đạt | bash scripts/check.sh; P5 | 17/10/2026 | TaskDomainTest boundary Clock and TaskWebTest filter; test data only |
 | UAT-09 | đạt | bash scripts/check.sh; P5 | 17/10/2026 | RestartPersistenceTest + TaskWebTest edits overdue task; test data only |
 | UAT-10 | đạt | bash scripts/check.sh; P5 | 17/10/2026 | TaskWebTest.everyEndpointIsolation: foreign owner and anonymous across GET/POST routes, including malformed params; test data only |
-| UAT-11 | đạt | bash scripts/check.sh; TaskWebTest + GroupVersionWebTest | 18/10/2026 | Cổng P7 79 test PASS: stale task/group trả 409 giữ bản nháp; thiếu/sai group version 400; dữ liệu thử |
+| UAT-11 | đạt | MIGRATION_BASELINE_REF=0ed3330 bash scripts/check.sh; xem verification/r2-final.txt | 18/10/2026 | Clone sạch vòng2 138 test PASS: version từ HTML nhóm/tạo-sửa việc/trạng thái, validation/conflict/reload; hidden input mutation đỏ; dữ liệu thử |
 | UAT-12 | đạt | bash scripts/check.sh; P5 | 17/10/2026 | TaskWebTest.filtersAndPastDue totals independent of filters; zero/50% domain test; test data only |
 | UAT-13 | đạt | bash scripts/check.sh; AuthWebTest.sessionLifecycle + OpsWorkflowTest.reset + ProductionSecurityTest.unknownError | 17/10/2026 | Đổi/reset/logout hủy phiên; force-change; healthy log scan và captured exception message không lộ marker; dữ liệu thử cục bộ |
-| UAT-14 | đạt | bash scripts/check.sh; BackupFailureTest + BackupRestoreTest + RestoredSessionTest | 18/10/2026 | Cổng P7 79 test PASS: metadata lỗi phải fail, không retention; count/checksum/FK và tamper; cookie cũ 302 sau restore; trigger Owner hoạt động; dữ liệu thử |
+| UAT-14 | đạt | MIGRATION_BASELINE_REF=0ed3330 bash scripts/check.sh; xem verification/r2-final.txt | 18/10/2026 | Clone sạch vòng2 138 test PASS: principal thiếu TRIGGER và dump bỏ trigger bị chặn, giữ backup trước; schema inventory/probe Owner rollback sau restore; clock skew/concurrent retention; reset từng tài khoản bắt buộc trước mở web; dữ liệu thử |
 | UAT-15 | đạt | bash scripts/check.sh; P5 | 17/10/2026 | AuthWebTest CSRF missing/invalid; GroupInvitationWebTest join POST; test data only |
 | UAT-16 | đạt | bash scripts/check.sh; P5 | 17/10/2026 | TaskWebTest.xssAndHeaders; test data only |
 | UAT-17 | đạt | bash scripts/check.sh; P5 | 17/10/2026 | AuthWebTest.rateLimit + RateLimitTest IP/username and expiry; test data only |
@@ -49,15 +69,15 @@ Clone sạch commit `83dbb34b5fce2276b0a2553f45d70bbb6eb01f50`: `bash scripts/ch
 | SEC-11 | đạt | bash scripts/check.sh; ProductionSecurityTest.debugClosed/unknownError + OpsWorkflowTest.noWebOps | 17/10/2026 | Không actuator/debug endpoint; 500 có reference, không stacktrace/input message trong response/log; ops không HTTP; dữ liệu thử cục bộ |
 | SEC-12 | đạt | bash scripts/check.sh; scripts/check.sh gitleaks | 17/10/2026 | gitleaks dir scan no leaks; .env/cache/tool/backup excluded; không đưa bí mật thật vào repo; dữ liệu thử cục bộ |
 | SEC-13 | đạt | bash scripts/check.sh; scripts/check.sh OWASP12.1.8 | 17/10/2026 | Tomcat vá11.0.27 sau finding11.0.24; 54 dependency entries, 0 findings trong report mới; không suppress; OSS Index tắt vì cần credentials; dữ liệu thử cục bộ |
-| SEC-14 | đạt | bash scripts/check.sh; ChunkedRequestTest + AuthWebTest | 18/10/2026 | Cổng P7 79 test PASS: HTTP chunked thật, 16383/16384 nhận; 16385/17000 trả 413, kiểu body không hỗ trợ 415; chưa kiểm proxy Internet/DoS |
-| DATA-01 | đạt | bash scripts/check.sh; OwnerIntegrityTest + PersistenceTest | 18/10/2026 | Cổng P7 79 test PASS: V4 mới, V1/V2/V3 bất biến; V3 hợp lệ nâng cấp giữ membership, dữ liệu sai bị từ chối; Hibernate validate |
-| DATA-02 | đạt | bash scripts/check.sh; OwnerIntegrityTest + PersistenceTest + BackupRestoreTest | 18/10/2026 | Cổng P7 79 test PASS: DB tạo đúng Owner nguyên tử, chặn SQL hạ/xóa/dời/đổi Owner; FK/unique/check còn được kiểm; trigger có hiệu lực sau restore |
+| SEC-14 | đạt | MIGRATION_BASELINE_REF=0ed3330 bash scripts/check.sh; xem verification/r2-final.txt | 18/10/2026 | Clone sạch vòng2 138 test PASS: chunked biên 16383/16384/16385/17000; unsupported415, wildcard application/* và */* 400 không ghi; chưa proxy Internet/DoS |
+| DATA-01 | đạt | MIGRATION_BASELINE_REF=0ed3330 bash scripts/check.sh; xem verification/r2-final.txt | 18/10/2026 | Clone sạch vòng2 138 test PASS: V1–V4 không đổi so 0ed3330; Git baseline gate bắt sửa đã commit/M/D/R, thiếu ref/Git lỗi fail, none tường minh in BỎ QUA; Hibernate validate |
+| DATA-02 | đạt | MIGRATION_BASELINE_REF=0ed3330 bash scripts/check.sh; xem verification/r2-final.txt | 18/10/2026 | Clone sạch vòng2 138 test PASS: startup prod/test từ chối thiếu/sai trigger, FK/CHECK/unique; restore inventory và hành vi Owner rollback; SQL Owner/V3 upgrade tiếp tục xanh |
 | DATA-03 | đạt | bash scripts/check.sh / P2 | 17/10/2026 | PersistenceTest.groupRollback/eventAtomicity: forced rollback and event idempotency; chạy lại toàn bộ ở P6 |
-| DATA-04 | đạt | bash scripts/check.sh; PersistenceTest + TaskWebTest + GroupVersionWebTest | 18/10/2026 | Cổng P7 79 test PASS: optimistic writer và hai phiên form nhóm; version lúc mở form, 409 giữ bản nháp, tải lại sửa được |
+| DATA-04 | đạt | MIGRATION_BASELINE_REF=0ed3330 bash scripts/check.sh; xem verification/r2-final.txt | 18/10/2026 | Clone sạch vòng2 138 test PASS: optimistic writer và version từ HTML mọi form, sau validation/conflict/tải lại; tháo hidden input từng form làm test đỏ |
 | DATA-05 | đạt | bash scripts/check.sh / P2 | 17/10/2026 | PersistenceTest.invitationClaimPrimitive: actual InvitationStore, one of two joins; chạy lại toàn bộ ở P6 |
 | DATA-06 | đạt | bash scripts/check.sh / P2 | 17/10/2026 | TaskDomainTest.deadlineBoundaries and MariaDB UTC persistence; chạy lại toàn bộ ở P6 |
 | DATA-07 | đạt | bash scripts/check.sh / P2 | 17/10/2026 | Source scan: no DeleteMapping/RequestMethod.DELETE/business delete calls in current production source; chạy lại toàn bộ ở P6 |
-| DATA-08 | đạt | bash scripts/check.sh; BackupFailureTest + BackupRestoreTest + RestoredSessionTest | 18/10/2026 | Cổng P7 79 test PASS: hai script chạy DB tạm, metadata phải thành công, bộ backup hoàn chỉnh mới retention, checksum logic/FK/tamper, hủy phiên phục hồi; lịch/offsite/RPO/RTO thật chưa kiểm |
+| DATA-08 | đạt | MIGRATION_BASELINE_REF=0ed3330 bash scripts/check.sh; xem verification/r2-final.txt | 18/10/2026 | Clone sạch vòng2 138 test PASS: principal có/thiếu TRIGGER, dump CREATE TRIGGER, inventory/probe Owner và rollback, fail closed trước công bố/RESTORE_OK, giữ bộ tốt với clock skew/concurrency; lịch/offsite/RPO/RTO thật chưa kiểm |
 | DATA-09 | đạt | bash scripts/check.sh; OpsWorkflowTest 4 tests | 17/10/2026 | Nonweb reset/anonymize, cần console/xác nhận, giữ references, invalidation/force-change, disabled assignee chặn; không HTTP; dữ liệu thử cục bộ |
 | DATA-10 | đạt | bash scripts/check.sh / P2 | 17/10/2026 | RestartPersistenceTest: close context, reopen, read same committed overdue task; chạy lại toàn bộ ở P6 |
 

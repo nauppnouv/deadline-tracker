@@ -1,8 +1,16 @@
 # Tiến độ và điểm tiếp tục
 
-Cập nhật 18/10/2026. Đang sửa bảy mục review vòng 2 trên nhánh `fix/p7-security-data-findings`; chưa push/merge. Các mục P7 bên dưới là lịch sử vòng 1; trạng thái vòng 2 ghi cuối tệp.
+Cập nhật 18/10/2026. Đã sửa và kiểm chứng cục bộ bảy mục review vòng 2 trên nhánh `fix/p7-security-data-findings`; không push/merge. Trạng thái hiện tại ở khối dưới; các mục P7 tiếp theo là lịch sử vòng 1.
 
-## P7 — công việc hiện tại
+## Trạng thái hiện tại sau review vòng 2
+
+- Mã runtime/test tại `c3364fb` đã qua clone mới `.tools/r2-clean-c3364fb`: `MIGRATION_BASELINE_REF=0ed3330 bash scripts/check.sh`, 138 test/24 lớp, 0 failure/error/skip, mọi cổng OK. Quét NVD cập nhật thật, 54 dependency/0 finding; không thay phiên bản. Clone git status sạch sau check. Biên bản `docs/verification/r2-final.txt`, JSON `r2-clean-summary.json`, raw log `target/r2-clean-check.log`.
+- Mục1 aa74117, mục2/R2-03 9568982, mục3/R2-02 17b4d92, mục4 8a2d065, mục5 be02058, mục6 763db53, mục7 cdd2a47. Phần kiểm cuối phát hiện race retention mới trong R2-01: RED hai backup xóa chéo còn0 -> c3364fb khóa nguyên tử GREEN còn1; đã chạy full check và clone sạch sau sửa.
+- Không có diff V1–V4 so `0ed3330`; không cần V5. Toàn bộ negative control đã khôi phục mã gốc, không nới quyền hay thay HTTP status. Chỉ có tài liệu/bằng chứng được bổ sung sau commit runtime đã kiểm.
+- Bước tiếp theo: chủ dự án/reviewer xem bảy biên bản và giới hạn; không tự deploy/push/merge. Chưa kiểm HTTPS/proxy/IP/firewall thật, lịch/alert/offsite/RPO/RTO, reset tài khoản thật, image/OS và pilot. Browser/Compose không chạy lại trong vòng này. OPS yêu cầu reset mọi tài khoản còn được phép trước mở web; người vận hành phải thực hiện.
+- Phần AI viết ghi `docs/AI_WRITTEN.md` là `chưa đọc`. Không tự viết nhật ký học của chủ dự án hoặc đánh dấu kỹ năng của họ đã đạt.
+
+## Lịch sử P7 vòng 1
 
 - Chấp nhận cả năm phát hiện review; xử lý ba Chặn pilot trước hai Nên sửa.
 - P7-01 hoàn tất phần sửa: RED thật 8 test/2 failure → GREEN 9 test; full `scripts/check.sh` 66 test PASS, static/gitleaks/dependency/migration OK, không bỏ qua. Logs `target/p7-01-{red,green,check}.log`.

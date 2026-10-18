@@ -28,3 +28,4 @@ Phạm vi do chủ dự án yêu cầu: sửa đúng năm phát hiện review, t
 | scripts/verify-restore.sh; docs/OPS.md; BackupRestoreTest.java | Mục 6: thông báo/reset mọi tài khoản còn được phép, kiểm thông báo trước RESTORE_OK; không thay logic dữ liệu | chưa đọc |
 | Round2MatrixTest.java | Mục 7: đưa test review vào src/test, giữ 45 assertion HTTP, bổ sung mã UAT/SEC và version từ HTML; negative control kiểm guard rồi khôi phục nguyên mã nghiệp vụ | chưa đọc |
 | scripts/backup.sh; Round2VariantsTest.java (concurrentRetention); docs/OPS.md; docs/DEPLOY.md | Bổ sung R2-01: tái hiện xóa chéo retention thật, khóa mkdir nguyên tử và release; hướng dẫn stale lock, quyền runtime metadata nhất quán | chưa đọc |
+| docs/DECISIONS.md, BLOCKERS.md, EVIDENCE.md, PROGRESS.md, verification/r2-final.txt và r2-clean-summary.json | Biên bản clone sạch/giới hạn thực tế/đối chiếu bảy mục và quyết định được giao; không thêm code sau commit đã kiểm | chưa đọc |
