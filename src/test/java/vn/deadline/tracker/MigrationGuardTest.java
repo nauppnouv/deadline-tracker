@@ -57,10 +57,46 @@ class MigrationGuardTest {
         var result=check(null,false);assertNotEquals(0,result.code(),result.text());
         assertTrue(result.text().contains("FAIL"),result.text());
     }
+    @ParameterizedTest @ValueSource(strings={"staged","committed"})
+    @DisplayName("REV-02 DATA-01 changed migration index cannot hide behind baseline working bytes")
+    void indexDiffersFromWorkingTree(String state)throws Exception {
+        Path old=repo.resolve(MIGRATIONS+"V1__base.sql");
+        byte[] baseline=Files.readAllBytes(old);
+        Files.writeString(old,"-- indexed historical modification\n",StandardOpenOption.APPEND);
+        git("add",MIGRATIONS+"V1__base.sql");
+        if(state.equals("committed"))git("commit","-m","indexed historical edit");
+        Files.write(old,baseline);
+        assertEquals(0,command(List.of("git","diff","--quiet","origin/main","--",MIGRATIONS),Map.of()).code(),"Worktree must match pinned baseline");
+        assertEquals(1,command(List.of("git","diff","--cached","--quiet","origin/main","--",MIGRATIONS),Map.of()).code(),"Index must still contain modified V1");
+        var result=check(null,false);
+        assertNotEquals(0,result.code(),"Guard accepted changed "+state+" index with clean baseline working bytes: "+result.text());
+        assertTrue(result.text().contains("index"),result.text());
+        assertTrue(result.text().contains("FAIL"),result.text());
+    }
+
+    @Test @DisplayName("REV-02 DATA-01 Git index diff error fails closed independently of worktree diff")
+    void indexGitFailure()throws Exception {
+        String bash=Files.exists(Path.of("C:/Program Files/Git/bin/bash.exe"))?"C:/Program Files/Git/bin/bash.exe":"bash";
+        String script="""
+            git() {
+              if [[ $1 == diff ]]; then
+                for argument in "$@"; do
+                  if [[ "$argument" == --cached ]]; then echo injected-index-diff-error >&2; return 42; fi
+                done
+              fi
+              command git "$@"
+            }
+            export -f git
+            bash scripts/check.sh
+            """;
+        var result=command(List.of(bash,"-c",script),Map.of("RUN_DEPENDENCY_AUDIT","0","AUDIT_SKIP_REASON","isolated migration guard fixture"));
+        assertNotEquals(0,result.code(),"Index diff failure must reject check: "+result.text());
+        assertTrue(result.text().contains("injected-index-diff-error"),result.text());
+    }
     @Test @DisplayName("DATA-01 R2-03 only new V5 can be added against an existing baseline")
     void newMigration()throws Exception {
         Files.writeString(repo.resolve(MIGRATIONS+"V5__new.sql"),"CREATE TABLE newer(id INT);\n");git("add",".");git("commit","-m","new migration");
-        var result=check("baseline",false);assertEquals(0,result.code(),result.text());
+        var result=check("origin/main",false);assertEquals(0,result.code(),result.text());
     }
     @ParameterizedTest @ValueSource(strings={"missing-ref",""})
     @DisplayName("DATA-01 R2-03 absent or empty baseline ref fails explicitly")

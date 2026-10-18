@@ -1,5 +1,13 @@
 # Bằng chứng kiểm chứng W1
 
+## Sửa REV-02 của review độc lập pha A — 18/10/2026
+
+- RED hợp lệ: `bash scripts/mvn.sh test -Dtest=MigrationGuardTest`:13 test,3 failure,0 error/skip. Hai ca index staged/committed bị working tree baseline che và Git index diff lỗi đều bị checker cũ nhận sai là đạt. Ref fixture dùng origin/main ghim; lượt trước dùng branch di chuyển có một failure precondition nên không dùng làm kết luận cho ca đó.
+- GREEN cùng lệnh:13 test,0 failure/error/skip. Guard so riêng worktree/index với cùng baseline; từng view báo FAIL khi M/D/R/T hoặc Git lỗi. Giữ default origin/main, ref lỗi fail closed, none tường minh in BỎ QUA, thêm migration mới được phép khi so origin/main ghim (không dùng branch fixture đang di chuyển). Audit opt-out chỉ trong fixture Git cô lập; không dùng để gọi full gate đạt.
+- Full `MIGRATION_BASELINE_REF=0ed33309821c1fdd55cbd551246b89f1cd78d324 bash scripts/check.sh`:148 test/25 lớp,0 failure/error/skip; build/static/gitleaks/audit/migration OK, không skip. [Biên bản](verification/rev02-remediation.txt); log/XML/exit/hash: `D:/Documents/coding/security-revalidation-20261018/remediation-runs/fix-20261018T073702Z-5083274d/`.
+- REV-01 được sửa riêng ở `dac7663007d6bbdd86828a6e65515a9cdaba686d`; không sửa V1–V4, không V5, không đổi JDK/dependency. Hai bản sửa **chưa phải review độc lập cổng A đạt**. Clean-clone cuối và prompt review được bàn giao ở packet remediation; chưa triển khai/pilot.
+
+
 ## Sửa REV-01 của review độc lập pha A — 18/10/2026
 
 Review `run-20261018T063619Z-531425e2` vẫn là hồ sơ độc lập chưa qua cổng A. Theo EXECUTE mới, đã sửa REV-01 ở code; REV-02 chưa sửa tại mốc này. Không coi sửa xong là reviewer chấp nhận.

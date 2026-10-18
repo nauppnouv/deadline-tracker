@@ -37,3 +37,11 @@ Phạm vi do chủ dự án yêu cầu: sửa đúng năm phát hiện review, t
 | scripts/schema.lib.sh; scripts/schema-trigger-bodies.sha256; .gitattributes | Allowlist SHA-256 body năm trigger gốc V4, giữ nguyên body, kể cả khoảng trắng trong SQL literal, ghim LF; dùng khi restore, không đổi migration | chưa đọc |
 | scripts/verify-restore.sh; RestoreOwnerGuardsTest.java | Từ chối no-op mọi trigger; probe rollback đổi/xóa Owner, ca tốt và row counts; RED 6/3 -> GREEN 21/full145 | chưa đọc |
 | docs/OPS.md, EVIDENCE.md, PROGRESS.md, verification/rev01-remediation.txt, AI_WRITTEN.md | Phạm vi thay đổi, bằng chứng chạy và giới hạn; chưa phải review cổng A đạt | chưa đọc |
+
+## Sửa REV-02 sau review độc lập pha A — 18/10/2026
+
+| Tệp | Mô tả | Trạng thái |
+|---|---|---|
+| scripts/check-migrations.sh | So baseline với worktree và index độc lập; lỗi từng diff fail closed; không đổi none/default/new migration policy | chưa đọc |
+| src/test/java/vn/deadline/tracker/MigrationGuardTest.java | Index staged/committed khác working tree; lỗi Git riêng index; ref fixture ghim. RED13/3 -> GREEN13, full148 | chưa đọc |
+| docs/EVIDENCE.md, PROGRESS.md, AI_WRITTEN.md, verification/rev02-remediation.txt | Chứng cứ thực và handoff chờ reviewer; không tự mở cổng A/B | chưa đọc |

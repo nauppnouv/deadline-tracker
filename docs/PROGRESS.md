@@ -1,5 +1,12 @@
 # Tiến độ và điểm tiếp tục
 
+## Hai bản sửa pha A chờ kiểm lại độc lập — 18/10/2026
+
+- REV-01 commit `dac7663007d6bbdd86828a6e65515a9cdaba686d`: RED6/3 + literal1/1 -> GREEN21/full145; body V4 nguyên văn khi restore, probe rollback đổi/xóa Owner.
+- REV-02: RED13/3 -> GREEN13/full148; kiểm cả Git index và working tree. EVIDENCE/AI_WRITTEN và verification/rev02-remediation.txt ghi bằng chứng. Bản sửa này lưu commit riêng; full SHA và clean-clone receipt trong handoff packet.
+- Cổng A vẫn chờ phiên reviewer độc lập. Không tự sửa ledger review cũ thành pass. Chưa push/merge/deploy; host/domain/IP/ngân sách/người vận hành/backup ngoài máy/kênh cảnh báo chưa xác nhận, chỉ hỏi sau khi cổng A thực sự qua.
+
+
 ## Điểm tiếp tục sau phát hiện pha A — 18/10/2026
 
 - REV-01: RED 6/3 failure -> GREEN 21 -> full check 145 PASS, 0 error/skip; xem EVIDENCE và verification/rev01-remediation.txt. Kiểm body V4 khi restore và probe rollback đổi/xóa Owner; không sửa migration.
