@@ -1,5 +1,12 @@
 # Tiến độ và điểm tiếp tục
 
+## Điểm tiếp tục sau phát hiện pha A — 18/10/2026
+
+- REV-01: RED 6/3 failure -> GREEN 21 -> full check 145 PASS, 0 error/skip; xem EVIDENCE và verification/rev01-remediation.txt. Kiểm body V4 khi restore và probe rollback đổi/xóa Owner; không sửa migration.
+- REV-02: còn phải sửa index-only migration guard, theo review mới. Cổng A chưa được reviewer mở; không triển khai pha B.
+- Host/domain/IP/ngân sách/người vận hành/backup ngoài máy/kênh cảnh báo chưa xác nhận; chỉ yêu cầu chốt sau khi cổng A thực sự qua. Không push/merge hoặc mở Internet.
+
+
 Cập nhật 18/10/2026. Đã sửa và kiểm chứng cục bộ bảy mục review vòng 2 trên nhánh `fix/p7-security-data-findings`; không push/merge. Trạng thái hiện tại ở khối dưới; các mục P7 tiếp theo là lịch sử vòng 1.
 
 ## Trạng thái hiện tại sau review vòng 2

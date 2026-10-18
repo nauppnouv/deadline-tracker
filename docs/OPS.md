@@ -54,7 +54,7 @@ export BACKUP_FILE=/absolute/path/outside/repository/deadline-....sql.gz
 bash scripts/verify-restore.sh
 ```
 
-Script xác minh SHA trước import, không overwrite DB tồn tại. Import vào DB mới; kiểm kê trigger/FK/CHECK/unique/NOT NULL/InnoDB theo hợp đồng, chạy phép thử tạo nhóm có Owner và hạ Owner bị chặn trong transaction rồi rollback; so từng bảng với manifest count/checksum SHA-256 logic, kiểm tra orphan cho mọi FK. **Sau khi so snapshot**, script xóa mọi phiên Spring Session trong DB phục hồi (attributes xóa theo FK cascade), kiểm tra hai bảng phiên đều rỗng rồi in SESSIONS_CLEARED và RESTORE_OK. Dữ liệu nghiệp vụ giữ nguyên; mọi người phải đăng nhập lại. Tắt cleanup session khi so checksum. Không tự drop DB thử hay DB nguồn.
+Script xác minh SHA trước import, không overwrite DB tồn tại. Import vào DB mới; kiểm kê trigger/FK/CHECK/unique/NOT NULL/InnoDB theo hợp đồng, đối chiếu body đủ năm trigger với allowlist V4 tin cậy, rồi thử tạo Owner, chặn hạ/đổi/xóa Owner và cho sửa metadata hợp lệ trong transaction rollback; so từng bảng với manifest count/checksum SHA-256 logic, kiểm tra orphan cho mọi FK. **Sau khi so snapshot**, script xóa mọi phiên Spring Session trong DB phục hồi (attributes xóa theo FK cascade), kiểm tra hai bảng phiên đều rỗng rồi in SESSIONS_CLEARED và RESTORE_OK. Dữ liệu nghiệp vụ giữ nguyên; mọi người phải đăng nhập lại. Tắt cleanup session khi so checksum. Không tự drop DB thử hay DB nguồn.
 
 **RESTORE_OK chưa cho phép mở DB ra web.** Giữ ứng dụng cách ly, không phục vụ người dùng thật, rồi thực hiện:
 
@@ -78,3 +78,7 @@ Log ứng dụng không bật request/access/body/SQL/parameter DEBUG. Unknown e
 ### Checksum dữ liệu sau review P7
 
 Manifest mới ghi `sha256:` từ dữ liệu logic: tên cột theo ordinal; giá trị HEX có dấu phân biệt NULL; SHA-256 từng hàng được sắp ổn định rồi băm cả bảng. Bao gồm cột sinh và kiểm tra số hàng. Manifest cũ có checksum số vẫn được đối chiếu CHECKSUM TABLE và từ chối khi lệch; không tự bỏ qua mismatch. Lỗi truy vấn metadata/dữ liệu phải làm thất bại; bộ backup dở không được công bố hay chạy retention.
+
+### REV-01 — body trigger khi restore
+
+Mang scripts/schema-trigger-bodies.sha256 cùng các script của đúng commit được review. Allowlist được lấy từ ACTION_STATEMENT gốc V4 (không gồm DEFINER; giữ nguyên ACTION_STATEMENT), không tái tạo từ dump hay schema đích. Đây là đối chiếu định nghĩa chặt, không phải so tương đương ngữ nghĩa SQL. Restore từ chối body khác dù tuple/rows còn nguyên; kiểm inventory ở startup vẫn có giới hạn D-28. Không sửa V1–V4 để làm hash khớp; migration mới sau này cần cập nhật chuẩn tin cậy qua review riêng.

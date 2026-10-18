@@ -27,3 +27,17 @@ verify_dump_triggers() {
     [[ "$line" == *CREATE* ]] || { echo "Dump missing CREATE TRIGGER $name $timing $event ON $table" >&2; return 1; }
   done < "$schema_dir/schema-required.txt"
 }
+
+# Restore checks a trusted V4 body allowlist as well as the tuple inventory.
+# Hash the exact ACTION_STATEMENT: whitespace inside SQL literals is significant.
+verify_trigger_bodies() {
+  local database="$1" actual required
+  actual="$("${sql[@]}" "$database" -e "SELECT CONCAT(TRIGGER_NAME,'|',SHA2(ACTION_STATEMENT,256)) FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA=DATABASE()")"
+  while IFS= read -r required; do
+    [[ -n "$required" && "$required" != \#* ]] || continue
+    if ! grep -Fxq -- "$required" <<< "$actual"; then
+      echo "Restore probe: V4 trigger body mismatch: ${required%%|*}" >&2
+      return 1
+    fi
+  done < "$schema_dir/schema-trigger-bodies.sha256"
+}

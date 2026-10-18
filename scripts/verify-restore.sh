@@ -14,20 +14,23 @@ source "$(dirname "$0")/schema.lib.sh"
 "${sql[@]}" -e "CREATE DATABASE \`$RESTORE_DB\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
 gzip -dc -- "$BACKUP_FILE" | "${sql[@]}" "$RESTORE_DB"
 verify_schema "$RESTORE_DB"
-# Exercise both Owner invariants in one connection/transaction. The temporary
+verify_trigger_bodies "$RESTORE_DB"
+# Exercise Owner invariants in one connection/transaction. The temporary
 # procedure handles only the expected SQLSTATE; any other SQL error fails closed.
 "${sql[@]}" "$RESTORE_DB" <<'SQL'
 DELIMITER //
 CREATE PROCEDURE deadline_verify_owner()
 BEGIN
  DECLARE uid CHAR(36) DEFAULT UUID();
+ DECLARE other_uid CHAR(36) DEFAULT UUID();
  DECLARE gid CHAR(36) DEFAULT UUID();
  DECLARE blocked BOOLEAN DEFAULT FALSE;
  DECLARE owners INT;
  DECLARE EXIT HANDLER FOR SQLEXCEPTION BEGIN ROLLBACK; RESIGNAL; END;
  START TRANSACTION;
  INSERT INTO app_user(id,username,display_name,password_hash,created_at)
- VALUES(uid,CONCAT('probe.',LEFT(REPLACE(uid,'-',''),24)),'Restore probe','unusable',UTC_TIMESTAMP(6));
+ VALUES(uid,CONCAT('probe.',LEFT(REPLACE(uid,'-',''),24)),'Restore probe','unusable',UTC_TIMESTAMP(6)),
+ (other_uid,CONCAT('probe.',LEFT(REPLACE(other_uid,'-',''),24)),'Restore probe','unusable',UTC_TIMESTAMP(6));
  INSERT INTO project_group(id,name,description,owner_id,created_at)
  VALUES(gid,'Restore probe','',uid,UTC_TIMESTAMP(6));
  SELECT COUNT(*) INTO owners FROM group_member WHERE group_id=gid AND user_id=uid AND role='OWNER';
@@ -37,13 +40,27 @@ BEGIN
   UPDATE group_member SET role='MEMBER' WHERE group_id=gid AND user_id=uid;
  END;
  IF NOT blocked THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Restore probe: Owner demotion was allowed'; END IF;
+ -- Ordinary metadata edits must still work; the whole probe is rolled back.
+ UPDATE project_group SET name='Restore probe renamed' WHERE id=gid;
+ SET blocked=FALSE;
+ BEGIN
+  DECLARE CONTINUE HANDLER FOR SQLSTATE '45000' SET blocked=TRUE;
+  UPDATE project_group SET owner_id=other_uid WHERE id=gid;
+ END;
+ IF NOT blocked THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Restore probe: Owner replacement was allowed'; END IF;
+ SET blocked=FALSE;
+ BEGIN
+  DECLARE CONTINUE HANDLER FOR SQLSTATE '45000' SET blocked=TRUE;
+  DELETE FROM group_member WHERE group_id=gid AND user_id=uid;
+ END;
+ IF NOT blocked THEN SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT='Restore probe: Owner deletion was allowed'; END IF;
  ROLLBACK;
 END//
 DELIMITER ;
 CALL deadline_verify_owner();
 DROP PROCEDURE deadline_verify_owner;
 SQL
-echo 'OWNER_BEHAVIOR_OK (create Owner; demotion blocked; transaction rolled back)'
+echo 'OWNER_BEHAVIOR_OK (create Owner; demotion/replacement/deletion blocked; metadata editable; transaction rolled back)'
 actual_tables="$("${sql[@]}" "$RESTORE_DB" -e 'SHOW TABLES' | sort)"
 expected_tables="$(cut -f 1 "$BACKUP_FILE.tables.tsv" | sort)"
 [[ -n "$actual_tables" && "$actual_tables" == "$expected_tables" ]] || { echo 'Table inventory mismatch' >&2; exit 1; }

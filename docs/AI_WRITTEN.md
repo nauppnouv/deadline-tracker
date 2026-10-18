@@ -29,3 +29,11 @@ Phạm vi do chủ dự án yêu cầu: sửa đúng năm phát hiện review, t
 | Round2MatrixTest.java | Mục 7: đưa test review vào src/test, giữ 45 assertion HTTP, bổ sung mã UAT/SEC và version từ HTML; negative control kiểm guard rồi khôi phục nguyên mã nghiệp vụ | chưa đọc |
 | scripts/backup.sh; Round2VariantsTest.java (concurrentRetention); docs/OPS.md; docs/DEPLOY.md | Bổ sung R2-01: tái hiện xóa chéo retention thật, khóa mkdir nguyên tử và release; hướng dẫn stale lock, quyền runtime metadata nhất quán | chưa đọc |
 | docs/DECISIONS.md, BLOCKERS.md, EVIDENCE.md, PROGRESS.md, verification/r2-final.txt và r2-clean-summary.json | Biên bản clone sạch/giới hạn thực tế/đối chiếu bảy mục và quyết định được giao; không thêm code sau commit đã kiểm | chưa đọc |
+
+## Sửa REV-01 sau review độc lập pha A — 18/10/2026
+
+| Tệp | Mô tả | Trạng thái |
+|---|---|---|
+| scripts/schema.lib.sh; scripts/schema-trigger-bodies.sha256; .gitattributes | Allowlist SHA-256 body năm trigger gốc V4, giữ nguyên body, kể cả khoảng trắng trong SQL literal, ghim LF; dùng khi restore, không đổi migration | chưa đọc |
+| scripts/verify-restore.sh; RestoreOwnerGuardsTest.java | Từ chối no-op mọi trigger; probe rollback đổi/xóa Owner, ca tốt và row counts; RED 6/3 -> GREEN 21/full145 | chưa đọc |
+| docs/OPS.md, EVIDENCE.md, PROGRESS.md, verification/rev01-remediation.txt, AI_WRITTEN.md | Phạm vi thay đổi, bằng chứng chạy và giới hạn; chưa phải review cổng A đạt | chưa đọc |

@@ -1,5 +1,16 @@
 # Bằng chứng kiểm chứng W1
 
+## Sửa REV-01 của review độc lập pha A — 18/10/2026
+
+Review `run-20261018T063619Z-531425e2` vẫn là hồ sơ độc lập chưa qua cổng A. Theo EXECUTE mới, đã sửa REV-01 ở code; REV-02 chưa sửa tại mốc này. Không coi sửa xong là reviewer chấp nhận.
+
+- RED: `bash scripts/mvn.sh test -Dtest=RestoreOwnerGuardsTest`: 6 test, 3 failure, 0 error/skip; restore nhận no-op stable/insert/delete trong khi tuple/rows vẫn hợp lệ.
+- Sau sửa: `bash scripts/mvn.sh test -Dtest=RestoreOwnerGuardsTest,Round2VariantsTest,BackupRestoreTest,RestoredSessionTest`: 21 test PASS, 0 failure/error/skip. Cả năm no-op trigger bị từ chối; normal restore giữ count/Owner, probe rollback, metadata sửa được; đổi/xóa Owner SQLSTATE45000.
+- Full: `MIGRATION_BASELINE_REF=0ed33309821c1fdd55cbd551246b89f1cd78d324 bash scripts/check.sh`: 145 test/25 lớp, 0 failure/error/skip; build/static/gitleaks/audit/migration OK, không opt-out.
+- Test bổ sung `RestoreOwnerGuardsTest#literalWhitespaceIsNotFormatting` RED 1/1 failure vì bỏ whitespace làm thay chuỗi SQL bị coi là formatting; đã dùng SHA body nguyên văn, không chuẩn hóa chuỗi. Một lượt sau sửa chưa xanh do allowlist CRLF bị so sai; đã ghim LF rồi chạy lại. Không tính lượt đó là GREEN. Logs/XML/exit/hash ngoài nguồn: `D:/Documents/coding/security-revalidation-20261018/remediation-runs/fix-20261018T073702Z-5083274d/`; [biên bản](verification/rev01-remediation.txt).
+- V1–V4, dependency/JDK không đổi; không cần V5. Cổng A chờ sửa REV-02 và phiên reviewer độc lập; chưa triển khai/pilot. D-25, inventory startup D-28, Flyway MariaDB11.8/verified11.7 và giới hạn SCA còn nguyên.
+
+
 Ngày khởi tạo: 17/10/2026. Chỉ cập nhật khi đã chạy thật. Log local trong target/; kết quả có thể tái hiện bằng lệnh và tên test.
 
 ## Chốt review vòng 2 — 18/10/2026
