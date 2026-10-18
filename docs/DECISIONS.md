@@ -90,3 +90,9 @@ Câu chữ mới được chủ dự án duyệt:
 
 - Ảnh hưởng/công sức: cập nhật câu chữ, ghi chú giới hạn và hồ sơ tiến độ/AI; chạy lại toàn bộ check theo baseline được giao, không đổi source/test/migration/scripts/dependency/JDK/image. Bằng chứng test SEC-05 và dòng trạng thái lịch sử không đổi; không suy kết quả check thành đạt SEC-05 theo nghĩa đen.
 - **câu chữ này chưa có review độc lập**. Reviewer cần đối chiếu câu chữ mới và bằng chứng trong phiên riêng. Gate A chưa qua; không mở Phase B, không push/merge/deploy. Quyết định này thay trạng thái chờ duyệt câu chữ được ghi ở cuối D-33, không sửa nội dung lịch sử D-33.
+
+## D-35 — hợp đồng charset/collation F-01 (19/10/2026)
+
+- Chọn từ chối schema có charset/collation khác chuẩn thay vì chỉ kiểm dữ liệu hiện có. Thêm TEXTDEF cho mọi cột văn bản trong 8 bảng nghiệp vụ/session và dùng chung lúc startup prod/test, trước backup, sau restore. Chuẩn lấy từ schema V1–V4 mới migrate trên MariaDB image đã pin; migration cũ giữ nguyên.
+- Kiểm tra exact-set chặn khác biệt collation dù dữ liệu hiện tại và checksum chưa đổi, đồng thời chặn cột văn bản chưa có hợp đồng. Metadata khác chuẩn server có thể fail closed; khi đổi phiên bản phải dẫn xuất chuẩn mới từ schema tin cậy rồi review.
+- Bằng chứng cục bộ ở `docs/verification/f01-remediation.txt`. Chưa có review độc lập; không ký Gate A.

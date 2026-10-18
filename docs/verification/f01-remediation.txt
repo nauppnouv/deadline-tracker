@@ -1,0 +1,7 @@
+# F-01 — charset/collation schema contract (19/10/2026)
+
+- Phạm vi: bổ sung `TEXTDEF` vào inventory dùng chung, cho cả 8 bảng nghiệp vụ/session; chuẩn được dẫn xuất từ migration V1–V4 trên MariaDB image đã pin. Startup prod/test, backup và restore đều dùng cùng hợp đồng. Không sửa V1–V4.
+- RED: `mvn -q -Dtest=D28SchemaDefinitionTest test` trước khi thêm consumer `TEXTDEF` vào hợp đồng. Hai profile prod/test chấp nhận `task.status` chuyển sang `utf8mb4_general_ci`; kiểm tra completeness báo thiếu toàn bộ dòng TEXTDEF. Hành vi lỗi tái hiện đúng F-01.
+- GREEN mục tiêu: `mvn -q -Dtest=D28SchemaDefinitionTest test`, 34 test, 0 failure/error/skip. Bao gồm startup prod/test, backup và restore từ chối collation sai; kiểm tra completeness đối chiếu độc lập metadata của 8 bảng; schema chuẩn và restore chuẩn vẫn qua. Log: `target/f01-green-targeted.log`, SHA-256 `D25890B9900B5953751D780F81718DD428944E8269A7C6046689EB5BE82AFB60`.
+- Full: `MIGRATION_BASELINE_REF=0ed33309821c1fdd55cbd551246b89f1cd78d324 bash scripts/check.sh`, exit 0; 182 test/26 lớp, 0 failure/error/skip; build, static, secret, dependency, migration baseline đều OK. Chạy với Java 25.0.4.1 và MariaDB 11.8.9 image đã pin. Log: `target/f01-final-full.log`, SHA-256 `D5BDDEE583D27B97EAAE3738987756E4849DEFFC24CE336FF1C8C16C8CE95196`.
+- Giới hạn: đây là kiểm định schema trên MariaDB image đã pin; hash metadata MariaDB khác phiên bản có thể fail closed. Không phải review độc lập mới hay Gate A.

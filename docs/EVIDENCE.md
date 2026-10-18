@@ -1,5 +1,9 @@
 # Bằng chứng kiểm chứng W1
 
+## F-01 — hợp đồng charset/collation (19/10/2026)
+
+- RED: D28SchemaDefinitionTest trước sửa cho thấy startup prod/test nhận `task.status` với collation `utf8mb4_general_ci`; completeness không có TEXTDEF. Sau sửa, 34 test PASS, gồm startup, backup, restore, schema chuẩn và kiểm tra đủ 8 bảng. Full `MIGRATION_BASELINE_REF=0ed33309821c1fdd55cbd551246b89f1cd78d324 bash scripts/check.sh`: 182 test/26 lớp, 0 failure/error/skip; mọi bước OK. Chi tiết lệnh, thời gian, log hash và giới hạn: [F-01 remediation](verification/f01-remediation.txt). Chưa có review độc lập cho commit này; Gate A chưa ký.
+
 ## Sửa D-28 bằng D-33 sau review độc lập Phase A — 18–19/10/2026
 
 - Trạng thái review do chủ dự án cung cấp: REV-01…08 đạt trong phạm vi review 18/10, nhưng Gate A chưa được ký vì D-28; chủ dự án chọn sửa. Các kết quả dưới đây là kiểm chứng cục bộ cho bản sửa mới, **chưa có review độc lập cho commit mới**, không mở Gate A.

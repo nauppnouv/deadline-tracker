@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 
-/** Shared metadata contract: required objects and exact CHECK/generated definitions. */
+/** Shared metadata contract: required objects and exact CHECK/generated/text definitions. */
 @Component
 @Profile({"prod","test"})
 @DependsOnDatabaseInitialization
@@ -27,7 +27,7 @@ public class SchemaInvariantVerifier implements InitializingBean {
             .map(SchemaInvariantVerifier::label).sorted().toList();
         if(!unexpected.isEmpty())throw new IllegalStateException("Unexpected schema invariants: "+String.join(", ",unexpected));
     }
-    private static boolean definition(String row) { return row.startsWith("CHECKDEF|")||row.startsWith("GENERATEDDEF|"); }
+    private static boolean definition(String row) { return row.startsWith("CHECKDEF|")||row.startsWith("GENERATEDDEF|")||row.startsWith("TEXTDEF|"); }
     private static String label(String row) {
         if(!definition(row))return row;
         String[] parts=row.split("\\|",4);

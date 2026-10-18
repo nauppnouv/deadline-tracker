@@ -1,5 +1,13 @@
 # Phần AI viết — sửa phát hiện P7
 
+## F-01 — hợp đồng charset/collation — 19/10/2026
+
+| Tệp | Mô tả | Trạng thái |
+|---|---|---|
+| scripts/schema-inventory.sql; scripts/schema-required.txt; scripts/schema.lib.sh; SchemaInvariantVerifier.java | TEXTDEF exact-set charset/collation cho 8 bảng nghiệp vụ/session tại startup prod/test, backup và restore; không sửa migration | chưa đọc |
+| D28SchemaDefinitionTest.java | Đối chiếu completeness độc lập; mutation collation sai ở startup prod/test, backup, restore | chưa đọc |
+| docs/verification/f01-remediation.txt; docs/EVIDENCE.md; docs/PROGRESS.md; docs/DECISIONS.md; docs/AI_WRITTEN.md | Ghi RED/GREEN/full-check, hash log, giới hạn và quyết định F-01 | chưa đọc |
+
 ## D-34 — chỉ tài liệu, câu chữ SEC-05 đã được chủ dự án duyệt — 19/10/2026
 
 | Tệp | Mô tả | Trạng thái |

@@ -1,5 +1,11 @@
 # Tiến độ và điểm tiếp tục
 
+## F-01 — sửa hợp đồng charset/collation — 19/10/2026
+
+- Thêm TEXTDEF cho mọi cột văn bản của 8 bảng nghiệp vụ/session vào hợp đồng dùng chung; startup prod/test, backup, restore đều từ chối thiếu/sai/thừa. Không sửa V1–V4. RED tái hiện startup chấp nhận task.status đổi collation; GREEN 34 test; full check 182/26, 0 failure/error/skip.
+- Bằng chứng và hash log: `docs/verification/f01-remediation.txt`. Chưa có review độc lập cho commit mới; Gate A chưa ký.
+- Bước kế tiếp: F-04, mở rộng cùng hợp đồng cho kiểu, độ dài/precision, NULL/default và EXTRA của các cột trong 8 bảng.
+
 ## D-34 — làm rõ câu chữ SEC-05, chờ review độc lập — 19/10/2026
 
 - Chủ dự án đã duyệt câu SEC-05 theo D-25. Đã thay định nghĩa ở AGENTS.md §6 và bổ sung cùng câu vào PROJECT_PLAN §10 (trước phiên chưa có SEC-05 tại kế hoạch). Chỉ sửa Markdown; D-25/D-28/D-33 và dòng trạng thái SEC-05 trong EVIDENCE giữ nguyên.

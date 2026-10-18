@@ -49,6 +49,7 @@ class D28SchemaDefinitionTest extends DatabaseTest {
             case "type" -> "ALTER TABLE group_member MODIFY owner_marker BIGINT GENERATED ALWAYS AS ("+generated()+") VIRTUAL;";
             case "newCheck" -> "ALTER TABLE task ADD CONSTRAINT ck_d28_unreviewed CHECK(1=1);";
             case "newGenerated" -> "ALTER TABLE task ADD codex_d28_unreviewed INT GENERATED ALWAYS AS (1) VIRTUAL;";
+            case "collation" -> "ALTER TABLE task MODIFY status VARCHAR(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;";
             default -> throw new IllegalArgumentException(kind);
         };
     }
@@ -57,6 +58,7 @@ class D28SchemaDefinitionTest extends DatabaseTest {
             case "noop","near" -> "ck_task_status";
             case "newCheck" -> "ck_d28_unreviewed";
             case "newGenerated" -> "task.codex_d28_unreviewed";
+            case "collation" -> "task.status";
             default -> "group_member.owner_marker";
         };
     }
@@ -70,7 +72,7 @@ class D28SchemaDefinitionTest extends DatabaseTest {
     }
     @ParameterizedTest @CsvSource({
         "test,noop","prod,noop","test,near","prod,near",
-        "test,values","prod,values","test,same","prod,same",
+        "test,values","prod,values","test,same","prod,same","test,collation","prod,collation",
         "test,stored","prod,stored","test,type","prod,type",
         "test,newCheck","prod,newCheck","test,newGenerated","prod,newGenerated"})
     @DisplayName("D-28 DATA-02 SEC-11 startup rejects changed or uncontracted definitions in both profiles")
@@ -101,6 +103,14 @@ class D28SchemaDefinitionTest extends DatabaseTest {
         assertEquals(10,actual.stream().filter(s->s.startsWith("CHECKDEF|")).count());
         assertEquals(1,actual.stream().filter(s->s.startsWith("GENERATEDDEF|")).count());
     }
+    @Test @DisplayName("D-33 DATA-02 exact contract covers charset and collation of every text column")
+    void completeTextContract() throws Exception {
+        var actual=new TreeSet<>(jdbc.queryForList("SELECT CONCAT('TEXTDEF|',TABLE_NAME,'|',COLUMN_NAME,'|',CHARACTER_SET_NAME,'|',COLLATION_NAME) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN ('app_user','project_group','group_member','task','invitation','task_event','SPRING_SESSION','SPRING_SESSION_ATTRIBUTES') AND CHARACTER_SET_NAME IS NOT NULL",String.class));
+        Files.write(Path.of("target/d28-text-contract-derived.txt"),actual,StandardCharsets.UTF_8);
+        var expected=Files.readAllLines(Path.of("scripts/schema-required.txt")).stream().filter(s->s.startsWith("TEXTDEF|")).collect(Collectors.toCollection(TreeSet::new));
+        assertFalse(actual.isEmpty());
+        assertEquals(actual,expected,"Missing or surplus text charset/collation contracts");
+    }
     ExecResult shell(String command) throws Exception {
         return DB.execInContainer("bash","-lc","set -euo pipefail; export DB_HOST=127.0.0.1 DB_USER=root DB_NAME="+source+" DB_PASSWORD=\"${MARIADB_ROOT_PASSWORD:-${MYSQL_ROOT_PASSWORD:-}}\" BACKUP_DIR="+directory+"/backups BACKUP_KEEP=1; "+command);
     }
@@ -128,7 +138,7 @@ class D28SchemaDefinitionTest extends DatabaseTest {
     ExecResult restore(String file,String db) throws Exception {
         return shell("export BACKUP_FILE='"+file+"' RESTORE_DB="+db+"; "+script("verify-restore"));
     }
-    @ParameterizedTest @ValueSource(strings={"noop","near","values","same"})
+    @ParameterizedTest @ValueSource(strings={"noop","near","values","same","collation"})
     @DisplayName("D-28 DATA-08 UAT-14 restore rejects definition drift before row checksums; source and good backup unchanged")
     void restoreRejects(String kind) throws Exception {
         String file=backup(),beforeArtifacts=artifacts(),beforeRows=snapshot();
@@ -145,7 +155,7 @@ class D28SchemaDefinitionTest extends DatabaseTest {
             assertEquals(0,resultSame.getExitCode(),"+0 fixture must have identical logical data: "+resultSame.getStderr());
         }
     }
-    @ParameterizedTest @ValueSource(strings={"noop","same","newCheck","newGenerated"})
+    @ParameterizedTest @ValueSource(strings={"noop","same","newCheck","newGenerated","collation"})
     @DisplayName("D-28 DATA-08 backup refuses drift or unknown definitions without publication or retention")
     void backupRejects(String kind) throws Exception {
         backup();String before=artifacts();jdbc.execute(mutation(kind));
