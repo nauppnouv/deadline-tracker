@@ -109,3 +109,8 @@ Câu chữ mới được chủ dự án duyệt:
 - Bỏ file hash riêng để tránh hai allowlist có thể lệch. Backup vẫn kiểm lệnh CREATE TRIGGER trong dump theo các trigger của hợp đồng chung. Restore no-op bị từ chối trước probe/checksum/session cleanup.
 - Chuẩn lấy độc lập từ schema mới migrate V1–V4 trên MariaDB image đã pin. Không sửa migration/dependency/image/JDK. Full 195 test/26 lớp và các lệnh mục tiêu, hash trong `docs/verification/f02-remediation.txt`.
 - Metadata MariaDB khác phiên bản có thể fail closed; không nới hash. Chưa có review độc lập, không ký Gate A và không coi đây là phê duyệt deploy.
+## D-38 — làm rõ phạm vi xuất hiện raw invite theo luồng chia sẻ đã duyệt (19/10/2026)
+
+- Chủ dự án duyệt giữ luồng chia sẻ hiện tại. D-34(c) được làm chính xác hơn: token thô có thể xuất hiện ở phản hồi Owner khi phát hành và phản hồi xem trước/form lặp lại cho người giữ liên kết hợp lệ. Đây là phản hồi bắt buộc để hiển thị/thực hiện liên kết hiện có, không mở thêm kênh chia sẻ.
+- Tách rõ token xuất hiện lại khỏi quy tắc dùng một lần: tham gia thành công vẫn tối đa một lần theo BR-16; hết hạn/thu hồi và POST giữ nguyên. DB chỉ lưu hash; không cho ngoại lệ log, no-referrer giữ nguyên.
+- Cập nhật câu SEC-05 đồng bộ ở AGENTS.md §6 và PROJECT_PLAN §10, thêm regression GET preview lặp. Không đổi mã ứng dụng/schema. `GroupInvitationWebTest` 2/0; biên bản ở `docs/verification/f03-remediation.txt`. Chưa có review độc lập; không kết luận SEC-05 đạt, Gate A chưa qua.

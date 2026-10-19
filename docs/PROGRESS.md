@@ -1,3 +1,8 @@
+## F-03 — câu chữ SEC-05 khớp luồng chia sẻ đã duyệt — 19/10/2026
+
+- Giữ phát hành/xem lời mời như hiện tại. SEC-05 ở AGENTS.md và PROJECT_PLAN.md nói rõ token thô có thể lặp lại trong phản hồi preview/form cho người đang giữ link; chỉ hành động tham gia thành công bị giới hạn một lần theo BR-16. Thêm GET preview lặp vào GroupInvitationWebTest.
+- `mvn -q -Dtest=GroupInvitationWebTest test`: 2/0. Biên bản và hash: `docs/verification/f03-remediation.txt`. Chưa có review độc lập; không tuyên bố SEC-05 đạt, Gate A chưa ký.
+- Bước tiếp theo: F-06, sửa mô tả quyền TRIGGER và chứng minh trên fixture MariaDB tạm.
 # Tiến độ và điểm tiếp tục
 
 ## F-02 — exact body trigger V4 — 19/10/2026

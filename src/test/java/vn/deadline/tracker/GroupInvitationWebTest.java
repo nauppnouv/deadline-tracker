@@ -29,6 +29,7 @@ class GroupInvitationWebTest extends DatabaseTest {
             String path=issued.getResponse().getRedirectedUrl();assertTrue(path.startsWith("/invitations/"));assertTrue(issued.getFlashMap().isEmpty());
             Cookie member=login(name,path);
             mvc.perform(get(path).cookie(member)).andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("Project A")));
+            mvc.perform(get(path).cookie(member)).andExpect(status().isOk()).andExpect(header().string("Referrer-Policy","no-referrer"));
             mvc.perform(post(path).cookie(member).with(csrf())).andExpect(redirectedUrl("/groups/"+group));
             mvc.perform(post("/groups/"+group+"/invitations").cookie(member).with(csrf())).andExpect(status().isForbidden());
         }

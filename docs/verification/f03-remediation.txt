@@ -1,0 +1,7 @@
+F-03 wording remediation, 19/10/2026; giữ nguyên luồng chia sẻ và xử lý token.
+
+Lệnh: `mvn -q -Dtest=GroupInvitationWebTest test` — exit 0, 2 tests, 0 failure/error/skip. Log `target/f03-green-targeted.log`, SHA-256 `0AF23A7035623A6FE8ED9CF89FA5C3A4E3E63CEFD048A9A3694FD9968E7F4782`.
+
+Đã duyệt sửa câu SEC-05 ở `AGENTS.md` và `docs/PROJECT_PLAN.md`: token thô có thể xuất hiện trong phản hồi Owner lúc phát hành và phản hồi xem trước/form lặp lại cho người giữ liên kết hợp lệ; tham gia thành công vẫn một lần theo BR-16. Bổ sung một GET xem trước lặp lại vào luồng web test hiện có. Không đổi controller/service/DB, không mở thêm kênh chia sẻ. DB chỉ lưu hash; log không được phép có bí mật; no-referrer giữ nguyên.
+
+Full check sau cả năm mục được ghi riêng ở lần kiểm cuối. Câu chữ mới và thay đổi này chưa có review độc lập; không tuyên bố SEC-05 đạt theo nghĩa đen, Gate A chưa ký.

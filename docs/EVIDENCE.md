@@ -1,3 +1,6 @@
+## F-03 — làm rõ câu chữ SEC-05 về phản hồi chia sẻ (19/10/2026)
+
+- Chủ dự án đồng ý giữ luồng chia sẻ. Hai tài liệu đặc tả nói rõ raw token có thể lặp trong phản hồi xem trước/form cho holder của link hợp lệ; join thành công vẫn one-time theo BR-16. `mvn -q -Dtest=GroupInvitationWebTest test`: 2 test, 0 failure/error/skip. Hash và giới hạn: [F-03 remediation](verification/f03-remediation.txt). Không đổi bằng chứng trạng thái SEC-05 lịch sử; chưa có review độc lập, Gate A chưa ký.
 ## F-02 — exact body trigger V4 (19/10/2026)
 
 - RED D28: 47 test/4 failure, tái hiện startup và backup nhận trigger no-op; GREEN D28 + RestoreOwnerGuards: 54/0; Round2Variants: 12/0. Full `MIGRATION_BASELINE_REF=0ed33309821c1fdd55cbd551246b89f1cd78d324 bash scripts/check.sh`: 195 test/26 lớp, 0 failure/error/skip; mọi cổng OK. Lệnh/hash và giới hạn: [F-02 remediation](verification/f02-remediation.txt). Chưa có review độc lập; Gate A chưa ký.
