@@ -1,3 +1,8 @@
+## F-06 — mô tả đúng quyền MariaDB TRIGGER — 19/10/2026
+
+- OPS không còn gọi grant TRIGGER là "không DDL"; ghi rõ quyền này cho phép CREATE/DROP/SHOW CREATE TRIGGER, nhưng không có DML hoặc DDL tổng quát.
+- `TriggerPrivilegeTest` dùng schema/user tạm: tạo/xóa trigger được, tạo bảng bị từ chối. Targeted 1/0; bằng chứng `docs/verification/f06-remediation.txt`.
+- Full check cuối trên working tree gồm đủ năm mục; sau kiểm tra chỉ cập nhật receipt Markdown, không đổi mã/test: 196 test/27 lớp, 0 failure/error/skip; build/static/secret/dependency/migration checks đều OK. Log hash: `97B67F8C2AE154C86260F2F1C99CC778762C5E8C01FF2B0A2E9033F9ABD76401`, receipt `docs/verification/f06-remediation.txt`. Gate A vẫn cần review độc lập; chưa triển khai/pilot.
 ## F-03 — câu chữ SEC-05 khớp luồng chia sẻ đã duyệt — 19/10/2026
 
 - Giữ phát hành/xem lời mời như hiện tại. SEC-05 ở AGENTS.md và PROJECT_PLAN.md nói rõ token thô có thể lặp lại trong phản hồi preview/form cho người đang giữ link; chỉ hành động tham gia thành công bị giới hạn một lần theo BR-16. Thêm GET preview lặp vào GroupInvitationWebTest.

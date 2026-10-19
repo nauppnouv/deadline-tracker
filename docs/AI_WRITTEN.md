@@ -96,3 +96,10 @@ Phạm vi do chủ dự án yêu cầu: sửa đúng năm phát hiện review, t
 | AGENTS.md; docs/PROJECT_PLAN.md | Đồng bộ câu SEC-05 về raw token có thể xuất hiện lại trong preview/form của holder link; one-time áp dụng cho join thành công | chưa đọc |
 | GroupInvitationWebTest.java | Kiểm tra GET preview lặp lại vẫn hoạt động trước POST join trong luồng hiện có | chưa đọc |
 | docs/verification/f03-remediation.txt; docs/EVIDENCE.md; docs/PROGRESS.md; docs/DECISIONS.md; docs/AI_WRITTEN.md | Ghi kiểm thử và quyết định D-38; không tuyên bố cổng bảo mật đạt | chưa đọc |
+## F-06 — phạm vi quyền TRIGGER MariaDB — 19/10/2026
+
+| Tệp | Mô tả | Trạng thái |
+|---|---|---|
+| docs/OPS.md | Sửa mô tả: TRIGGER cho phép CREATE/DROP/SHOW CREATE TRIGGER; không cấp DML hoặc DDL tổng quát | chưa đọc |
+| TriggerPrivilegeTest.java | User/schema tạm trên MariaDB Testcontainers; trigger DDL được phép, CREATE TABLE bị từ chối, fixture được dọn | chưa đọc |
+| docs/verification/f06-remediation.txt; docs/EVIDENCE.md; docs/PROGRESS.md; docs/DECISIONS.md; docs/AI_WRITTEN.md | Lệnh, hash, kết quả và nguồn MariaDB chính thức | chưa đọc |

@@ -1,0 +1,8 @@
+F-06 remediation, 19/10/2026; correct scope of MariaDB TRIGGER privilege.
+
+Lệnh: `mvn -q -Dtest=TriggerPrivilegeTest test` — exit 0, 1 test, 0 failure/error/skip. Log `target/f06-green-targeted.log`, SHA-256 `553295E3DB451DC0E0E0B80F721BC307BA1BB100ACA5DB9E3DEA1E716998716E`.
+
+OPS.md bỏ phát biểu rằng principal `SELECT, SHOW VIEW, TRIGGER` không có DDL. Ghi đúng phạm vi: TRIGGER cho phép CREATE/DROP/SHOW CREATE TRIGGER đối với bảng được cấp; không cấp DML hay DDL tổng quát. Regression test tạo schema/user tạm trong MariaDB Testcontainers, cấp riêng TRIGGER, xác nhận CREATE và DROP TRIGGER thành công, CREATE TABLE bị từ chối; finally dọn fixture trong container. Không đổi grant cho tài khoản hay DB ngoài fixture.
+
+Căn cứ chính thức: MariaDB GRANT documentation (TRIGGER privilege commands), CREATE TRIGGER, DROP TRIGGER. Full check cuối sau năm mục sẽ ghi ở đây. Chưa có review độc lập; không suy test thành đạt Gate A/deploy.
+Full check cuối trên working tree chứa đủ 5 mục: `MIGRATION_BASELINE_REF=0ed33309821c1fdd55cbd551246b89f1cd78d324 bash scripts/check.sh` — exit 0, 196 tests/27 classes, 0 failure/error/skip; build, static, secret scan, dependency audit và migration worktree/index đều OK. Log `target/remediation-final-full.log`, SHA-256 `97B67F8C2AE154C86260F2F1C99CC778762C5E8C01FF2B0A2E9033F9ABD76401`.

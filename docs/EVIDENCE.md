@@ -1,3 +1,6 @@
+## F-06 — phạm vi quyền MariaDB TRIGGER (19/10/2026)
+
+- Sửa OPS: quyền `TRIGGER` cho phép CREATE/DROP/SHOW CREATE TRIGGER, không phải "không DDL"; vẫn không cấp DML hay DDL tổng quát. Test scratch với user/schema tạm: CREATE/DROP TRIGGER thành công, CREATE TABLE bị từ chối. `mvn -q -Dtest=TriggerPrivilegeTest test`: 1/0. Full cuối trên working tree gồm đủ 5 mục: `MIGRATION_BASELINE_REF=0ed33309821c1fdd55cbd551246b89f1cd78d324 bash scripts/check.sh`, 196 test/27 lớp, 0 failure/error/skip; mọi cổng OK. [Bằng chứng/hash và giới hạn](verification/f06-remediation.txt). Chưa có review độc lập; Gate A chưa ký.
 ## F-03 — làm rõ câu chữ SEC-05 về phản hồi chia sẻ (19/10/2026)
 
 - Chủ dự án đồng ý giữ luồng chia sẻ. Hai tài liệu đặc tả nói rõ raw token có thể lặp trong phản hồi xem trước/form cho holder của link hợp lệ; join thành công vẫn one-time theo BR-16. `mvn -q -Dtest=GroupInvitationWebTest test`: 2 test, 0 failure/error/skip. Hash và giới hạn: [F-03 remediation](verification/f03-remediation.txt). Không đổi bằng chứng trạng thái SEC-05 lịch sử; chưa có review độc lập, Gate A chưa ký.
