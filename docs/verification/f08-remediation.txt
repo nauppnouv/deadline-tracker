@@ -1,0 +1,58 @@
+F-08 remediation — DATA-08 / UAT-14 — 19/10/2026
+
+Authorization: user continued the proposed F-08 remediation and requested one agent. No sub-agent spawned/used for this remediation. Work sequence: behavioral FAIL before product edits → fix → PASS → full check → evidence → separate commit. No V1–V4 edits, dependency/JDK/image/grant change, risk acceptance or Gate A signature.
+Initial clean HEAD: e628fbd9683944515ab81a1598228e2dd2fa33dc, branch fix/p7-security-data-findings.
+Trusted migration baseline: 0ed33309821c1fdd55cbd551246b89f1cd78d324.
+Independent finding being fixed: D:/Documents/coding/security-revalidation-20261018/independent-runs/f07-20261019T154042Z/REVIEW.md, F-08. That review/ledger/resources are preserved unchanged. Its F-07 preservation finding passed the tested scope; F-08 interruption/current cleanup remained open.
+New evidence run: D:/Documents/coding/security-revalidation-20261018/remediation-runs/f08-20261019T160057Z
+
+Change
+------
+EXIT cleanup no longer infers that a generation is unpublished from verified_unpublished alone. It checks the on-disk current pointer: a missing pointer, or a regular readable correctly-shaped pointer to another existing non-symlink generation, permits deletion of the uncommitted generation. A reference to the generation itself, read failure, unexpected type/symlink/malformed value or uncertain target causes conservative retention. Pending scratch cleanup and owned lock cleanup remain; no recursive deletion. Normal previous-generation retirement still follows successful pointer publication. Signal/error exit status is preserved, no false RESTORE_OK/VERIFIED_BACKUP_FILE.
+
+After an interrupted commit the new current may be valid while the previous generation remains unreferenced. Ambiguous publication may also leave an extra generation. OPS describes disk monitoring and evidence-based manual disposition; no automatic global GC, fsync/power-loss or malicious-host guarantee was added. A failed invocation does not imply that rename never committed. No manual pointer rewrite is needed in the regression's retry path.
+
+RED before product fix
+----------------------
+Command: bash scripts/mvn.sh -q '-Dtest=BackupVerifiedRetentionTest#interruptedPointerPublicationKeepsCurrent' test
+UTC 2026-10-19T16:01:46.328990+00:00 → 16:02:47.178431+00:00; real exit1.
+XML: 4 tests / 3 assertion failures / 0 errors / 0 skipped.
+before: mv wrapper signals TERM before pointer rename; original cleanup keeps old current and actual retry works (control PASS).
+after: real /usr/bin/mv current completes, then TERM143; current points at a generation deleted by EXIT cleanup (FAIL).
+after-error: real rename completes, wrapper exits42; same dangling current assertion (FAIL).
+after-unreadable: real rename completes then TERM; injected cat read error during EXIT cleanup, same dangling current assertion (FAIL).
+The three failures say: F-08 current must reference an intact generation after interruption: Invalid verified backup generation, expected0 actual1. Compilation/DB startup succeed. Probe bytes and tracked diff saved BEFORE execution; product library unchanged until after RED completed.
+Log SHA256: 437be86403b334fd1a5ae4e11624ce7e6c3745328a3e5a5cac25998f217eba89
+Before diff SHA256: e3feae50e82c447bb1a5a78cc5b497e27c1dd321980b40d99a50d36f20074ac9
+Receipt/log/XML: red/ in the evidence run.
+
+GREEN and F-07 regression
+------------------------
+Command: bash scripts/mvn.sh -q -Dtest=BackupVerifiedRetentionTest test
+UTC 2026-10-19T16:03:16.496528+00:00 → 16:05:46.325254+00:00; real exit0.
+XML: 14 tests / 0 failures / 0 errors / 0 skipped (four new F-08 cases + ten F-07 cases).
+Log SHA256: 76a091440f4dfd5b19254c954fedeebf3116948524ae3580999068faba28b16c
+Before diff SHA256: a3d0528656b6edb48da6da47c2bdf40e949b17897ca9a0712a54b2a10e23aaeb
+Each F-08 case checks real exit143/42, no success marker, unchanged old trio, resolvable current, exact candidate trio digests when rename committed, no owned pending/temp-pointer/lock leftover, subsequent backup and full restore of the current protected input with Owner proof. Before-rename control also checks unpublished generation removal. No pointer/receipt/hash is rewritten to make retry pass. after-unreadable is a transient read failure in cleanup only; real unresolved storage corruption still fails closed.
+Receipt/log/XML: green-targeted/. The runner also archives unrelated old XML left in target; targeted counts include only BackupVerifiedRetentionTest. Full runs independently recount all logged classes.
+
+Full checks and commit pin
+--------------------------
+Source command: RUN_DEPENDENCY_AUDIT=1 MIGRATION_BASELINE_REF=0ed33309821c1fdd55cbd551246b89f1cd78d324 bash scripts/check.sh
+UTC 2026-10-19T16:06:01.591485+00:00 → 16:13:05.638554+00:00; real exit0.
+XML: 210 tests / 28 classes / 0 failures / 0 errors / 0 skipped. Every XML class is matched to a class logged in this execution. Build/tests, template/SQL checks, gitleaks (no leaks), enabled dependency audit and immutable migration worktree/index checks all OK. No opt-out or skip substituted for audit.
+Log SHA256: afd06fe7fde4a3193c01ecbc670295ec0cd53ad760d1526a0c8870c5f20e1278
+Before diff SHA256: 08591fa67ea8dd3a4679cc96f3ed73240abee8842462a1a1a23833ea1aff1f3a
+Dependency-Check12.1.8, 54 dependency entries, 0 vulnerability entries. Report date2026-10-19T16:13:04.122127500Z; NVD API Last Checked2026-10-19T12:21:17Z, Last Modified2026-10-19T12:20:00Z. Existing cache used, OSS Index disabled in unchanged pom; no OS/image scan. Not a no-vulnerability certification.
+
+V1–V4 raw SHA256 (worktree=index=trusted baseline):
+V1__business_schema.sql e24dfcde276edf3ba4464d5d976e4dcb0c7f19b1d06e15d46d1a07e731331e64
+V2__jdbc_sessions.sql 0d99d2e6cb1e439dd96428166d9fc7c64680773820936b0ac7d20d09309834bb
+V3__internal_disabled_usernames.sql 8c0fbef420eefac0d4461911044f3edf2c49cc52bf7718c0f5525f4553483722
+V4__owner_membership_integrity.sql 4f2b8d9629f3e8979ef75c6b5651f1aecd811a827016b1f419e834b0b2382cf2
+
+Authoritative source full-check and post-commit fresh clone results reside in full-check/receipt.json and clean-clone-check/receipt.json in this evidence run; absence/nonzero is not a pass. The clone runner records exact commit, initial absence of target/env/tools/cache, actual command/UTC/exit, log SHA and XML plus unchanged tracked bytes/source state. Only existing JDK25.0.4.1+1/Maven3.9.15 and Maven/NVD caches are reused; source and clone full runs are sequential with fresh Testcontainers DBs. ledger.json and ARTIFACTS-SHA256.json retain per-run outcomes and hash evidence. A post-commit receipt is outside the repo to avoid a circular commit hash; the committed verification receipt links that exact evidence location. Audit timestamps for the clone must be read from its actual report rather than copied from the source run above.
+
+Limits
+------
+This is single-agent implementation verification by the remediation author, not a new independent signature. Revalidate the resulting commit before proposing Gate A; no F-05/TRIGGER/canonicalization/Flyway residual acceptance is supplied. Existing warning MariaDB11.8 newer than Flyway verified11.7 is not vendor-support certification. Audit scope/data timestamps are recorded with full-check reports; no OS/image scan or absolute no-vulnerability claim. No deployment/public HTTPS/proxy/firewall validation, offsite schedule/encryption/alert/RPO/RTO, real-account reset/reconciliation or pilot. Protected inputs still contain raw snapshot credential/session state and OPS reset/reconciliation remains mandatory. Old review resources and historical artifacts are not mutated; new tests use disposable resources. Source AI-authored files are marked chưa đọc in docs/AI_WRITTEN.md.

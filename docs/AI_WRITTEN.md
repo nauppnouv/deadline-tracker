@@ -112,3 +112,12 @@ Phạm vi do chủ dự án yêu cầu: sửa đúng năm phát hiện review, t
 | src/test/java/vn/deadline/tracker/BackupVerifiedRetentionTest.java | RED no-op/CHECK dump thực, giữ ba file và phục hồi lại protected; lỗi copy/current, đồng thời, bootstrap, receipt/bytes/pointer sai | chưa đọc |
 | docs/OPS.md; docs/DECISIONS.md | Vận hành, D-40, ranh giới quyền/trust/durability; không chấp nhận rủi ro hoặc ký Gate A | chưa đọc |
 | docs/verification/f07-remediation.txt; docs/EVIDENCE.md; docs/PROGRESS.md; docs/AI_WRITTEN.md | Biên bản RED/GREEN/full, đường dẫn log/XML/ledger và giới hạn review | chưa đọc |
+
+## F-08 — interruption sau đổi current — 19/10/2026
+
+| Tệp | Mô tả | Trạng thái |
+|---|---|---|
+| scripts/verified-backup.lib.sh | Cleanup kiểm current trên đĩa; giữ generation đã công bố hoặc chưa xác định an toàn; không che exit lỗi/ngắt | chưa đọc |
+| src/test/java/vn/deadline/tracker/BackupVerifiedRetentionTest.java | Bốn ca trước/sau rename, post-rename error, lỗi đọc current; kiểm all3/current/lock, backup và actual restore retry không can thiệp pointer | chưa đọc |
+| docs/OPS.md; docs/DECISIONS.md | Hành vi interruption, generation dư, D-41 và giới hạn vận hành | chưa đọc |
+| docs/verification/f08-remediation.txt; docs/EVIDENCE.md; docs/PROGRESS.md; docs/AI_WRITTEN.md | Bằng chứng RED/GREEN/full/clone, hash/ledger và giới hạn review của tác giả; một agent thực hiện | chưa đọc |

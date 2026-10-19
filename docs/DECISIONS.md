@@ -125,3 +125,9 @@ Câu chữ mới được chủ dự án duyệt:
 - Theo EXECUTE của chủ dự án và phương án thứ hai trong REVIEW.md: giữ một bộ đã qua full restore tách khỏi N ứng viên. Backup vẫn tạo ứng viên; không tuyên bố kiểm artifact đầy đủ ngay lúc dump, không cấp thêm quyền restore DDL cho principal backup.
 - Verify-restore giữ khóa chung, kiểm schema/Owner/data/FK/session rồi copy đúng input ba file và receipt. Công bố generation/current trước khi bỏ bộ protected cũ. Chưa có receipt thì hoãn mọi candidate retention; lỗi protected bytes/receipt fail closed. OPS ghi bootstrap, dung lượng, recovery và ranh giới trust.
 - Không sửa V1–V4, không thay JDK/dependency/image. RED thực với no-op trigger và CHECK(1=1), GREEN và full check được ghi trong `docs/verification/f07-remediation.txt`. Đây là lựa chọn triển khai trong phạm vi sửa lỗi được giao, không là acceptance F-05/TRIGGER/Flyway/canonicalization hay ký Gate A; cần review độc lập bản sửa.
+
+## D-41 — cleanup dựa trên current đã công bố để sửa F-08 (19/10/2026)
+
+- Chủ dự án yêu cầu tiếp tục sửa với một agent. Review e628fbd phát hiện TERM sau rename current làm EXIT xóa generation đã công bố, khiến con trỏ treo. Giữ review cũ làm lịch sử; không sửa verdict hoặc hồ sơ đó.
+- Không suy trạng thái filesystem từ biến verified_unpublished: cleanup chỉ bỏ generation khi current vắng hoặc con trỏ hợp lệ trỏ rõ tới generation khác. Current tham chiếu chính generation đó, sai kiểu/symlink/không đọc được/không xác định an toàn thì giữ lại để kiểm tra. Giữ nguyên real exit lỗi/ngắt và không báo thành công giả; không chặn signal để che lỗi.
+- Regression trước/sau rename, rename thành công rồi trả lỗi và current read failure; đối chiếu bộ cũ, current mới, cleanup/lock và actual automatic backup/restore retry. OPS công khai generation dư sau ngắt và giới hạn fsync/trust/dung lượng. Không sửa V1–V4, grant, dependency/JDK/image; không tự chấp nhận residual hoặc ký Gate A. Biên bản `docs/verification/f08-remediation.txt`.

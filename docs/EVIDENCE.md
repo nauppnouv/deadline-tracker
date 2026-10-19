@@ -1,3 +1,10 @@
+## F-08 — DATA-08/UAT-14, cleanup sau công bố current (19/10/2026)
+
+- RED `bash scripts/mvn.sh -q '-Dtest=BackupVerifiedRetentionTest#interruptedPointerPublicationKeepsCurrent' test` trên e628fbd trước sửa sản phẩm: exit1, 4 tests/3 failures/0 errors/skips. Ngắt trước rename qua; sau rename, post-rename error và current-read failure đều fail đúng assertion con trỏ trỏ generation đã mất. Diff/hash/probe lưu trước execution.
+- GREEN `bash scripts/mvn.sh -q -Dtest=BackupVerifiedRetentionTest test`: exit0, 14 tests/0 failures/errors/skips. Bốn ca F-08 giữ current resolvable, all3 cũ và actual backup/restore retry không sửa pointer; 10 hồi quy F-07 cùng chạy. Exit143/42 vẫn được truyền ra, không success giả.
+- Full source `RUN_DEPENDENCY_AUDIT=1 MIGRATION_BASELINE_REF=0ed33309821c1fdd55cbd551246b89f1cd78d324 bash scripts/check.sh`: exit0, 210 tests/28 lớp, 0 failures/errors/skips; build/static/gitleaks/dependency/migration đều OK. Log SHA256 `afd06fe7fde4a3193c01ecbc670295ec0cd53ad760d1526a0c8870c5f20e1278`. V1–V4 raw bytes khớp baseline cả worktree/index. Exact-commit clone receipt ngoài repo cùng run là nguồn kết quả clone, không dùng số liệu pin cũ.
+- [Biên bản/UTC/exit/hash/XML/ledger và full checks](verification/f08-remediation.txt). Một agent thực hiện remediation; không đổi bằng chứng tác giả thành review độc lập, risk acceptance hay Gate A qua.
+
 ## F-07 — DATA-08/UAT-14, bảo toàn bộ đã full restore (19/10/2026)
 
 - Đã chạy RED trước sửa trên HEAD `6748797c6e1e2d5991ed53a397d9768b2d373bd7`: no-op trigger và CHECK(1=1) trong dump hợp lệ gây mất cả ba file bộ tốt khi KEEP=1; 2 failures, 0 errors/skips. Replay `red-provenance` lưu diff/byte/hash test chưa tracked trước chạy.

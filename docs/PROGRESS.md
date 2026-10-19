@@ -1,3 +1,10 @@
+## F-08 — giữ generation đã công bố khi ngắt sau rename — 19/10/2026
+
+- Chủ dự án yêu cầu tiếp tục với một agent. Review tại `D:/Documents/coding/security-revalidation-20261018/independent-runs/f07-20261019T154042Z/REVIEW.md` đã xác nhận F-07 gốc giữ all3, nhưng F-08 TERM sau rename current gây cleanup xóa generation đang tham chiếu. Giữ hồ sơ/verdict lịch sử nguyên vẹn.
+- Cleanup nay đối chiếu current trên đĩa trước khi xóa generation tưởng là chưa công bố; current đã tham chiếu hoặc không xác định an toàn thì giữ. Không che exit lỗi/ngắt. OPS/D-41 ghi generation dư, dung lượng và giới hạn; không sửa V1–V4/grant/dependency/JDK/image.
+- RED trước sửa: 4 ca/3 assertion failures/0 errors/skips; GREEN cả BackupVerifiedRetentionTest: 14/0/0/0, gồm actual automatic backup/restore retry sau lỗi/ngắt, không can thiệp pointer thủ công. Biên bản `docs/verification/f08-remediation.txt`, ledger/log/XML ngoài repo.
+- Full source check exit0: 210 tests/28 lớp/0 failures/errors/skips; build/static/gitleaks/dependency/migration OK, V1–V4 raw bytes baseline=worktree=index. Receipt clone mới đúng commit sửa nằm ngoài repo cùng run, gồm pin/UTC/exit/XML/hash/source+clone integrity, chỉ coi đạt theo actual receipt. Đây là kiểm chứng của tác giả sửa, một agent; không có review độc lập mới, không acceptance residual hoặc ký Gate A, không deploy/pilot.
+
 ## F-07 — giữ bộ đã full restore khi dump ứng viên sai nghĩa — 19/10/2026
 
 - Review độc lập tại `D:/Documents/coding/security-revalidation-20261018/independent-runs/run-20261019T100429Z-6fb14510/REVIEW.md` phát hiện backup exit0 có thể prune bộ tốt trước khi dump sai bị restore chặn. Gate A của review đó chưa đủ điều kiện đề nghị qua; không sửa lịch sử verdict.

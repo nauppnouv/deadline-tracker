@@ -53,12 +53,27 @@ prepare_verified_backup() {
   trap cleanup_verified_backup EXIT
 }
 
+can_remove_unpublished_backup() {
+  local current
+  # A signal or failing mv wrapper may run EXIT after the rename committed.
+  # Use the pointer on disk, not the shell flag alone, to rule out publication.
+  if [[ ! -e "$verified_store/current" && ! -L "$verified_store/current" ]]; then return 0; fi
+  [[ -f "$verified_store/current" && ! -L "$verified_store/current" ]] || return 1
+  current="$(cat -- "$verified_store/current")" || return 1
+  [[ "$current" =~ ^verified-[a-zA-Z0-9]{6}$ && -d "$verified_store/$current" && ! -L "$verified_store/$current" ]] || return 1
+  [[ "$current" != "${1##*/}" ]]
+}
+
 cleanup_verified_backup() {
   local code=$? directory
   trap - EXIT
   # These are only exact paths allocated by this invocation; never recurse.
   for directory in "${verified_pending:-}" "${verified_unpublished:-}"; do
     [[ -n "$directory" ]] || continue
+    if [[ "$directory" == "${verified_unpublished:-}" ]] && ! can_remove_unpublished_backup "$directory"; then
+      echo 'Retaining backup generation: publication cannot be ruled out' >&2
+      continue
+    fi
     rm -f -- "$directory/backup.sql.gz" "$directory/backup.sql.gz.sha256" "$directory/backup.sql.gz.tables.tsv" "$directory/verification.txt" || code=1
     rmdir -- "$directory" || code=1
   done

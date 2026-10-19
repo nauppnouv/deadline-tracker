@@ -45,6 +45,45 @@ class BackupVerifiedRetentionTest extends DatabaseTest {
     }
     String pointer()throws Exception {var r=shell("cat '"+directory+"/backups/.deadline-verified/current'");assertEquals(0,r.getExitCode(),r.getStderr());return r.getStdout();}
 
+    @ParameterizedTest @ValueSource(strings={"before","after","after-error","after-unreadable"})
+    @DisplayName("F-08 DATA-08 UAT-14 interrupted pointer publication preserves a resolvable full restore and automatic retry")
+    void interruptedPointerPublicationKeepsCurrent(String phase)throws Exception {
+        String pinned=verify(backup()),oldHashes=hashes(pinned),oldPointer=pointer(),candidate=backup();
+        var candidateDigests=hashes(candidate).lines().map(line->line.substring(0,64)).toList();
+        String marker=directory+"/pointer-renamed";
+        String signal="kill -TERM \"$PPID\"; sleep 0.15; exit 0";
+        String publication=phase.equals("before")?signal:
+            "/usr/bin/mv \"$@\"; touch '"+marker+"'; "+(phase.equals("after-error")?"exit 42":signal);
+        wrapper("mv","for arg in \"$@\"; do if [[ \"$arg\" == */current ]]; then "+publication+"; fi; done\nexec /usr/bin/mv \"$@\"");
+        if(phase.equals("after-unreadable")) {
+            // An I/O-like read failure during EXIT cleanup must retain the
+            // generation whose publication cannot be ruled out.
+            wrapper("cat","for arg in \"$@\"; do if [[ \"$arg\" == */current && -f '"+marker+"' ]]; then exit 44; fi; done\nexec /usr/bin/cat \"$@\"");
+        }
+        var interrupted=restore(candidate,"export PATH="+directory+"/bin:$PATH;");
+        assertEquals(phase.equals("after-error")?42:143,interrupted.getExitCode(),interrupted.getStderr());
+        assertFalse(interrupted.getStdout().contains("RESTORE_OK"));
+        assertFalse(interrupted.getStdout().contains("VERIFIED_BACKUP_FILE="));
+        assertEquals(oldHashes,hashes(pinned),"Previous full-restore input must remain intact");
+        String store=directory+"/backups/.deadline-verified";
+        var resolved=shell("source '"+directory+"/project/scripts/verified-backup.lib.sh'; current_verified_backup '"+store+"'");
+        assertEquals(0,resolved.getExitCode(),"F-08 current must reference an intact generation after interruption: "+resolved.getStderr());
+        String current=resolved.getStdout().strip();
+        if(phase.equals("before")) {
+            assertEquals(oldPointer,pointer());assertEquals(pinned,current);
+            assertEquals("1",shell("find '"+store+"' -maxdepth 1 -type d -name 'verified-*' | wc -l").getStdout().strip());
+        } else {
+            assertNotEquals(oldPointer,pointer());
+            assertEquals(candidateDigests,hashes(current).lines().map(line->line.substring(0,64)).toList());
+        }
+        assertEquals(0,shell("test ! -e '"+directory+"/backups/.deadline-backup.lock'; test -z \"$(find '"+store+"' -maxdepth 1 \\( -name '.pending-*' -o -name '.current-*' \\))\"").getExitCode());
+        String currentHashes=hashes(current);backup();
+        assertEquals(currentHashes,hashes(current));assertEquals(oldHashes,hashes(pinned));
+        var retry=restore(current);assertEquals(0,retry.getExitCode(),retry.getStderr());
+        assertTrue(retry.getStdout().contains("OWNER_BEHAVIOR_OK"));assertTrue(retry.getStdout().contains("RESTORE_OK"));
+        System.out.println("F08 phase="+phase+" interrupted_exit="+interrupted.getExitCode()+" current_valid=true old_all3_preserved=true automatic_backup_and_restore_retry=true");
+    }
+
     @ParameterizedTest @ValueSource(strings={"noop","check"})
     @DisplayName("F-07 DATA-08 UAT-14 corrupt emitted dump cannot evict last successful full restore at KEEP=1")
     void badDumpKeepsLastRestoredSet(String kind)throws Exception {
