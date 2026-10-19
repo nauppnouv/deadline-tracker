@@ -213,3 +213,9 @@ COLDEF|task|status|varchar(20)|varchar|20|<NULL>|<NULL>|<NULL>|NO|<NULL>|
 COLDEF|task|title|varchar(150)|varchar|150|<NULL>|<NULL>|<NULL>|NO|<NULL>|
 COLDEF|task|updated_at|datetime(6)|datetime|<NULL>|<NULL>|<NULL>|6|NO|<NULL>|
 COLDEF|task|version|bigint(20)|bigint|<NULL>|19|0|<NULL>|NO|0|
+# F-02: exact V4 ACTION_STATEMENT hash and trigger tuple from trusted migration schema.
+TRIGGERDEF|tr_group_create_owner|project_group|AFTER|INSERT|39b7af17397ce9e4d3375580e13a9b4162629bdccc9c633a22020b5b5def4673
+TRIGGERDEF|tr_group_stable_owner|project_group|BEFORE|UPDATE|1b8806ea8d68f73475336b1f4571ab52fc961641bdbdd97080704c474c854e48
+TRIGGERDEF|tr_member_owner_delete|group_member|BEFORE|DELETE|bd39222acfe7b4b0172ed817360e9c1e63ffd2f35e345767510e31ba72a5020f
+TRIGGERDEF|tr_member_owner_insert|group_member|BEFORE|INSERT|a078536472cf62a5077a9157d9720844b3addde2ea0eef8a3edbc82d244341df
+TRIGGERDEF|tr_member_owner_update|group_member|BEFORE|UPDATE|989543636be35d5dac0cbd13f3bf32344d2c8ba7cba14ea83cdb89e94691dc2a

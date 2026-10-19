@@ -7,6 +7,9 @@ schema_invariant_label() {
     CHECKDEF\|*|GENERATEDDEF\|*|TEXTDEF\|*|COLDEF\|*)
       IFS='|' read -r kind table object rest <<< "$row"
       printf '%s.%s [%s]' "$table" "$object" "$row" ;;
+    TRIGGERDEF\|*)
+      IFS='|' read -r kind object rest <<< "$row"
+      printf 'trigger %s [%s]' "$object" "$row" ;;
     *) printf '%s' "$row" ;;
   esac
 }
@@ -22,10 +25,10 @@ verify_schema() {
       missing=true
     fi
   done < "$schema_dir/schema-required.txt"
-  # New CHECK/generated/text definitions must be reviewed, not silently admitted.
+  # New CHECK/generated/text/column/trigger definitions must be reviewed, not silently admitted.
   while IFS= read -r actual; do
     case "$actual" in
-      CHECKDEF\|*|GENERATEDDEF\|*|TEXTDEF\|*|COLDEF\|*)
+      CHECKDEF\|*|GENERATEDDEF\|*|TEXTDEF\|*|COLDEF\|*|TRIGGERDEF\|*)
         if ! grep -Fxq -- "$actual" "$schema_dir/schema-required.txt"; then
           echo "Unexpected schema invariant: $(schema_invariant_label "$actual")" >&2
           missing=true
@@ -33,30 +36,15 @@ verify_schema() {
     esac
   done <<< "$inventory"
   [[ "$missing" == false ]] || return 1
-  echo "SCHEMA_OK triggers=$count (V4 required=5); FK/unique/NOT NULL/InnoDB inventory and exact CHECK/generated/text/column definitions verified"
+  echo "SCHEMA_OK triggers=$count (V4 required=5); FK/unique/NOT NULL/InnoDB inventory and exact CHECK/generated/text/column/trigger definitions verified"
 }
-
 verify_dump_triggers() {
-  local dump="$1" definition name table timing event line tick=$'\x60'
+  local dump="$1" definition kind name table timing event hash line tick=$'\x60'
   # Read every byte so pipefail also detects a corrupt gzip stream.
   definition="$(gzip -dc -- "$dump")"
-  while IFS='|' read -r kind name table timing event; do
-    [[ "$kind" == TRIGGER ]] || continue
+  while IFS='|' read -r kind name table timing event hash; do
+    [[ "$kind" == TRIGGERDEF ]] || continue
     line="$(grep -E "TRIGGER[[:space:]]+${tick}?${name}${tick}?[[:space:]]+${timing}[[:space:]]+${event}[[:space:]]+ON[[:space:]]+${tick}?${table}${tick}?" <<< "$definition" || :)"
     [[ "$line" == *CREATE* ]] || { echo "Dump missing CREATE TRIGGER $name $timing $event ON $table" >&2; return 1; }
   done < "$schema_dir/schema-required.txt"
-}
-
-# Restore checks a trusted V4 body allowlist as well as the tuple inventory.
-# Hash the exact ACTION_STATEMENT: whitespace inside SQL literals is significant.
-verify_trigger_bodies() {
-  local database="$1" actual required
-  actual="$("${sql[@]}" "$database" -e "SELECT CONCAT(TRIGGER_NAME,'|',SHA2(ACTION_STATEMENT,256)) FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA=DATABASE()")"
-  while IFS= read -r required; do
-    [[ -n "$required" && "$required" != \#* ]] || continue
-    if ! grep -Fxq -- "$required" <<< "$actual"; then
-      echo "Restore probe: V4 trigger body mismatch: ${required%%|*}" >&2
-      return 1
-    fi
-  done < "$schema_dir/schema-trigger-bodies.sha256"
 }

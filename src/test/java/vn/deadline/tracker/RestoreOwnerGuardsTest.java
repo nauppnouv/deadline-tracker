@@ -51,10 +51,10 @@ class RestoreOwnerGuardsTest extends DatabaseTest {
         var changed=shell("{ gzip -dc '"+file+"'; echo '"+ddl+"'; } | gzip > '"+file+".new'; mv '"+file+".new' '"+file+"'; sha256sum '"+file+"' | cut -d ' ' -f 1 > '"+file+".sha256'");
         assertEquals(0,changed.getExitCode(),changed.getStderr());
         var restored=shell("export BACKUP_FILE='"+file+"' RESTORE_DB="+restoreDb()+"; bash /deadline-project/scripts/verify-restore.sh");
-        assertTrue(restored.getStdout().contains("SCHEMA_OK"),"Fixture must pass tuple inventory: "+restored.getStderr());
         assertNotEquals(0,restored.getExitCode(),"Restore accepted no-op "+trigger);
         assertFalse(restored.getStdout().contains("RESTORE_OK"));
-        assertTrue(restored.getStderr().contains("Restore probe:"),restored.getStderr());
+        assertTrue(restored.getStderr().contains("TRIGGERDEF")
+                && restored.getStderr().contains("schema invariant"),restored.getStderr());
     }
 
     @Test @DisplayName("REV-01 DATA-08 whitespace inside an SQL literal is a changed trigger body")
@@ -67,7 +67,6 @@ class RestoreOwnerGuardsTest extends DatabaseTest {
         var changed=shell("{ gzip -dc '"+file+"'; cat <<'CHANGED_TRIGGER'\n"+ddl+"CHANGED_TRIGGER\n} | gzip > '"+file+".new'; mv '"+file+".new' '"+file+"'; sha256sum '"+file+"' | cut -d ' ' -f 1 > '"+file+".sha256'");
         assertEquals(0,changed.getExitCode(),changed.getStderr());
         var restored=shell("export BACKUP_FILE='"+file+"' RESTORE_DB="+restoreDb()+"; bash /deadline-project/scripts/verify-restore.sh");
-        assertTrue(restored.getStdout().contains("SCHEMA_OK"),restored.getStderr());
         assertNotEquals(0,restored.getExitCode(),"A changed SQL role literal must not pass as formatting");
         assertFalse(restored.getStdout().contains("RESTORE_OK"));
         assertTrue(restored.getStderr().contains("tr_member_owner_insert"),restored.getStderr());

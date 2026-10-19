@@ -1,10 +1,17 @@
 # Tiến độ và điểm tiếp tục
 
+## F-02 — exact body trigger V4 — 19/10/2026
+
+- Hợp đồng exact-set TRIGGERDEF so tuple và SHA-256 ACTION_STATEMENT tại startup prod/test, trước backup, sau restore import. Bỏ allowlist hash trùng; cập nhật test restore để kiểm tra fail sớm qua inventory chung. Không sửa V1–V4.
+- RED 47/4; GREEN D28 + RestoreOwnerGuards 54/0; Round2Variants 12/0; full 195 test/26 lớp, 0 failure/error/skip.
+- Bằng chứng: `docs/verification/f02-remediation.txt`; chưa có review độc lập, Gate A chưa ký.
+- Bước tiếp theo: F-03 — đồng bộ câu chữ SEC-05 đã được chủ dự án duyệt, giữ luồng chia sẻ hiện tại.
+
 ## F-04 — hợp đồng kiểu và thuộc tính cột — 19/10/2026
 
 - Bổ sung COLDEF cho 63 cột của 8 bảng nghiệp vụ/session: kiểu, độ dài, precision, nullable, default, EXTRA. Dùng chung ở startup, backup, restore; không sửa V1–V4. RED 43/9; GREEN 43/0; full check 191 test/26 lớp, không failure/error/skip.
 - Bằng chứng: `docs/verification/f04-remediation.txt`; chưa có review độc lập cho commit mới, Gate A chưa ký.
-- Bước tiếp theo: F-02, xác thực body năm trigger V4 ngay tại startup và trước khi công bố backup, dùng cùng allowlist tin cậy.
+- Đã tiếp tục F-02 ở khối phía trên.
 
 ## F-01 — sửa hợp đồng charset/collation — 19/10/2026
 

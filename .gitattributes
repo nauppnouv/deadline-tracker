@@ -3,5 +3,4 @@
 *.sql text eol=lf
 *.md text eol=lf
 scripts/schema-required.txt text eol=lf
-scripts/schema-trigger-bodies.sha256 text eol=lf
 docs/verification/d28-remediation.txt text eol=lf

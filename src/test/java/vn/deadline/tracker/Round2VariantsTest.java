@@ -132,8 +132,8 @@ class Round2VariantsTest extends DatabaseTest {
         assertEquals(0,changed.getExitCode(),changed.getStderr());
         var result=shell("export RESTORE_DB="+restoreDb()+" BACKUP_FILE='"+file+"'; bash /deadline-project/scripts/verify-restore.sh");
         assertNotEquals(0,result.getExitCode());assertFalse(result.getStdout().contains("RESTORE_OK"));
-        assertTrue(result.getStdout().contains("SCHEMA_OK"),result.getStderr());
-        assertTrue(result.getStderr().contains("Restore probe:"),result.getStderr());
+        assertTrue(result.getStderr().contains("TRIGGERDEF")
+                && result.getStderr().contains("schema invariant"),result.getStderr());
     }
     @ParameterizedTest @ValueSource(strings={"fk_task_assignee","ck_task_status","uq_one_owner"})
     @DisplayName("UAT-14 DATA-02/08 R2-01 restore inventories FK CHECK and unique even with unchanged rows")

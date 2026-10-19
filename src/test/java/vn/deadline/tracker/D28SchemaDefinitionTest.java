@@ -52,6 +52,7 @@ class D28SchemaDefinitionTest extends DatabaseTest {
             case "collation" -> "ALTER TABLE task MODIFY status VARCHAR(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL;";
             case "length" -> "ALTER TABLE task MODIFY title VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL;";
             case "default" -> "ALTER TABLE task ALTER COLUMN version SET DEFAULT 1;";
+            case "triggerNoop" -> "CREATE OR REPLACE TRIGGER tr_member_owner_delete BEFORE DELETE ON group_member FOR EACH ROW SET @schema_probe=1;";
             default -> throw new IllegalArgumentException(kind);
         };
     }
@@ -63,6 +64,7 @@ class D28SchemaDefinitionTest extends DatabaseTest {
             case "collation" -> "task.status";
             case "length" -> "task.title";
             case "default" -> "task.version";
+            case "triggerNoop" -> "tr_member_owner_delete";
             default -> "group_member.owner_marker";
         };
     }
@@ -78,7 +80,7 @@ class D28SchemaDefinitionTest extends DatabaseTest {
         "test,noop","prod,noop","test,near","prod,near",
         "test,values","prod,values","test,same","prod,same","test,collation","prod,collation","test,length","prod,length","test,default","prod,default",
         "test,stored","prod,stored","test,type","prod,type",
-        "test,newCheck","prod,newCheck","test,newGenerated","prod,newGenerated"})
+        "test,newCheck","prod,newCheck","test,newGenerated","prod,newGenerated","test,triggerNoop","prod,triggerNoop"})
     @DisplayName("D-28 DATA-02 SEC-11 startup rejects changed or uncontracted definitions in both profiles")
     void startupRejects(String profile,String kind,CapturedOutput output) {
         jdbc.execute(mutation(kind));
@@ -100,12 +102,17 @@ class D28SchemaDefinitionTest extends DatabaseTest {
         // Deliberately query metadata independently of schema-inventory.sql.
         var actual=new TreeSet<>(jdbc.queryForList("SELECT CONCAT('CHECKDEF|',TABLE_NAME,'|',CONSTRAINT_NAME,'|',SHA2(CHECK_CLAUSE,256)) FROM information_schema.CHECK_CONSTRAINTS WHERE CONSTRAINT_SCHEMA=DATABASE()",String.class));
         actual.addAll(jdbc.queryForList("SELECT CONCAT('GENERATEDDEF|',TABLE_NAME,'|',COLUMN_NAME,'|',COLUMN_TYPE,'|',EXTRA,'|',SHA2(GENERATION_EXPRESSION,256)) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND IS_GENERATED='ALWAYS'",String.class));
+        var triggerBodies=new TreeSet<>(jdbc.queryForList("SELECT CONCAT('TRIGGERDEF|',TRIGGER_NAME,'|',EVENT_OBJECT_TABLE,'|',ACTION_TIMING,'|',EVENT_MANIPULATION,'|',SHA2(ACTION_STATEMENT,256)) FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA=DATABASE() AND ACTION_STATEMENT IS NOT NULL",String.class));
+        Files.write(Path.of("target/f02-trigger-contract-derived.txt"),triggerBodies,StandardCharsets.UTF_8);
         Files.write(Path.of("target/d28-derived-contract.txt"),actual,StandardCharsets.UTF_8);
         Files.writeString(Path.of("target/d28-metadata.txt"),"version="+jdbc.queryForObject("SELECT VERSION()",String.class)+"\n"+jdbc.queryForList("SELECT TABLE_NAME,COLUMN_NAME,COLUMN_TYPE,EXTRA,GENERATION_EXPRESSION FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND IS_GENERATED='ALWAYS'")+"\nCHECKS="+jdbc.queryForList("SELECT TABLE_NAME,CONSTRAINT_NAME,CHECK_CLAUSE FROM information_schema.CHECK_CONSTRAINTS WHERE CONSTRAINT_SCHEMA=DATABASE()"),StandardCharsets.UTF_8);
         var expected=Files.readAllLines(Path.of("scripts/schema-required.txt")).stream().filter(s->s.startsWith("CHECKDEF|")||s.startsWith("GENERATEDDEF|")).collect(Collectors.toCollection(TreeSet::new));
         assertEquals(actual,expected,"Missing or surplus definition contracts");
         assertEquals(10,actual.stream().filter(s->s.startsWith("CHECKDEF|")).count());
         assertEquals(1,actual.stream().filter(s->s.startsWith("GENERATEDDEF|")).count());
+        var expectedTriggers=Files.readAllLines(Path.of("scripts/schema-required.txt")).stream().filter(s->s.startsWith("TRIGGERDEF|")).collect(Collectors.toCollection(TreeSet::new));
+        assertEquals(5,triggerBodies.size());
+        assertEquals(triggerBodies,expectedTriggers,"Missing or surplus trigger body contracts");
     }
     @Test @DisplayName("D-33 DATA-02 exact contract covers charset and collation of every text column")
     void completeTextContract() throws Exception {
@@ -150,7 +157,7 @@ class D28SchemaDefinitionTest extends DatabaseTest {
     ExecResult restore(String file,String db) throws Exception {
         return shell("export BACKUP_FILE='"+file+"' RESTORE_DB="+db+"; "+script("verify-restore"));
     }
-    @ParameterizedTest @ValueSource(strings={"noop","near","values","same","collation","length","default"})
+    @ParameterizedTest @ValueSource(strings={"noop","near","values","same","collation","length","default","triggerNoop"})
     @DisplayName("D-28 DATA-08 UAT-14 restore rejects definition drift before row checksums; source and good backup unchanged")
     void restoreRejects(String kind) throws Exception {
         String file=backup(),beforeArtifacts=artifacts(),beforeRows=snapshot();
@@ -167,7 +174,7 @@ class D28SchemaDefinitionTest extends DatabaseTest {
             assertEquals(0,resultSame.getExitCode(),"+0 fixture must have identical logical data: "+resultSame.getStderr());
         }
     }
-    @ParameterizedTest @ValueSource(strings={"noop","same","newCheck","newGenerated","collation","length","default"})
+    @ParameterizedTest @ValueSource(strings={"noop","same","newCheck","newGenerated","collation","length","default","triggerNoop"})
     @DisplayName("D-28 DATA-08 backup refuses drift or unknown definitions without publication or retention")
     void backupRejects(String kind) throws Exception {
         backup();String before=artifacts();jdbc.execute(mutation(kind));

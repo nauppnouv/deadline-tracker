@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 
-/** Shared metadata contract: required objects and exact CHECK/generated/text/column definitions. */
+/** Shared metadata contract: required objects and exact CHECK/generated/text/column/trigger definitions. */
 @Component
 @Profile({"prod","test"})
 @DependsOnDatabaseInitialization
@@ -27,9 +27,10 @@ public class SchemaInvariantVerifier implements InitializingBean {
             .map(SchemaInvariantVerifier::label).sorted().toList();
         if(!unexpected.isEmpty())throw new IllegalStateException("Unexpected schema invariants: "+String.join(", ",unexpected));
     }
-    private static boolean definition(String row) { return row.startsWith("CHECKDEF|")||row.startsWith("GENERATEDDEF|")||row.startsWith("TEXTDEF|")||row.startsWith("COLDEF|"); }
+    private static boolean definition(String row) { return row.startsWith("CHECKDEF|")||row.startsWith("GENERATEDDEF|")||row.startsWith("TEXTDEF|")||row.startsWith("COLDEF|")||row.startsWith("TRIGGERDEF|"); }
     private static String label(String row) {
         if(!definition(row))return row;
+        if(row.startsWith("TRIGGERDEF|"))return "trigger "+row.split("\\|",3)[1]+" ["+row+"]";
         String[] parts=row.split("\\|",4);
         return parts[1]+"."+parts[2]+" ["+row+"]";
     }

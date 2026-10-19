@@ -14,7 +14,6 @@ source "$(dirname "$0")/schema.lib.sh"
 "${sql[@]}" -e "CREATE DATABASE \`$RESTORE_DB\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
 gzip -dc -- "$BACKUP_FILE" | "${sql[@]}" "$RESTORE_DB"
 verify_schema "$RESTORE_DB"
-verify_trigger_bodies "$RESTORE_DB"
 # Exercise Owner invariants in one connection/transaction. The temporary
 # procedure handles only the expected SQLSTATE; any other SQL error fails closed.
 "${sql[@]}" "$RESTORE_DB" <<'SQL'

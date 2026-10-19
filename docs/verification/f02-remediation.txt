@@ -1,0 +1,11 @@
+F-02 remediation, 19/10/2026; không sửa V1–V4; không đổi JDK/dependency/image; chưa có review độc lập.
+
+Lệnh RED: `mvn -q -Dtest=D28SchemaDefinitionTest test` — exit 1, 47 tests, 4 failures, 0 errors/skips. Tái hiện startup prod/test chấp nhận trigger no-op, backup chấp nhận no-op và thiếu hợp đồng exact body; log `target/f02-red.log`, SHA-256 `B4B6D3B6FB240A739643A6A94362E2C695056B82F51759DCD0D33DD0C2574DA5`.
+
+Lệnh GREEN mục tiêu: `mvn -q -Dtest=D28SchemaDefinitionTest,RestoreOwnerGuardsTest test` — exit 0, 54 tests, 0 failures/errors/skips. Hash `target/f02-green-targeted.log`: `EB8D32552193570A5EB42B88B4140941C42C0A82BF80F43A12156149BB47B3C4`. `mvn -q -Dtest=Round2VariantsTest test` — exit 0, 12 tests, 0 failures/errors/skips; hash `target/f02-variants-green.log`: `78E482E436AC51C4ED190A376647AA89EC83D28D545E40E10A16C3E4F2FFB2A6`.
+
+Full: `MIGRATION_BASELINE_REF=0ed33309821c1fdd55cbd551246b89f1cd78d324 bash scripts/check.sh` — exit 0; 195 tests/26 classes, 0 failure/error/skip; build, template/SQL checks, secret scan, dependency audit và migration worktree/index checks đều OK. Log `target/f02-full.log`, SHA-256 `3505F46B5A0C8CF880D6FE510354C527692E492D4DDE480D3202A5E98C48BAB8`.
+
+Thay đổi: dùng exact-set TRIGGERDEF gồm tuple và SHA-256 ACTION_STATEMENT tại startup prod/test, trước backup và sau import restore; từ chối thiếu/sai/thừa trigger definition. Backup vẫn xác nhận CREATE TRIGGER trong dump bằng cùng danh sách. Bỏ allowlist trùng `schema-trigger-bodies.sha256`. Cập nhật test restore cũ để xác nhận từ chối ngay tại inventory dùng chung thay vì đòi qua SCHEMA_OK/Owner probe trước. Chuẩn hash độc lập lấy từ DB mới migrate V1–V4 bằng image MariaDB đã pin; không ghi body trigger ra log. Migration không đổi.
+
+Giới hạn: hash so chính xác chuỗi ACTION_STATEMENT MariaDB trả về, server/version khác có thể fail closed; cần dẫn xuất chuẩn mới qua review khi đổi phiên bản. Flyway cảnh báo MariaDB 11.8 mới hơn bản 11.7 đã kiểm chứng; cảnh báo này không đổi. Chưa có review độc lập cho commit này; Gate A chưa ký, không mở pilot/deploy.

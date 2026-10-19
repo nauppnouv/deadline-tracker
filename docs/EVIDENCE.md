@@ -1,3 +1,6 @@
+## F-02 — exact body trigger V4 (19/10/2026)
+
+- RED D28: 47 test/4 failure, tái hiện startup và backup nhận trigger no-op; GREEN D28 + RestoreOwnerGuards: 54/0; Round2Variants: 12/0. Full `MIGRATION_BASELINE_REF=0ed33309821c1fdd55cbd551246b89f1cd78d324 bash scripts/check.sh`: 195 test/26 lớp, 0 failure/error/skip; mọi cổng OK. Lệnh/hash và giới hạn: [F-02 remediation](verification/f02-remediation.txt). Chưa có review độc lập; Gate A chưa ký.
 # Bằng chứng kiểm chứng W1
 
 ## F-04 — hợp đồng định nghĩa cột (19/10/2026)

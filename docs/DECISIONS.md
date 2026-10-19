@@ -102,3 +102,10 @@ Câu chữ mới được chủ dự án duyệt:
 - Bổ sung exact-set cho toàn bộ cột của 8 bảng nghiệp vụ/session: COLUMN_TYPE/DATA_TYPE, độ dài, numeric và datetime precision, NULL, default và EXTRA. Cùng contract dùng tại startup prod/test, trước backup và sau import restore.
 - Metadata chuẩn được dẫn xuất độc lập từ schema V1–V4 mới migrate trên MariaDB image đã pin. Thay đổi độ dài/default vẫn bị từ chối dù không đổi dữ liệu; cột mới ngoài chuẩn cũng bị từ chối. Không sửa migration cũ hoặc dùng JPA validate làm chuẩn schema.
 - Kết quả cục bộ trong `docs/verification/f04-remediation.txt`; chưa có review độc lập cho commit này, không ký Gate A.
+
+## D-37 — exact body trigger V4 ở mọi cổng schema (19/10/2026)
+
+- F-02 sửa khoảng hở đã ghi sau D-33: body trigger không còn chỉ được kiểm khi restore. Hợp đồng `TRIGGERDEF` trong `schema-required.txt` ghép tên/bảng/timing/event với SHA-256 chính xác của ACTION_STATEMENT, và `schema-inventory.sql`/consumer dùng chung tại startup prod/test, trước backup và sau restore import.
+- Bỏ file hash riêng để tránh hai allowlist có thể lệch. Backup vẫn kiểm lệnh CREATE TRIGGER trong dump theo các trigger của hợp đồng chung. Restore no-op bị từ chối trước probe/checksum/session cleanup.
+- Chuẩn lấy độc lập từ schema mới migrate V1–V4 trên MariaDB image đã pin. Không sửa migration/dependency/image/JDK. Full 195 test/26 lớp và các lệnh mục tiêu, hash trong `docs/verification/f02-remediation.txt`.
+- Metadata MariaDB khác phiên bản có thể fail closed; không nới hash. Chưa có review độc lập, không ký Gate A và không coi đây là phê duyệt deploy.
