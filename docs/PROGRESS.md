@@ -1,3 +1,11 @@
+## F-07 — giữ bộ đã full restore khi dump ứng viên sai nghĩa — 19/10/2026
+
+- Review độc lập tại `D:/Documents/coding/security-revalidation-20261018/independent-runs/run-20261019T100429Z-6fb14510/REVIEW.md` phát hiện backup exit0 có thể prune bộ tốt trước khi dump sai bị restore chặn. Gate A của review đó chưa đủ điều kiện đề nghị qua; không sửa lịch sử verdict.
+- EXECUTE F-07: tách bộ protected khỏi N ứng viên, khóa chung backup/restore, chỉ xoay sau full schema/Owner/data/FK/session và đối chiếu đúng byte input/copy. Không có receipt thì hoãn retention. D-40 và OPS ghi cách vận hành/giới hạn; không đổi grant, V1–V4, dependency/JDK/image.
+- RED no-op trigger/CHECK: 2 assertion failures, 0 errors/skips trước sửa. GREEN: 10 tests, 0 failures/errors/skips, gồm copy/current failure, concurrency, bootstrap và dữ liệu/receipt/pointer protected hỏng. Lệnh/hash/XML trong `docs/verification/f07-remediation.txt` và ledger ngoài repo.
+- Full source check: exit0, 206 tests/28 lớp, 0 failures/errors/skips; build/static/gitleaks/dependency/migration worktree+index OK. V1–V4 khớp byte baseline tin cậy. Kết quả clone mới đúng commit sửa nằm ở receipt `clean-clone-check` ngoài repo cùng run, có pin/exit/log/XML/hash; không chuyển bằng chứng giữa commit.
+- Cần review độc lập trên đúng commit sửa F-07 và quyết định residual theo review cũ trước khi đề nghị Gate A; phần sửa này không tự chấp nhận F-05/TRIGGER/Flyway/canonicalization, không ký Gate A, không deploy/pilot.
+
 ## F-06 — mô tả đúng quyền MariaDB TRIGGER — 19/10/2026
 
 - OPS không còn gọi grant TRIGGER là "không DDL"; ghi rõ quyền này cho phép CREATE/DROP/SHOW CREATE TRIGGER, nhưng không có DML hoặc DDL tổng quát.

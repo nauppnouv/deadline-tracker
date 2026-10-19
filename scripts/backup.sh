@@ -14,6 +14,7 @@ export MYSQL_PWD="$DB_PASSWORD"
 sql=(mariadb --host="$DB_HOST" --port="${DB_PORT:-3306}" --user="$DB_USER" --batch --skip-column-names)
 source "$(dirname "$0")/checksum.lib.sh"
 source "$(dirname "$0")/schema.lib.sh"
+source "$(dirname "$0")/verified-backup.lib.sh"
 verify_schema "$DB_NAME"
 # An assignment propagates the SQL exit status; process substitution does not.
 tables="$("${sql[@]}" "$DB_NAME" -e 'SHOW TABLES')"
@@ -52,15 +53,25 @@ sha256sum "$file" | cut -d ' ' -f 1 > "$file.sha256"
 chmod 600 "$file" "$file.sha256" "$file.tables.tsv"
 # Only remove our own generated backups, never unrelated files.
 backup_names="$(find "$BACKUP_DIR" -maxdepth 1 -type f -regextype posix-extended -regex '.*/deadline-[0-9]{8}T[0-9]{6}Z\.[a-zA-Z0-9]{6}\.sql\.gz' -printf '%T@ %f\n' | sort -rn | cut -d ' ' -f 2-)"
-# Always retain the just-verified set, even if old file mtimes are in the future.
+# Always retain the new candidate, even if old mtimes are in the future.
 new_name="${file##*/}"
 backups=("$new_name")
 while IFS= read -r name; do
   if [[ -n "$name" && "$name" != "$new_name" && -s "$BACKUP_DIR/$name.sha256" && -s "$BACKUP_DIR/$name.tables.tsv" ]]; then backups+=("$name"); fi
 done <<< "$backup_names"
-complete=true
-for ((i=keep; i<${#backups[@]}; i++)); do
-  old="$BACKUP_DIR/${backups[$i]}"
-  rm -- "$old" "$old.sha256" "$old.tables.tsv"
-done
+verified_store="$BACKUP_DIR/.deadline-verified"
+if [[ -e "$verified_store/current" || -L "$verified_store/current" ]]; then
+  # Candidate retention never touches this separately protected full restore.
+  current_verified_backup "$verified_store" >/dev/null
+  complete=true
+  for ((i=keep; i<${#backups[@]}; i++)); do
+    old="$BACKUP_DIR/${backups[$i]}"
+    rm -- "$old" "$old.sha256" "$old.tables.tsv"
+  done
+else
+  # Upgrade/bootstrap: no durable verification receipt means nothing is pruned.
+  complete=true
+  echo 'RETENTION_DEFERRED (run a successful full verify-restore first)'
+fi
+echo 'BACKUP_CANDIDATE_READY (full restore verification still required)'
 printf 'BACKUP_FILE=%s\n' "$file"

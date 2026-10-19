@@ -4,6 +4,9 @@ umask 077
 : "${DB_HOST:?}" "${DB_USER:?}" "${DB_PASSWORD:?}" "${DB_NAME:?}" "${RESTORE_DB:?}" "${BACKUP_FILE:?}"
 [[ "$DB_NAME" =~ ^[a-zA-Z0-9_]+$ && "$RESTORE_DB" =~ ^deadline_restore_[a-zA-Z0-9_]+$ && "$DB_NAME" != "$RESTORE_DB" ]] || { echo 'Unsafe restore target' >&2; exit 1; }
 [[ -f "$BACKUP_FILE" && -f "$BACKUP_FILE.sha256" && -f "$BACKUP_FILE.tables.tsv" ]] || { echo 'Backup components missing' >&2; exit 1; }
+source "$(dirname "$0")/verified-backup.lib.sh"
+prepare_verified_backup
+verified_source_digests="$(backup_set_digests "$BACKUP_FILE")"
 expected="$(cat "$BACKUP_FILE.sha256")"
 [[ "$expected" =~ ^[a-f0-9]{64}$ && "$(sha256sum "$BACKUP_FILE" | cut -d ' ' -f 1)" == "$expected" ]] || { echo 'Backup checksum mismatch' >&2; exit 1; }
 export MYSQL_PWD="$DB_PASSWORD"
@@ -105,6 +108,7 @@ remaining_sessions="$("${sql[@]}" "$RESTORE_DB" -e 'SELECT COUNT(*) FROM SPRING_
 remaining_attributes="$("${sql[@]}" "$RESTORE_DB" -e 'SELECT COUNT(*) FROM SPRING_SESSION_ATTRIBUTES')"
 [[ "$remaining_sessions" == 0 && "$remaining_attributes" == 0 ]] || { echo 'Restored sessions were not cleared' >&2; exit 1; }
 echo 'SESSIONS_CLEARED (after snapshot comparison)'
+protect_verified_backup
 echo 'BẮT BUỘC: đặt lại mật khẩu từng tài khoản bằng ops reset-password trước khi mở lại web'
 echo 'Verify identity first; reset every account allowed to sign in; keep disabled accounts disabled. Verification does not authorize reopening web.'
 echo 'RESTORE_OK (keep isolated until post-snapshot account security review)'

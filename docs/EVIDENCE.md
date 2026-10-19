@@ -1,3 +1,10 @@
+## F-07 — DATA-08/UAT-14, bảo toàn bộ đã full restore (19/10/2026)
+
+- Đã chạy RED trước sửa trên HEAD `6748797c6e1e2d5991ed53a397d9768b2d373bd7`: no-op trigger và CHECK(1=1) trong dump hợp lệ gây mất cả ba file bộ tốt khi KEEP=1; 2 failures, 0 errors/skips. Replay `red-provenance` lưu diff/byte/hash test chưa tracked trước chạy.
+- Đã chạy GREEN `bash scripts/mvn.sh -q -Dtest=BackupVerifiedRetentionTest test`: 10 tests, 0 failures/errors/skips. Dump sai bị restore chặn đúng schema; ba file protected giữ hash và phục hồi lại được. Có ca lỗi copy/current, khóa chồng lấn, xoay/recheck protected, bootstrap deferred, pointer/receipt/bytes hỏng.
+- Full `RUN_DEPENDENCY_AUDIT=1 MIGRATION_BASELINE_REF=0ed33309821c1fdd55cbd551246b89f1cd78d324 bash scripts/check.sh`: exit0, 206 tests/28 lớp, 0 failures/errors/skips; build/static/gitleaks/dependency/migration worktree+index đều OK. Log SHA-256 `4047be32ab5dd175f7c3b9bbb12d0c348888e9499f3a6fe9c467c5994de0a929`. Receipt clone mới của commit sửa được lưu ngoài repo cùng run, đối chiếu actual exit/XML/hash trong biên bản; không dùng số liệu clone của commit cũ.
+- [Biên bản lệnh/UTC/exit/hash/XML và giới hạn](verification/f07-remediation.txt). Đây là bằng chứng triển khai của tác giả sửa; cần review độc lập bản sửa. Không chuyển suite xanh thành risk acceptance hay đề nghị Gate A qua.
+
 ## F-06 — phạm vi quyền MariaDB TRIGGER (19/10/2026)
 
 - Sửa OPS: quyền `TRIGGER` cho phép CREATE/DROP/SHOW CREATE TRIGGER, không phải "không DDL"; vẫn không cấp DML hay DDL tổng quát. Test scratch với user/schema tạm: CREATE/DROP TRIGGER thành công, CREATE TABLE bị từ chối. `mvn -q -Dtest=TriggerPrivilegeTest test`: 1/0. Full cuối trên working tree gồm đủ 5 mục: `MIGRATION_BASELINE_REF=0ed33309821c1fdd55cbd551246b89f1cd78d324 bash scripts/check.sh`, 196 test/27 lớp, 0 failure/error/skip; mọi cổng OK. [Bằng chứng/hash và giới hạn](verification/f06-remediation.txt). Chưa có review độc lập; Gate A chưa ký.

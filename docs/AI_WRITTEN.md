@@ -103,3 +103,12 @@ Phạm vi do chủ dự án yêu cầu: sửa đúng năm phát hiện review, t
 | docs/OPS.md | Sửa mô tả: TRIGGER cho phép CREATE/DROP/SHOW CREATE TRIGGER; không cấp DML hoặc DDL tổng quát | chưa đọc |
 | TriggerPrivilegeTest.java | User/schema tạm trên MariaDB Testcontainers; trigger DDL được phép, CREATE TABLE bị từ chối, fixture được dọn | chưa đọc |
 | docs/verification/f06-remediation.txt; docs/EVIDENCE.md; docs/PROGRESS.md; docs/DECISIONS.md; docs/AI_WRITTEN.md | Lệnh, hash, kết quả và nguồn MariaDB chính thức | chưa đọc |
+
+## F-07 — giữ riêng bộ full-restore-verified — 19/10/2026
+
+| Tệp | Mô tả | Trạng thái |
+|---|---|---|
+| scripts/backup.sh; scripts/verify-restore.sh; scripts/verified-backup.lib.sh | Ứng viên tách bộ protected; khóa chung, copy/digest/receipt, đổi current nguyên tử trước khi bỏ generation cũ; hoãn retention khi bootstrap | chưa đọc |
+| src/test/java/vn/deadline/tracker/BackupVerifiedRetentionTest.java | RED no-op/CHECK dump thực, giữ ba file và phục hồi lại protected; lỗi copy/current, đồng thời, bootstrap, receipt/bytes/pointer sai | chưa đọc |
+| docs/OPS.md; docs/DECISIONS.md | Vận hành, D-40, ranh giới quyền/trust/durability; không chấp nhận rủi ro hoặc ký Gate A | chưa đọc |
+| docs/verification/f07-remediation.txt; docs/EVIDENCE.md; docs/PROGRESS.md; docs/AI_WRITTEN.md | Biên bản RED/GREEN/full, đường dẫn log/XML/ledger và giới hạn review | chưa đọc |

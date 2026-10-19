@@ -119,3 +119,9 @@ Câu chữ mới được chủ dự án duyệt:
 - Sửa câu OPS cũ "không cấp DML/DDL/root": quyền `TRIGGER` được grant cho backup principal thật sự cho phép CREATE/DROP/SHOW CREATE TRIGGER trên bảng trong phạm vi đó. Giữ nguyên grants; không cấp thêm quyền.
 - Tài liệu MariaDB: [GRANT](https://mariadb.com/docs/server/reference/sql-statements/account-management-sql-statements/grant), [CREATE TRIGGER](https://mariadb.com/docs/server/server-usage/triggers-events/triggers/create-trigger), [DROP TRIGGER](https://mariadb.com/docs/server/reference/sql-statements/data-definition/drop/drop-trigger). Test dùng schema/user giả lập trong container, kiểm tra thêm CREATE TABLE vẫn bị từ chối; không chạm DB vận hành.
 - `TriggerPrivilegeTest` 1/0. Full check cuối trên working tree gồm đủ năm mục: 196 test/27 lớp, không failure/error/skip; log/hash trong `docs/verification/f06-remediation.txt`. Chưa có review độc lập, không suy thành Gate A/deploy.
+
+## D-40 — bảo vệ riêng bộ full-restore-verified để sửa F-07 (19/10/2026)
+
+- Theo EXECUTE của chủ dự án và phương án thứ hai trong REVIEW.md: giữ một bộ đã qua full restore tách khỏi N ứng viên. Backup vẫn tạo ứng viên; không tuyên bố kiểm artifact đầy đủ ngay lúc dump, không cấp thêm quyền restore DDL cho principal backup.
+- Verify-restore giữ khóa chung, kiểm schema/Owner/data/FK/session rồi copy đúng input ba file và receipt. Công bố generation/current trước khi bỏ bộ protected cũ. Chưa có receipt thì hoãn mọi candidate retention; lỗi protected bytes/receipt fail closed. OPS ghi bootstrap, dung lượng, recovery và ranh giới trust.
+- Không sửa V1–V4, không thay JDK/dependency/image. RED thực với no-op trigger và CHECK(1=1), GREEN và full check được ghi trong `docs/verification/f07-remediation.txt`. Đây là lựa chọn triển khai trong phạm vi sửa lỗi được giao, không là acceptance F-05/TRIGGER/Flyway/canonicalization hay ký Gate A; cần review độc lập bản sửa.

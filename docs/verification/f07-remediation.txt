@@ -1,0 +1,64 @@
+F-07 remediation — DATA-08 / UAT-14 — 19/10/2026
+
+Authorization: EXECUTE F-07, test FAIL → fix → PASS → full check → evidence → separate commit; no V1–V4 edits, risk acceptance or Gate A signature.
+Initial clean HEAD: 6748797c6e1e2d5991ed53a397d9768b2d373bd7 (fix/p7-security-data-findings).
+Trusted migration baseline: 0ed33309821c1fdd55cbd551246b89f1cd78d324.
+Original independent finding: D:/Documents/coding/security-revalidation-20261018/independent-runs/run-20261019T100429Z-6fb14510/REVIEW.md, F-07. Original review/ledger are unchanged; that review's Gate A verdict remains historical NO.
+Evidence run: D:/Documents/coding/security-revalidation-20261018/remediation-runs/f07-20261019T150401Z
+
+Change and boundary
+-------------------
+Selected the review's alternative remedy: a separate last-full-restore-verified set, outside candidate retention. Backup emits BACKUP_CANDIDATE_READY/BACKUP_FILE; it does not certify the artifact's entire schema/data. The protected generation contains the exact three input files plus verification.txt with their SHA-256 digests and UTC time. Full schema/Owner/data/FK/session checks, byte comparison, successful copy and atomic current-pointer replacement precede retiring the previous protected generation. Both scripts serialize on the same lock. No receipt yet means RETENTION_DEFERRED, preserving legacy/bootstrap candidates until successful full verification. No extra backup-principal DB grant is needed.
+
+RED, before product edits
+-------------------------
+Command (Git Bash): bash scripts/mvn.sh -q '-Dtest=BackupVerifiedRetentionTest#badDumpKeepsLastRestoredSet' test
+Primary RED: red-provenance/receipt.json, UTC 2026-10-19T15:08:18.027777+00:00 → 15:08:51.343119+00:00, real exit 1.
+XML: BackupVerifiedRetentionTest, 2 tests / 2 failures / 0 errors / 0 skipped.
+No-op tr_group_create_owner and same-name ck_task_status CHECK(1=1) are appended as valid SQL to a real emitted dump. Positive backup/full restore succeed first. At KEEP=1, both bad candidates cause the original script to delete all three files of that prior verified set. Assertions fail on missing files, after compilation and DB startup; not on a newly introduced output marker. Source DB schema is not mutated by these emitters.
+Log SHA-256: a097544c47b0431eeb819f2ac222a026e9889a5113391e37f63e8e1c46e3450b
+Before-run diff SHA-256: 4c70e612ca05faf812efd3024599526459c65c1d5ea64975ad4871e941513624
+The untracked test's bytes/diff/digest are saved before running. An earlier real red/ run also failed 2/2, but its original runner omitted the untracked test from the diff. It is retained honestly; use red-provenance as the complete RED provenance.
+
+GREEN, targeted
+----------------
+Command: bash scripts/mvn.sh -q -Dtest=BackupVerifiedRetentionTest test
+green-targeted/receipt.json, UTC 2026-10-19T15:12:17.989001+00:00 → 15:14:23.427918+00:00, real exit 0.
+XML: 10 tests / 0 failures / 0 errors / 0 skipped.
+Log SHA-256: 784c8cb6978e61d01fd737aba9834641d33f4cf28ac76c3f5c929962860424ee
+Before-run diff SHA-256: b6641c7c38a937a2ff3bf4c4243f6aa2013f90b73501888912fd5a06f98945cb
+
+Executed behavior:
+- Two corrupt dump candidates can still be emitted, but full restore rejects the expected TRIGGERDEF/CHECKDEF object, with no RESTORE_OK or promotion. All three protected file hashes remain unchanged; that actual protected input then restores with OWNER_BEHAVIOR_OK and RESTORE_OK.
+- Successful promotion separates one protected set from one candidate at KEEP=1. Rechecking a protected input rotates in the same store, preserves permissions and retires only its old generation.
+- cp failure and atomic current-pointer mv failure both retain the old protected trio/current; temporary files and owned lock are cleaned; retry succeeds.
+- A barrier holds restore during copy: overlapping backup exits nonzero before publication/pruning, the previous trio matches its hashes, release completes restore and retry works.
+- A traversal-shaped current pointer fails closed without changing the protected trio or outside sentinel.
+- Before first receipt, three KEEP=1 candidates are retained with RETENTION_DEFERRED; after full verification, candidate retention resumes.
+- Corrupt protected bytes and an empty-digest receipt separately block publication/retention, preserving the prior candidate trio.
+
+Full source check
+------------------
+Command: RUN_DEPENDENCY_AUDIT=1 MIGRATION_BASELINE_REF=0ed33309821c1fdd55cbd551246b89f1cd78d324 bash scripts/check.sh
+Environment: existing JDK .tools/java25/jdk-25.0.4.1+1, Maven repository .m2-local and Dependency-Check data .tools/dependency-check; no toolchain/dependency/image upgrade. Exact executable/cwd/environment setup are recorded by run.py and receipts in the evidence run.
+full-check/receipt.json, UTC 2026-10-19T15:15:46.627286+00:00 → 15:23:08.323935+00:00, real exit 0.
+206 tests / 28 classes / 0 failures / 0 errors / 0 skipped; every archived XML class is also logged in this execution.
+Build/tests, template/SQL static checks, gitleaks (no leaks), dependency audit and immutable migration worktree/index checks all OK. No opt-out/skip used for audit.
+Log SHA-256: 4047be32ab5dd175f7c3b9bbb12d0c348888e9499f3a6fe9c467c5994de0a929
+Dependency-Check 12.1.8: 54 dependency entries, 0 vulnerability entries in this report; report date 2026-10-19T15:23:06.785451Z. NVD API last checked 2026-10-19T12:21:17Z, last modified 2026-10-19T12:20:00Z. Existing cache reused, OSS Index disabled in pom, no OS/image scan. Zero report entries are not a claim of no exploitable vulnerability.
+
+Migration SHA-256, matched byte-for-byte against the trusted baseline (worktree AND index):
+V1__business_schema.sql e24dfcde276edf3ba4464d5d976e4dcb0c7f19b1d06e15d46d1a07e731331e64
+V2__jdbc_sessions.sql 0d99d2e6cb1e439dd96428166d9fc7c64680773820936b0ac7d20d09309834bb
+V3__internal_disabled_usernames.sql 8c0fbef420eefac0d4461911044f3edf2c49cc52bf7718c0f5525f4553483722
+V4__owner_membership_integrity.sql 4f2b8d9629f3e8979ef75c6b5651f1aecd811a827016b1f419e834b0b2382cf2
+
+Post-commit clean-clone evidence
+--------------------------------
+The exact remediation commit's clean clone is checked by verify_clean_clone.py. The authoritative result, commit pin, UTC time, real exit, log hash, XML and unchanged tracked-byte proof are kept outside the repo at clean-clone-check/{receipt.json,initial.json,final-integrity.json,command.log,surefire-reports} in this evidence run, and summarized by ledger.json. This avoids a circular commit hash in this committed receipt. Consult the actual receipt; absence/nonzero is not a pass. Only existing JDK/Maven/NVD caches are reused; no target, .env, database or old review volume is copied. Full runs are sequential.
+
+ledger.json preserves command/exit/XML/hash and each executed case outcome; ARTIFACTS-SHA256.json indexes evidence. Targeted runs count only their selected class, not unrelated old XML the runner also archived. Source snapshots/diffs before execution are preserved. AI-authored source and docs are marked chưa đọc in docs/AI_WRITTEN.md.
+
+Limits and next gate
+---------------------
+This is implementation verification by the remediation author, not independent revalidation. A new reviewer must pin the resulting commit and replay F-07 output/retention/failure cases plus relevant full checks. F-05, TRIGGER DDL, exact-definition canonicalization and Flyway MariaDB warning remain for explicit adjudication; no acceptance is inferred here. The private backup store/host/scripts are trusted; receipts are not signatures, atomic rename is not fsync/power-loss durability, bootstrap deferred retention needs disk monitoring. No public HTTPS/deployment, real backup schedule/offsite encryption/alerts/RPO/RTO, image/OS scan or real-user credential reconciliation is certified. Protected files remain raw snapshot input, including old credential/session state; OPS mandatory reset/reconciliation still applies. No source/old investigation database or container is changed by this remediation. Gate A is not signed or declared passed; no push/merge/deploy/pilot.
