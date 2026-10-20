@@ -1,3 +1,15 @@
+## BR-24 min8 — 21/10/2026
+
+Yêu cầu mới của chủ dự án: mật khẩu tài khoản tối thiểu8, tối đa128. Phần này là thay đổi sau release5ebb026, chưa áp dụng cho JAR/launcher đã chốt. Không nhận thay đã đọc/hiểu hoặc chấp thuận bảo mật.
+
+| Tệp | Phần AI viết | Trạng thái |
+|---|---|---|
+| src/main/java/vn/deadline/tracker/domain/Inputs.java | Ngưỡng8 và thông báo8–128 dùng chung đăng ký/đổi mật khẩu | chưa đọc |
+| src/main/resources/templates/register.html; src/main/resources/templates/password.html | minlength8 và gợi ý8–128 | chưa đọc |
+| src/test/java/vn/deadline/tracker/PasswordPolicyTest.java; src/test/java/vn/deadline/tracker/AuthWebTest.java | Boundary ASCII/Unicode/null/spaces; HTTP đăng ký/đổi, form và phiên | chưa đọc |
+| README.md; docs/PROJECT_PLAN.md; docs/DECISIONS.md; docs/LOCAL_RELEASE.md | Chính sách hiện tại/D-44 và phân biệt release cũ với source mới | chưa đọc |
+| docs/PROGRESS.md; docs/EVIDENCE.md; docs/verification/password-min8.md; docs/AI_WRITTEN.md | Lệnh/exit/hash thực tế, lỗi harness và phần chưa áp dụng | chưa đọc |
+
 # Phần AI viết — sửa phát hiện P7
 
 ## Local release finalization — 21/10/2026

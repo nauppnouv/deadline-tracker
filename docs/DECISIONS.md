@@ -146,3 +146,9 @@ Câu chữ mới được chủ dự án duyệt:
 - Runtime chỉ validate checksum history và exact schema/trigger; ops cũng chạy verifier. Không bỏ kiểm TRIGGER, không đổi V1–V4 hoặc schema contract. Runtime mẫu giảm quyền DML theo bảng, không sửa Flyway history/CREATE ALTER DROP TABLE. TRIGGER vẫn cho CREATE/DROP TRIGGER, đã kiểm thực trên bảng probe riêng; không gọi quyền này là chỉ đọc metadata.
 - Fixture giữ definer account và SELECT/INSERT/TRIGGER khi khóa login/thu hồi quyền nâng schema; test Owner/task/event/session/reset vẫn chạy. Tập quyền này là bằng chứng DB giả, không là provisioner hoặc chứng nhận quyền tối thiểu trên đích. Hướng dẫn chi tiết trong MIGRATION.md; preflight không tự audit effective identity/grants.
 - Biên bản docs/verification/p3-02-remediation.md ghi RED/GREEN/full và giới hạn. Một agent, chưa commit/push/merge, chưa thay JAR local; không thay dependency/JDK/image, quyền DB đang dùng, không ký Gate A. Review/packet cũ giữ nguyên lịch sử.
+
+## D-44 — mật khẩu tài khoản tối thiểu 8 ký tự — 21/10/2026
+
+- Chủ dự án yêu cầu đổi min từ 15 xuống 8. BR-24 hiện là 8–128 Unicode code points, giữ khoảng trắng nguyên trạng, Argon2 và hủy phiên sau đổi/reset. Quyết định D-14 phía trên là lịch sử của ngưỡng cũ.
+- Áp dụng cùng validator cho đăng ký/đổi mật khẩu và minlength trên form; không giảm ngưỡng secret DB/migration, không sửa migration, schema hoặc dữ liệu/mật khẩu hiện có.
+- Thay đổi source sau local release 5ebb0267f2fa4ce92141ac2c2340706b89caca28; không sửa JAR/ZIP/launcher đã chốt để giả là cùng bản release. Kiểm mới ghi riêng trong EVIDENCE.

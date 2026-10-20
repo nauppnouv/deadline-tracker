@@ -42,6 +42,36 @@ class AuthWebTest extends DatabaseTest {
         assertThrows(RuleViolation.class,()->accounts.register(name(),"x".repeat(81),PASSWORD));
         assertNotNull(accounts.register(name(),"Unicode","🔒".repeat(100)));
     }
+    ResultMatcher passwordMinimum(String field) {
+        return result -> assertTrue(result.getResponse().getContentAsString().matches(
+            "(?s).*<input\\b(?=[^>]*\\bname=\""+field+"\")(?=[^>]*\\bminlength=\"8\")[^>]*>.*"),
+            "Rendered HTML5 input "+field+" must require at least eight characters");
+    }
+    @Test @DisplayName("BR-24 eight-character register/change password, seven rejected, forms and sessions agree")
+    void passwordMinimumSupportsRegisterAndChange() throws Exception {
+        mvc.perform(get("/register")).andExpect(status().isOk())
+            .andExpect(passwordMinimum("password"));
+        String rejected=name();
+        mvc.perform(post("/register").with(csrf()).param("username",rejected).param("displayName","Min boundary").param("password","1234567"))
+            .andExpect(status().isBadRequest()).andExpect(model().attribute("message","Mật khẩu phải có 8–128 ký tự."));
+        assertFalse(rows.existsByUsername(rejected));
+        String username=name();
+        mvc.perform(post("/register").with(csrf()).param("username",username).param("displayName","Min boundary").param("password","Abcd1234"))
+            .andExpect(redirectedUrl("/login?registered"));
+        Cookie original=login(username,"Abcd1234");
+        mvc.perform(get("/password").cookie(original)).andExpect(status().isOk())
+            .andExpect(passwordMinimum("newPassword"))
+            .andExpect(passwordMinimum("confirmPassword"));
+        mvc.perform(post("/password").cookie(original).with(csrf()).param("currentPassword","Abcd1234").param("newPassword","1234567").param("confirmPassword","1234567"))
+            .andExpect(status().isBadRequest()).andExpect(model().attribute("message","Mật khẩu phải có 8–128 ký tự."));
+        mvc.perform(get("/account").cookie(original)).andExpect(status().isOk());
+        mvc.perform(post("/password").cookie(original).with(csrf()).param("currentPassword","Abcd1234").param("newPassword"," abcdef ").param("confirmPassword"," abcdef "))
+            .andExpect(redirectedUrl("/login?changed"));
+        mvc.perform(get("/account").cookie(original)).andExpect(status().is3xxRedirection());
+        login(username," abcdef ");
+        mvc.perform(post("/login").with(csrf()).with(r->{r.setRemoteAddr(UUID.randomUUID().toString());return r;}).param("username",username).param("password","Abcd1234"))
+            .andExpect(redirectedUrl("/login?error"));
+    }
     @Test @DisplayName("UAT-01/13 SEC-06 actual JDBC cookie logout invalidation and password change")
     void sessionLifecycle() throws Exception {
         String username=name();String id=accounts.register(username,"Member",PASSWORD);

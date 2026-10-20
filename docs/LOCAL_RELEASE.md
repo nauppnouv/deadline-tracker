@@ -1,3 +1,5 @@
+> **Sau bản release — 21/10/2026:** worktree có thay đổi min mật khẩu tài khoản từ15 xuống8 theo D-44, được chốt source theo yêu cầu push riêng, chưa cài vào launcher. Runbook/manifest release bên dưới vẫn mô tả bản đã chốt `5ebb026`; không chuyển kết quả/hash của bản đó sang JAR min8 mới. Xem [kiểm min8](verification/password-min8.md).
+
 # Bản local P3-01/P3-02 — 21/10/2026
 
 Đợt chốt này giao source được định danh bằng một commit local, JAR có hash cố định và ZIP chọn lọc đã kiểm. Không đồng nghĩa hoàn thành toàn bộ dự án, học tập, pilot hoặc Gate A. Đọc [PROGRESS](PROGRESS.md), [EVIDENCE](EVIDENCE.md), [OPS](OPS.md) và [MIGRATION](MIGRATION.md) cùng runbook này. Nội dung AI viết **chưa đọc** trong [AI_WRITTEN](AI_WRITTEN.md).

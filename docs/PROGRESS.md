@@ -1,3 +1,9 @@
+## Mật khẩu tài khoản tối thiểu 8 — 21/10/2026
+
+- Theo yêu cầu mới của chủ dự án, đăng ký/đổi mật khẩu dùng 8–128 Unicode code points; form và thông báo đồng bộ. Giữ Argon2, khoảng trắng và hủy phiên sau đổi/reset, ngưỡng secret DB/migration không đổi. BR-24 cập nhật, D-44 bổ sung, AI material chưa đọc.
+- Kiểm tập trung: RED13/4 failures; GREEN cuối16 tests, 0 failures/errors/skips. Lượt GREEN đầu có1 lỗi test do XPath đọc HTML5; sửa matcher test rồi kiểm lại đúng tập, không gọi lỗi đó là failure sản phẩm. [Biên bản](verification/password-min8.md).
+- Build offline JAR min8 riêng đạt, đối chiếu66 main classes và hai form với output đã test. Chốt source theo yêu cầu push riêng; chưa thay JAR launcher/chưa restart app; repo gốc, release ZIP/JAR/settings/cert/state giữ nguyên. Source min8 là thay đổi sau commit release5ebb026; lịch sử bên dưới giữ revision gốc.
+
 ## F-08 — giữ generation đã công bố khi ngắt sau rename — 19/10/2026
 
 ## Chốt bản local P3-01/P3-02 — 21/10/2026

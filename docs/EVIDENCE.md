@@ -1,3 +1,9 @@
+## BR-24 min8 — 21/10/2026, sau release5ebb026
+
+- Source worktree trên `fix/p3-01-web-root-secret` thay validator chung và form đăng ký/đổi mật khẩu từ15 xuống8; max128/Unicode/không strip/Argon2/hủy phiên giữ nguyên. DB/migration secrets không thay, không sửa V1–V4.
+- RED `PasswordPolicyTest`:13 tests/4 failures/0 errors/skips, exit1. GREEN đầu:16 tests/0 failures/1 error vì XPath parser XML gặp HTML5; giữ log, không gọi là đạt hoặc lỗi sản phẩm. GREEN sau sửa matcher: **16 tests/0 failures/errors/skips**, exit0; gồm13 boundary tests và3 ca AuthWebTest trên Testcontainers DB giả riêng, có HTTP đăng ký7→400/8→thành công, đổi7→400/8→thành công, form min8, giữ spaces và hủy phiên.
+- Build `bash scripts/mvn.sh -o -DskipTests package` exit0; không tính bước package là test. JAR mới chỉ tạo riêng,66 main classes khớp byte output đã test và hai form khớp source. [Lệnh/exit/hash/giới hạn](verification/password-min8.md). Không suite đầy đủ/audit mới hoặc kiểm trên app đang chạy; các kết quả release/CP006 lịch sử vẫn giữ snapshot gốc.
+
 ## P3-02 — DATA-01/02/09, migration riêng và runtime giảm quyền (20/10/2026)
 
 ## Hồ sơ bản local — 21/10/2026

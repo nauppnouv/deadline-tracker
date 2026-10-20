@@ -20,7 +20,7 @@ public final class Inputs {
         return name;
     }
     public static void password(String value) {
-        if (value == null || length(value) < 15 || length(value) > 128) throw RuleViolation.invalid("Mật khẩu phải có 15–128 ký tự.");
+        if (value == null || length(value) < 8 || length(value) > 128) throw RuleViolation.invalid("Mật khẩu phải có 8–128 ký tự.");
     }
     private static int length(String value) { return value.codePointCount(0, value.length()); }
 }

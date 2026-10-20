@@ -258,7 +258,7 @@ Các giới hạn số trong bảng là đề xuất cho W1. Quy tắc người 
 | BR-21 | Cập nhật trạng thái/thông tin và bản ghi thay đổi chính phải cùng thành công hoặc cùng thất bại. Xung đột phiên bản bị từ chối, không âm thầm ghi đè. |
 | BR-22 | W1 không có xóa công việc/nhóm. Nếu người dùng cần xử lý việc tạo nhầm, ghi nhận để ưu tiên chức năng lưu trữ; không tự xóa dữ liệu của họ bằng thao tác vận hành thường ngày. |
 | BR-23 | Tên tài khoản dài 3–30 ký tự, gồm chữ Latin thường, số, dấu chấm/gạch dưới/gạch ngang; chuẩn hóa chữ thường và phải duy nhất. Tên hiển thị 1–80 ký tự, có thể trùng và dùng tiếng Việt. |
-| BR-24 | Mật khẩu đề xuất 15–128 ký tự vì MVP chưa có MFA; cho phép khoảng trắng, không tự cắt/strip mật khẩu. Chỉ lưu bản băm; đổi/reset mật khẩu hủy phiên cũ. |
+| BR-24 | Mật khẩu 8–128 ký tự theo yêu cầu chủ dự án ngày 21/10/2026; MVP chưa có MFA; cho phép khoảng trắng, không tự cắt/strip mật khẩu. Chỉ lưu bản băm; đổi/reset mật khẩu hủy phiên cũ. |
 
 Ví dụ phân biệt trạng thái và thời hạn:
 

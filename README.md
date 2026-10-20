@@ -1,3 +1,5 @@
+> **Thay đổi sau release — 21/10/2026:** source dùng mật khẩu tài khoản **8–128 ký tự**, theo D-44. Bản release `5ebb026`/ZIP và JAR launcher đã chốt vẫn giữ nguyên ngưỡng cũ 15; JAR min8 mới chỉ được build riêng, chưa thay bản đang chạy.
+
 # Deadline Tracker — W1
 
 Quản lý công việc cho nhóm đồ án 4–5 người: giao việc, tiến độ, lọc hạn và lưu lịch sử. Bản local P3-01/P3-02 được chốt ngày **21/10/2026**, gồm triển khai candidate hiện có và tài liệu IR-01 trên nền `d992edc4172afc8eff050312066a7b33af35b6b5`. Full commit phát hành và kiểm gói nằm trong `release-manifest.json` của gói bàn giao ngoài repo; không dùng riêng commit nền để định danh candidate.
@@ -28,7 +30,7 @@ Sau khi build:
 
 1. Copy `.env.example` thành `.env`, thay hai mật khẩu DB bằng hai giá trị ngẫu nhiên khác nhau. Chỉ là mật khẩu DB cục bộ, không phải tài khoản ứng dụng. Không commit `.env`. `DB_ROOT_PASSWORD` chỉ dành cho bootstrap container DB; không truyền root secret vào JVM web, kể cả profile prod. Xem ranh giới provisioning trong [DEPLOY](docs/DEPLOY.md).
 2. Chạy `docker compose up --build -d`.
-3. Mở **http://127.0.0.1:8080/register**, tạo tài khoản thử (mật khẩu 15–128 ký tự), đăng nhập và tạo nhóm/công việc. Không có admin/mật khẩu mặc định.
+3. Mở **http://127.0.0.1:8080/register**, tạo tài khoản thử (mật khẩu 8–128 ký tự), đăng nhập và tạo nhóm/công việc. Không có admin/mật khẩu mặc định.
 4. Owner mở cài đặt nhóm → tạo liên kết → chuyển riêng cho đúng người. Mỗi liên kết dùng một lần, hạn 24 giờ; cần bốn liên kết cho bốn người.
 
 Compose chỉ bind máy cá nhân: app 8080, DB 3307. DB trong named volume giữ qua restart. Dừng `docker compose stop`, chạy lại `docker compose start`. `docker compose down` giữ volume; **không thêm `-v` nếu cần giữ dữ liệu**. Không đổi `.env` khi volume đã tồn tại mà chưa cập nhật tài khoản DB.
