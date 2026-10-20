@@ -11,9 +11,9 @@ import java.util.*;
 @Service @Transactional
 public class WorkService {
     private final GroupAccess access; private final GroupRepository groups; private final MemberRepository members;
-    private final TaskRepository tasks; private final TaskEventRepository events; private final Clock clock;
-    public WorkService(GroupAccess access,GroupRepository groups,MemberRepository members,TaskRepository tasks,TaskEventRepository events,Clock clock) {
-        this.access=access;this.groups=groups;this.members=members;this.tasks=tasks;this.events=events;this.clock=clock;
+    private final TaskRepository tasks; private final TaskEventRepository events; private final Clock clock;private final NotificationPublisher publisher;
+    public WorkService(GroupAccess access,GroupRepository groups,MemberRepository members,TaskRepository tasks,TaskEventRepository events,Clock clock,NotificationPublisher publisher) {
+        this.access=access;this.groups=groups;this.members=members;this.tasks=tasks;this.events=events;this.clock=clock;this.publisher=publisher;
     }
     public Group createGroup(String actor,String name,String description) {
         access.active(actor); var domain=Group.create(name,description,actor);
@@ -63,5 +63,6 @@ public class WorkService {
         var e=new TaskEventEntity();e.id=UUID.randomUUID().toString();e.taskId=after.getId();e.actorId=actor;e.eventType=change.name();e.changedAt=now();
         e.oldStatus=before==null?null:before.getStatus().name();e.newStatus=after.getStatus().name();e.oldAssignee=before==null?null:before.getAssigneeId();e.newAssignee=after.getAssigneeId();
         e.oldDue=before==null?null:before.getDueAt();e.newDue=after.getDueAt();events.save(e);
+        if(before==null||!before.getAssigneeId().equals(after.getAssigneeId()))publisher.assignment(actor,after.getGroupId(),after.getId(),after.getAssigneeId(),e.id);
     }
 }

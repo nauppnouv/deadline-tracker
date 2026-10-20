@@ -1,3 +1,5 @@
+> **W1.1 hiện tại:** kết quả local M0–M5, candidate và giới hạn ở [w11-final](verification/w11-final.md). Các mục cũ bên dưới giữ nguyên snapshot lịch sử.
+
 ## BR-24 min8 — 21/10/2026, sau release5ebb026
 
 - Source worktree trên `fix/p3-01-web-root-secret` thay validator chung và form đăng ký/đổi mật khẩu từ15 xuống8; max128/Unicode/không strip/Argon2/hủy phiên giữ nguyên. DB/migration secrets không thay, không sửa V1–V4.
@@ -319,3 +321,32 @@ R2-01 DATA-08 UAT-14 bổ sung ca retention đồng thời: RED hai lượt exit
 
 - RED: `target/r2-01-lock-red.log`; GREEN: `target/r2-01-lock-green.log`. Lệnh và hash log: [biên bản](verification/r2-01-lock.txt).
 - `bash scripts/check.sh`: 138/0/0/0 (tests/failures/errors/skipped), build/static/gitleaks/dependency/migration OK. Phạm vi tự động cục bộ; không suy thành đạt pilot.
+## W1.1 M0 — baseline/specification (21/10/2026)
+
+- **Đạt — M0 provenance/spec output only:** `python D:/Documents/coding/deadline-tracker-checkpoints/w11-baseline-reconciled-20261021T015624+0700/RECONCILE.py` exit0. Hash185 candidate files;13-path min8 overlay raw bytes và Git blobs; checkpoint trước/sau repo gốc/candidate/JAR/launcher; worktree `d2d1a97`.
+- Candidate đã tiến hợp lệ từ parent `5ebb026` lên min8 commit `d2d1a97` có đủ13 paths. Bốn path tài liệu khác snapshot cũ được giữ; source/template/test min8 khớp. Hai status marker CRLF/LF trong worktree nhưng normalized diff và staged diff exit0, không xóa raw bytes.
+- **Chưa chạy W1.1 behavior/build:** compile, migration, JUnit/integration, actual chunked HTTP/CSRF, backup+files restore, browser/push, gitleaks và dependency audit đều chưa chạy. `SETUP-ATTEMPT-1.json` exit1 là assertion của setup runner khi gặp EOL markers, không phải product test.
+- Ma trận quyền/quota/event cùng giới hạn và blocker ở [w11-m0](verification/w11-m0.md). Chưa chọn Web Push library/provider; chưa có scanner antivirus/trusted HTTPS/device push; không tuyên bố SEC/DATA/UAT đạt hoặc Gate A.
+
+## W1.1 — targeted implementation receipts (21/10/2026)
+
+| Scope | Kết quả | Lệnh / receipt |
+|---|---|---|
+| Java compile sau sửa reminder repository + preference mappings | Đạt, exit 0 | `& 'C:/Program Files/Git/bin/bash.exe' scripts/mvn.sh -DskipTests compile` |
+| Migration V1–V8 và exact schema contract | Đạt: `SchemaStartupTest`, 11 tests, 0 failures/errors/skips | `& 'C:/Program Files/Git/bin/bash.exe' scripts/mvn.sh -Dtest=SchemaStartupTest test` |
+| Task collaboration, comment, mention, attachment and pins | Đạt tập hiện tại `TaskWebTest`, 11 tests, 0 failures/errors/skips | `& 'C:/Program Files/Git/bin/bash.exe' scripts/mvn.sh -Dtest=TaskWebTest test` |
+| Reminder 24h/1h fixed Clock, dedupe, opt-out, stale due/DONE behavior | Đạt, 2 tests, 0 failures/errors/skips | `& 'C:/Program Files/Git/bin/bash.exe' scripts/mvn.sh -Dtest=ReminderSchedulerTest test` |
+| Preferences UI and CSRF | Đạt targeted `AuthWebTest#reminderPreferencesForm`, 1 test, 0 failures/errors/skips | `& 'C:/Program Files/Git/bin/bash.exe' scripts/mvn.sh '-Dtest=AuthWebTest#reminderPreferencesForm' test` |
+| Paired DB+file generation restore with synthetic blob | Đạt, 1 test, 0 failures/errors/skips | `& 'C:/Program Files/Git/bin/bash.exe' scripts/mvn.sh '-Dtest=BackupRestoreTest#pairedAttachmentGeneration' test`; Bash `-n` both generation scripts passed |
+| Reduced runtime DB grants for V5–V8 comment/revision/mention/pin/reminder writes; migration runner now applies 8 versions | Đạt, `MigrationRuntimeSeparationTest#runtimeBusinessAndOpsWithRetainedDefiner` and `#separateProcessAndIdempotence`, 1+1 tests, each 0 failures/errors/skips | `target/w11-runtime-grants.log`; `target/w11-migration-count.log` |
+| Multipart actual HTTP chunked path | Đạt, 1 test, 0 failures/errors/skips before this continuation | Prior `ChunkedRequestTest#chunkedMultipartUpload` report is in this worktree `target/surefire-reports` |
+| Local browser UX for account reminders | Đạt flow login synthetic demo → account → toggle/save → PRG back, checkbox persisted; final Playwright console 0 errors/warnings. Screenshot [w11-account-preview.png](verification/w11-account-preview.png), SHA-256 `C36A63CEB4D41CE67648DBAB73F357CCD49C63C57C69878ABF90D26A3BF1DA33` | `playwright-cli` against `http://127.0.0.1:18080`, loopback only, Testcontainers DB. Preview stopped and port 18080 no longer listening. |
+
+These are author-run focused checks on the worktree, not the final commit, full check, independent review, Gate A, production, or scanner proof. The combined rerun before the boolean JDBC assertion correction had one test-side `ClassCastException`; the corrected auth+reminder rerun passed 3/3. Paired restore first exposed a flawed MariaDB tab-concatenation comparison; the verifier now checks each unique manifest key plus exact row count and passed rerun. Extending runtime grants first hit the fixture's removed `java.io.tmpdir` property; fixture now sets its isolated external attachment path explicitly and both focused grants/migration tests passed. The preview launcher returned exit 1 on shutdown with `InterruptedException` from Testcontainers cleanup after the app had gracefully closed; browser flow had already succeeded and port 18080 was confirmed closed. Web Push transport/E2E, dependency/secret audit, full `scripts/check.sh`, final JAR and clean clone remain unrun.
+
+## W1.1 M0–M5 — kết quả local cuối (21/10/2026)
+
+- Đã có comments/revisions/timeline, mention/inbox/event preferences, file task/comment+pins+reconcile/scanner hook, Web Push opt-in/grants/epochs/outbox/provider policy và reminder24h/1h. V5–V9 + exact schema/runtime-grant/paired DB+files restore đồng bộ.
+- Full kiểm checkout mới từ snapshot cố định: **266 tests / 33 classes,0failure/error/skip**, exit0; build/static/secret/dependency/migration gates OK. Browser desktop/mobile và5permission states giả lập đạt; preview đã đóng. Lượt full trước bị snapshot không nhất quán exit1/51fail được giữ nguyên trong evidence.
+- Candidate riêng: `D:\Documents\coding\deadline-tracker-w11-20261021T015624+0700\target\w11-candidate-20261021T035528+0700\candidate-w11.jar`, SHA256 `db03fc0b30dbe6e73d8db06e6eec4a108814400ee9dc83e5fe08fea1f384828d`. Source/commit/receipt/hash ở [w11-final](verification/w11-final.md) và `D:\Documents\coding\deadline-tracker-checkpoints\w11-final-20261021T035528+0700/FINAL-CHECKPOINT.json`; launcher8443/repo gốc/P3/JAR cũ giữ nguyên.
+- M6 chuẩn bị [runbook](W11_SERVER_RUNBOOK.md), chưa server/push thật/tab đóng/scanner/offsite/ACL/proxy thật. Tài liệu AI **chưa đọc**, không review độc lập/pilot/Gate A. Dừng tại bàn giao; chưa push/merge/deploy.

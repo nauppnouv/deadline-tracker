@@ -16,6 +16,14 @@
     <dependency><groupId>org.flywaydb</groupId><artifactId>flyway-mysql</artifactId></dependency>
     <dependency><groupId>org.mariadb.jdbc</groupId><artifactId>mariadb-java-client</artifactId><scope>runtime</scope></dependency>
     <dependency><groupId>org.bouncycastle</groupId><artifactId>bcprov-jdk18on</artifactId><version>1.83</version></dependency>
+    <dependency><groupId>nl.martijndwars</groupId><artifactId>web-push</artifactId><version>5.1.2</version><exclusions>
+      <exclusion><groupId>com.beust</groupId><artifactId>jcommander</artifactId></exclusion>
+      <exclusion><groupId>org.apache.httpcomponents</groupId><artifactId>httpasyncclient</artifactId></exclusion>
+      <exclusion><groupId>org.asynchttpclient</groupId><artifactId>async-http-client</artifactId></exclusion>
+      <exclusion><groupId>org.bitbucket.b_c</groupId><artifactId>jose4j</artifactId></exclusion>
+    </exclusions></dependency>
+    <dependency><groupId>org.bitbucket.b_c</groupId><artifactId>jose4j</artifactId><version>0.9.7</version></dependency>
+    <dependency><groupId>org.apache.httpcomponents</groupId><artifactId>httpclient</artifactId><version>4.5.14</version></dependency>
     <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-webmvc-test</artifactId><scope>test</scope></dependency>
     <dependency><groupId>org.springframework.boot</groupId><artifactId>spring-boot-starter-security-test</artifactId><scope>test</scope></dependency>
     <dependency><groupId>org.testcontainers</groupId><artifactId>testcontainers-mariadb</artifactId><scope>test</scope></dependency>

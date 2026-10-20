@@ -1,0 +1,4 @@
+<!doctype html><html lang="vi" xmlns:th="http://www.thymeleaf.org"><head th:replace="~{fragments :: head('Bản sửa bình luận')}"></head>
+<body><header th:replace="~{fragments :: header}"></header><main class="container card"><h1>Bản sửa trước</h1>
+<ol><li th:each="revision : ${revisions}"><time th:text="${time.format(revision.revisedAt)}"></time><p class="pre-wrap" th:text="${revision.body}"></p></li></ol>
+<p th:if="${revisions.isEmpty()}">Bình luận chưa có bản sửa.</p><a th:href="${taskPath}">Về công việc</a></main></body></html>

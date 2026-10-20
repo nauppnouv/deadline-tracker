@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Thông báo')}"></head>
+<body>
+<header th:replace="~{fragments :: header}"></header>
+<main class="container">
+<h1>Thông báo</h1><p th:text="${unread + ' chưa đọc'}"></p>
+<p th:if="${items.isEmpty()}">Chưa có thông báo.</p>
+<ol class="timeline"><li th:each="item : ${items}">
+<p><strong th:text="${item.kind == 'MENTION' ? 'Bạn được nhắc trong bình luận' : (item.kind == 'REMINDER' ? 'Công việc sắp đến hạn' : (item.kind == 'TASK_ASSIGNMENT' ? 'Bạn được giao công việc' : 'Có bình luận mới về công việc'))}"></strong></p>
+<p><time th:text="${time.format(item.createdAt)}"></time><span th:if="${item.readAt == null}"> · Chưa đọc</span></p>
+<form th:action="@{/notifications/{id}/open(id=${item.id})}" method="post"><button type="submit">Mở công việc</button></form>
+<form th:if="${item.readAt == null}" th:action="@{/notifications/{id}/read(id=${item.id})}" method="post"><button class="secondary" type="submit">Đánh dấu đã đọc</button></form>
+</li></ol>
+</main></body></html>

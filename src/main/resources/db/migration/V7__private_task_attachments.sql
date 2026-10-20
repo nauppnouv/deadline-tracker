@@ -1,0 +1,46 @@
+CREATE TABLE task_attachment (
+    id VARCHAR(36) NOT NULL,
+    task_id VARCHAR(36) NOT NULL,
+    group_id VARCHAR(36) NOT NULL,
+    uploader_id VARCHAR(36) NOT NULL,
+    display_name VARCHAR(255) NOT NULL,
+    media_type VARCHAR(100) NOT NULL,
+    size_bytes BIGINT NOT NULL,
+    sha256 CHAR(64) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+    storage_key CHAR(36) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+    lifecycle VARCHAR(10) NOT NULL,
+    created_at DATETIME(6) NOT NULL,
+    hidden_at DATETIME(6),
+    hidden_by VARCHAR(36),
+    PRIMARY KEY (id),
+    CONSTRAINT uq_attachment_storage UNIQUE (storage_key),
+    CONSTRAINT uq_attachment_task UNIQUE (id,task_id),
+    CONSTRAINT fk_attachment_task FOREIGN KEY (task_id) REFERENCES task(id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT fk_attachment_group FOREIGN KEY (group_id) REFERENCES project_group(id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT fk_attachment_uploader FOREIGN KEY (group_id,uploader_id) REFERENCES group_member(group_id,user_id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT fk_attachment_hidden_by FOREIGN KEY (group_id,hidden_by) REFERENCES group_member(group_id,user_id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT ck_attachment_size CHECK (size_bytes BETWEEN 1 AND 10485760),
+    CONSTRAINT ck_attachment_lifecycle CHECK (lifecycle IN ('STAGED','READY','FAILED')),
+    INDEX ix_attachment_task_created (task_id,created_at,id),
+    INDEX ix_attachment_group_size (group_id,size_bytes)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;
+
+ALTER TABLE task_comment ADD CONSTRAINT uq_comment_task UNIQUE (id,task_id);
+CREATE TABLE task_pin (
+    id VARCHAR(36) NOT NULL,
+    task_id VARCHAR(36) NOT NULL,
+    group_id VARCHAR(36) NOT NULL,
+    comment_id VARCHAR(36),
+    attachment_id VARCHAR(36),
+    pinned_by VARCHAR(36) NOT NULL,
+    created_at DATETIME(6) NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT uq_pin_item UNIQUE (task_id,comment_id,attachment_id),
+    CONSTRAINT fk_pin_task FOREIGN KEY (task_id) REFERENCES task(id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT fk_pin_comment_task FOREIGN KEY (comment_id,task_id) REFERENCES task_comment(id,task_id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT fk_pin_attachment_task FOREIGN KEY (attachment_id,task_id) REFERENCES task_attachment(id,task_id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT fk_pin_group FOREIGN KEY (group_id) REFERENCES project_group(id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT fk_pin_actor FOREIGN KEY (group_id,pinned_by) REFERENCES group_member(group_id,user_id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT ck_pin_one_item CHECK ((comment_id IS NOT NULL AND attachment_id IS NULL) OR (comment_id IS NULL AND attachment_id IS NOT NULL)),
+    INDEX ix_pin_task_created (task_id,created_at,id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin;

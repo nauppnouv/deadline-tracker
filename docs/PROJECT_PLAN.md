@@ -165,9 +165,22 @@ D1 vẫn là mốc nội bộ, chưa đủ cho dùng thử web.
 - Lưu trữ/khôi phục công việc và nhóm; quản lý rời nhóm/loại thành viên/chuyển chủ nhóm.
 - Tìm kiếm từ khóa, xuất CSV, chế độ bảng Kanban.
 
+### 5.4.1. W1.1 collaboration increment — đã được giao local EXECUTE
+
+Mục này ghi phạm vi W1.1 đã được chủ dự án giao thực hiện cục bộ ngày 21/10/2026. Đây là đề bài triển khai, chưa phải bằng chứng nghiệm thu, owner comprehension, pilot hay chấp thuận cho dữ liệu thật.
+
+- Bình luận plain text tối đa 4.000 Unicode code points; sửa có version, giữ revision và ẩn mềm; timeline ghép `TaskEvent` bất biến, comment và attachment, trang 20 dòng.
+- Mention tối đa 10 thành viên đang hoạt động, lưu bằng account ID; notification bền trong inbox, phân trang/read ownership và deep link có kiểm membership hiện tại. Comment, mention, inbox và delivery intent cùng transaction.
+- File PDF/PNG/JPEG/TXT/DOCX/XLSX, tối đa 10 MiB/file, 12 MiB/request, một file/request, 20 file/task và 200 MiB/group. Private storage ngoài webroot; tên/path do server tạo; READY mới được đọc/ghim. Tombstone không giải phóng quota/bytes. Pin tối đa 5 comment/file mỗi task; Owner hoặc task creator.
+- Desktop Web Push phải opt-in sau thao tác bấm; inbox vẫn là nguồn dữ liệu khi permission unsupported/denied hoặc sender lỗi. Subscription, grant, preference, outbox lease/retry/dedupe và deadline reminder 24h/1h opt-in không đồng nghĩa đã hiện trên OS.
+- Notification desktop chỉ chứa payload chung và opaque ID; không body, display filename hay bearer secret. Logout, password reset/change, khóa/anonymize thu hồi server-side grants. Restore giữ inbox nhưng không bật lại subscriptions/deliveries snapshot.
+- Giữ Spring MVC/Thymeleaf, MariaDB, một instance và migration riêng cho prod/ops. Thêm migration sau V4; giữ byte V1–V4 và exact schema/trigger verifier. Attachment backup là một generation DB+bytes+hash manifest.
+
+Ma trận quyền/quota, event recipients, trạng thái kiểm và giới hạn triển khai nằm trong [W1.1 M0](verification/w11-m0.md). Quy tắc file ở đây là mặc định cho dữ liệu tổng hợp/local; scanner antivirus và retention dữ liệu thật cần owner/operator chọn ở M6.
+
 ### 5.5. Ngoài phạm vi hiện tại
 
-AI chia việc/chấm đóng góp, chat thời gian thực, gọi video, ứng dụng di động riêng, thanh toán, nhiều người phụ trách một việc, công việc lặp, phụ thuộc giữa việc, chấm điểm học tập, file đính kèm, đồng bộ lịch, tích hợp LMS, kiến trúc microservices.
+AI chia việc/chấm đóng góp, chat thời gian thực, gọi video, ứng dụng di động riêng, thanh toán, nhiều người phụ trách một việc, công việc lặp, phụ thuộc giữa việc, chấm điểm học tập, đồng bộ lịch, tích hợp LMS, kiến trúc microservices. File đính kèm thuộc increment W1.1 ở §5.4.1; phạm vi W1 gốc vẫn không có file.
 
 Không tự thêm các mục này chỉ vì AI có thể viết nhanh. Mọi yêu cầu mới phải nêu người cần, tình huống sử dụng, giá trị, chi phí và phần nào sẽ bị lùi.
 

@@ -31,7 +31,7 @@ FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND IS_GENERATED='
 UNION ALL
 SELECT CONVERT(CONCAT('TEXTDEF|',TABLE_NAME,'|',COLUMN_NAME,'|',CHARACTER_SET_NAME,'|',COLLATION_NAME) USING utf8mb4) COLLATE utf8mb4_bin
 FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE()
- AND TABLE_NAME IN ('app_user','project_group','group_member','task','invitation','task_event','SPRING_SESSION','SPRING_SESSION_ATTRIBUTES')
+ AND TABLE_NAME IN ('app_user','project_group','group_member','task','invitation','task_event','task_comment','task_comment_revision','comment_mention','notification','task_attachment','task_pin','notification_preference','push_preference','push_device','push_delivery','SPRING_SESSION','SPRING_SESSION_ATTRIBUTES')
  AND CHARACTER_SET_NAME IS NOT NULL
 UNION ALL
 SELECT CONVERT(CONCAT('COLDEF|',TABLE_NAME,'|',COLUMN_NAME,'|',COLUMN_TYPE,'|',DATA_TYPE,'|',
@@ -39,7 +39,7 @@ SELECT CONVERT(CONCAT('COLDEF|',TABLE_NAME,'|',COLUMN_NAME,'|',COLUMN_TYPE,'|',D
  COALESCE(CAST(NUMERIC_SCALE AS CHAR),'<NULL>'),'|',COALESCE(CAST(DATETIME_PRECISION AS CHAR),'<NULL>'),'|',
  IS_NULLABLE,'|',REPLACE(COALESCE(COLUMN_DEFAULT,'<NULL>'),'|','<PIPE>'),'|',EXTRA) USING utf8mb4) COLLATE utf8mb4_bin
 FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE()
- AND TABLE_NAME IN ('app_user','project_group','group_member','task','invitation','task_event','SPRING_SESSION','SPRING_SESSION_ATTRIBUTES')
+ AND TABLE_NAME IN ('app_user','project_group','group_member','task','invitation','task_event','task_comment','task_comment_revision','comment_mention','notification','task_attachment','task_pin','notification_preference','push_preference','push_device','push_delivery','SPRING_SESSION','SPRING_SESSION_ATTRIBUTES')
 UNION ALL
 SELECT CONVERT(CONCAT('TRIGGERDEF|',TRIGGER_NAME,'|',EVENT_OBJECT_TABLE,'|',ACTION_TIMING,'|',EVENT_MANIPULATION,'|',SHA2(ACTION_STATEMENT,256)) USING utf8mb4) COLLATE utf8mb4_bin
 FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA=DATABASE() AND ACTION_STATEMENT IS NOT NULL;

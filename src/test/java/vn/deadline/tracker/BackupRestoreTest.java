@@ -5,7 +5,7 @@ import java.nio.file.*;import java.time.*;import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 class BackupRestoreTest extends DatabaseTest {
-    @Autowired AccountService accounts;@Autowired WorkService work;
+    @Autowired AccountService accounts;@Autowired WorkService work;@Autowired org.springframework.jdbc.core.JdbcTemplate jdbc;
     String env(){return "export DB_HOST=127.0.0.1 DB_PORT=3306 DB_USER=root DB_NAME=deadline_test DB_PASSWORD=\"${MARIADB_ROOT_PASSWORD:-${MYSQL_ROOT_PASSWORD:-}}\" BACKUP_DIR=/tmp/deadline-backups BACKUP_KEEP=2; ";}
     org.testcontainers.containers.Container.ExecResult run(String command)throws Exception{return DB.execInContainer("bash","-lc",env()+command);}
     @Test @DisplayName("DATA-08 UAT-14 real dump/restore, table rows+checksums, FK, permissions and retention")
@@ -42,5 +42,37 @@ class BackupRestoreTest extends DatabaseTest {
         assertEquals("Backup task",work.task(user,group,task.getId()).getTitle());
         assertEquals(0,run("touch /tmp/deadline-backups/keep.txt; for n in 1 2 3; do bash /deadline-project/scripts/backup.sh >/dev/null || exit 1; done; test -f /tmp/deadline-backups/keep.txt").getExitCode());
         assertEquals("2",run("find /tmp/deadline-backups -maxdepth 1 -name 'deadline-*.sql.gz' -type f | wc -l").getStdout().strip());
+    }
+    @Test @DisplayName("W1.1 M3 paired generation backup restores matching private blobs and database metadata")
+    void pairedAttachmentGeneration()throws Exception{
+        jdbc.update("DELETE FROM task_pin");jdbc.update("DELETE FROM task_attachment");
+        String actor=accounts.register("g"+UUID.randomUUID().toString().replace("-","").substring(0,20),"Generation fixture","Generation backup fixture passphrase 123!");
+        String group=work.createGroup(actor,"Paired backup group","").getId();var task=work.createTask(actor,group,"Paired backup task","",actor,Instant.now().plusSeconds(3600));
+        byte[] bytes="Synthetic private attachment for paired generation".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        String digest=java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(bytes));
+        String id=UUID.randomUUID().toString(),key=UUID.randomUUID().toString();
+        jdbc.update("INSERT INTO task_attachment(id,task_id,group_id,uploader_id,display_name,media_type,size_bytes,sha256,storage_key,lifecycle,created_at) VALUES(?,?,?,?,?,?,?,?,?,'READY',UTC_TIMESTAMP(6))",id,task.getId(),group,actor,"note.txt","text/plain; charset=utf-8",bytes.length,digest,key);
+        String device=UUID.randomUUID().toString(),notification=UUID.randomUUID().toString();
+        jdbc.update("INSERT INTO push_preference(user_id,enabled,registration_window) VALUES(?,TRUE,UTC_TIMESTAMP(6))",actor);
+        jdbc.update("INSERT INTO push_device(id,user_id,endpoint,endpoint_hash,p256dh,auth_secret,enabled,created_at,updated_at) VALUES(?,?,?,?,?,?,TRUE,UTC_TIMESTAMP(6),UTC_TIMESTAMP(6))",device,actor,"https://fcm.googleapis.com/fcm/send/synthetic-backup",UUID.randomUUID().toString(),"synthetic-public","synthetic-auth");
+        jdbc.update("INSERT INTO notification(id,event_key,recipient_id,group_id,task_id,kind,created_at) VALUES(?,?,?,?,?,'COMMENT',UTC_TIMESTAMP(6))",notification,UUID.randomUUID().toString(),actor,group,task.getId());
+        jdbc.update("INSERT INTO push_delivery(id,notification_id,device_id,grant_epoch,next_attempt_at,created_at,expires_at) VALUES(?,?,?,1,UTC_TIMESTAMP(6),UTC_TIMESTAMP(6),DATE_ADD(UTC_TIMESTAMP(6),INTERVAL 1 DAY))",UUID.randomUUID().toString(),notification,device);
+        Path source=Path.of("target","paired-generation-attachment.blob");Files.createDirectories(source.getParent());Files.write(source,bytes);
+        DB.copyFileToContainer(MountableFile.forHostPath(Path.of("scripts").toAbsolutePath()),"/deadline-project/scripts");
+        DB.copyFileToContainer(MountableFile.forHostPath(source.toAbsolutePath()),"/deadline-project/target/paired-generation-attachment.blob");
+        var made=run("mkdir -p /tmp/private-attachments; cp /deadline-project/target/paired-generation-attachment.blob /tmp/private-attachments/"+key+".blob; export BACKUP_WRITES_PAUSED=1 ATTACHMENT_ROOT=/tmp/private-attachments; bash /deadline-project/scripts/backup-generation.sh");
+        assertEquals(0,made.getExitCode(),made.getStderr());String generation=made.getStdout().lines().filter(s->s.startsWith("GENERATION_DIR=")).findFirst().orElseThrow().substring("GENERATION_DIR=".length());
+        String restore="deadline_restore_pair_"+UUID.randomUUID().toString().replace("-","");
+        var restored=run("export GENERATION_DIR='"+generation+"' RESTORE_DB="+restore+" RESTORE_ATTACHMENT_ROOT=/tmp/restored-private-attachments; bash /deadline-project/scripts/verify-generation-restore.sh");
+        assertEquals(0,restored.getExitCode(),restored.getStderr()+"\n"+restored.getStdout());assertTrue(restored.getStdout().contains("ATTACHMENT_FILES_OK"));
+        assertTrue(restored.getStdout().contains("PUSH_GRANTS_REVOKED"));
+        assertEquals("0",run("export MYSQL_PWD=\"$DB_PASSWORD\"; mariadb -h127.0.0.1 -uroot "+restore+" -N -e \"SELECT COUNT(*) FROM push_device WHERE enabled=TRUE\"").getStdout().strip());
+        assertEquals("0",run("export MYSQL_PWD=\"$DB_PASSWORD\"; mariadb -h127.0.0.1 -uroot "+restore+" -N -e \"SELECT COUNT(*) FROM push_delivery WHERE state IN ('PENDING','LEASED')\"").getStdout().strip());
+        String badRestore="deadline_restore_bad_"+UUID.randomUUID().toString().replace("-","");
+        var extra=run("touch '"+generation+"/attachments/unpaired.blob'; export GENERATION_DIR='"+generation+"' RESTORE_DB="+badRestore+" RESTORE_ATTACHMENT_ROOT=/tmp/restored-extra; bash /deadline-project/scripts/verify-generation-restore.sh");assertNotEquals(0,extra.getExitCode());
+        run("rm '"+generation+"/attachments/unpaired.blob'; printf corrupted > '"+generation+"/attachments/"+key+".blob'");
+        var corrupt=run("export GENERATION_DIR='"+generation+"' RESTORE_DB="+badRestore+" RESTORE_ATTACHMENT_ROOT=/tmp/restored-corrupt; bash /deadline-project/scripts/verify-generation-restore.sh");assertNotEquals(0,corrupt.getExitCode());
+        assertEquals(digest,run("sha256sum /tmp/restored-private-attachments/"+key+".blob | cut -d ' ' -f 1").getStdout().strip());
+        assertEquals("1",run("export MYSQL_PWD=\"$DB_PASSWORD\"; mariadb -h127.0.0.1 -uroot "+restore+" -N -e \"SELECT COUNT(*) FROM task_attachment WHERE storage_key='"+key+"' AND sha256='"+digest+"'\"").getStdout().strip());
     }
 }

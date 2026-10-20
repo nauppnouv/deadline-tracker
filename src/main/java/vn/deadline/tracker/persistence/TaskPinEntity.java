@@ -1,0 +1,2 @@
+package vn.deadline.tracker.persistence;import jakarta.persistence.*;import java.time.Instant;import org.hibernate.annotations.JdbcTypeCode;import org.hibernate.type.SqlTypes;
+@Entity @Table(name="task_pin") public class TaskPinEntity{@Id @Column(length=36)public String id;@Column(length=36)public String taskId;@Column(length=36)public String groupId;@Column(length=36)public String commentId;@Column(length=36)public String attachmentId;@Column(length=36)public String pinnedBy;@JdbcTypeCode(SqlTypes.TIMESTAMP)public Instant createdAt;}

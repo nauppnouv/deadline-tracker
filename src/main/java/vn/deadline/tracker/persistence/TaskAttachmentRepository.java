@@ -1,0 +1,2 @@
+package vn.deadline.tracker.persistence;import org.springframework.data.jpa.repository.JpaRepository;import java.util.*;
+public interface TaskAttachmentRepository extends JpaRepository<TaskAttachmentEntity,String>{Optional<TaskAttachmentEntity> findByIdAndTaskId(String id,String taskId);List<TaskAttachmentEntity> findByTaskIdOrderByCreatedAtDescIdDesc(String taskId);long countByTaskId(String taskId);}

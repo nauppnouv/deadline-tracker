@@ -6,6 +6,8 @@ Quản lý công việc cho nhóm đồ án 4–5 người: giao việc, tiến 
 
 Đọc [LOCAL_RELEASE](docs/LOCAL_RELEASE.md) để dùng bộ launcher **đã có trên máy này**, xem phiên bản/JAR, sao lưu và giới hạn. Candidate dùng **https://127.0.0.1:8443**, tách khỏi bộ local cũ 8080. Launcher ghim **repo gốc** và phụ thuộc cấu hình/secret/DB/JDK của máy hiện tại; ZIP không phải bộ cài một lần bấm cho máy mới. Hướng dẫn dựng mới ở phần dưới và LOCAL_RELEASE.
 
+**W1.1 candidate local** đã được build và kiểm trên dữ liệu giả tại `D:/Documents/coding/deadline-tracker-w11-20261021T015624+0700` trên nhánh `feat/w11-collaboration-webpush`: comment/revisions/timeline, mentions/inbox, tệp riêng/pin, reminder 24h/1h và Web Push opt-in với outbox/thu hồi grant. Schema V5–V9, JAR mới và receipts tách khỏi launcher hiện hành. Desktop sender mặc định tắt; inbox hoạt động độc lập. Xem [runbook W1.1](docs/W11_SERVER_RUNBOOK.md), [PROGRESS](docs/PROGRESS.md) và [EVIDENCE](docs/EVIDENCE.md). Push thật/tab đóng trên thiết bị chưa kiểm; chưa triển khai server.
+
 Bằng chứng [EVIDENCE](docs/EVIDENCE.md) giữ ngày/snapshot gốc: CP-006 có **8 JUnit đạt và 29 probe checks** (có lặp), không phải 37 JUnit. Đợt chốt chỉ kiểm tài liệu, danh tính, byte và gói; không chạy lại ứng dụng/test tại commit mới. Chưa triển khai công khai, chưa pilot, chưa ký Gate A hoặc chấp thuận residual. Kiểm thử không phải chứng nhận bảo mật.
 
 ## Dựng mới cục bộ từ source
@@ -57,7 +59,7 @@ Argon2, CSRF, session JDBC 30 phút, cookie HttpOnly/SameSite; Secure/HSTS ở p
 
 **Một instance**, rate limit bộ nhớ mất khi restart: login 5 lần/username và 30 lần/IP/15 phút; đăng ký 5 lần/username và 10 lần/IP/giờ. Không tin địa chỉ chuyển tiếp mặc định; cấu hình proxy theo [DEPLOY](docs/DEPLOY.md), đo lại limit sau proxy. Username 3–30 ký tự a-z0-9._-, chuẩn hóa chữ thường; mật khẩu giữ nguyên khoảng trắng.
 
-Ops đổi định danh không xóa PII trong mô tả/tên người dùng đã nhập hay backup. Chưa chuyển Owner/rời nhóm/loại thành viên; khóa Owner khiến nhóm không quản lý lời mời được. Không có email, nhắc hạn tự động, bình luận, Kanban, file hoặc AI chia việc.
+Ops đổi định danh không xóa PII trong mô tả/tên người dùng đã nhập hay backup. Chưa chuyển Owner/rời nhóm/loại thành viên; khóa Owner khiến nhóm không quản lý lời mời được. **Launcher hiện hành** chưa có email, nhắc hạn tự động, bình luận, Kanban, file hoặc AI chia việc; W1.1 source local nêu phía trên chưa phải launcher/release đã kiểm đủ.
 
 ## Cấu trúc và tài liệu
 

@@ -12,7 +12,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 class TaskWebTest extends DatabaseTest {
     record User(String id,String name,Cookie cookie){}
     @Autowired MockMvc mvc;@Autowired AccountService accounts;@Autowired WorkService work;@Autowired InvitationService invites;
-    @Autowired TaskEventRepository events;@Autowired org.springframework.jdbc.core.JdbcTemplate jdbc;
+    @Autowired TaskEventRepository events;@Autowired org.springframework.jdbc.core.JdbcTemplate jdbc;@Autowired AttachmentService attachmentService;
     static final String PASS="A separate web test passphrase 123!";
     User owner,creator,worker,foreign;String group;
     User user()throws Exception{String n="u"+UUID.randomUUID().toString().replace("-","").substring(0,20);String id=accounts.register(n,"Person",PASS);
@@ -108,5 +108,76 @@ class TaskWebTest extends DatabaseTest {
             var response=mvc.perform(get(path).cookie(owner.cookie())).andExpect(status().isOk()).andExpect(header().string("Referrer-Policy","no-referrer")).andReturn().getResponse();
             assertFalse(response.getContentAsString().contains(payload));assertTrue(response.getContentAsString().contains("&lt;script&gt;"));assertFalse(response.getHeader("Content-Security-Policy").contains("unsafe-inline"));
         }
+    }
+    @Test @DisplayName("W1.1 M1 comment revisions use membership, CSRF, owner hide and optimistic versions")
+    void commentsAndTimeline()throws Exception {
+        var t=task();String commentUrl=url(t)+"/comments";String payload="<script>alert(1)</script> xin chào";
+        mvc.perform(post(commentUrl).cookie(creator.cookie()).param("body",payload)).andExpect(status().isForbidden());
+        mvc.perform(post(commentUrl).cookie(creator.cookie()).with(csrf()).param("body",payload).param("actorId",owner.id()).param("authorId",owner.id()))
+            .andExpect(redirectedUrl(url(t)));
+        var initial=mvc.perform(get(url(t)).cookie(worker.cookie())).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        assertTrue(initial.contains("&lt;script&gt;alert(1)&lt;/script&gt;"));assertFalse(initial.contains(payload));
+        var comment=commentsFor(t).getFirst();
+        mvc.perform(post(commentUrl+"/"+comment.id+"/edit").cookie(worker.cookie()).with(csrf()).param("body","forbidden").param("version","0")).andExpect(status().isForbidden());
+        mvc.perform(post(commentUrl+"/"+comment.id+"/edit").cookie(creator.cookie()).with(csrf()).param("body","updated").param("version","9")).andExpect(status().isConflict());
+        mvc.perform(post(commentUrl+"/"+comment.id+"/edit").cookie(creator.cookie()).with(csrf()).param("body","updated").param("version","0")).andExpect(redirectedUrl(url(t)));
+        assertEquals(1,jdbc.queryForObject("SELECT COUNT(*) FROM task_comment_revision WHERE comment_id=?",Integer.class,comment.id));
+        mvc.perform(get(url(t)).cookie(owner.cookie())).andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("updated")));
+        mvc.perform(post(commentUrl+"/"+comment.id+"/hide").cookie(owner.cookie()).with(csrf())).andExpect(redirectedUrl(url(t)));
+        mvc.perform(get(url(t)).cookie(owner.cookie())).andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("updated"))));
+        mvc.perform(get(url(t)).cookie(foreign.cookie())).andExpect(status().isNotFound());
+        mvc.perform(post(commentUrl).cookie(foreign.cookie()).with(csrf()).param("body","nope")).andExpect(status().isNotFound());
+    }
+    @Test @DisplayName("W1.1 M2 mentions persist inbox recipients once and read ownership is protected")
+    void mentionsAndInbox()throws Exception {
+        var t=task();String postComment=url(t)+"/comments";
+        mvc.perform(post(postComment).cookie(creator.cookie()).with(csrf()).param("body","Please review").param("mentionIds",owner.id()).param("mentionIds",owner.id()))
+            .andExpect(redirectedUrl(url(t)));
+        assertEquals(1,jdbc.queryForObject("SELECT COUNT(*) FROM comment_mention WHERE mentioned_user_id=?",Integer.class,owner.id()));
+        assertEquals(1,jdbc.queryForObject("SELECT COUNT(*) FROM notification WHERE recipient_id=? AND comment_id IS NOT NULL",Integer.class,owner.id()));
+        assertEquals(1,jdbc.queryForObject("SELECT COUNT(*) FROM notification WHERE recipient_id=? AND comment_id IS NOT NULL",Integer.class,worker.id()));
+        assertEquals(0,jdbc.queryForObject("SELECT COUNT(*) FROM notification WHERE recipient_id=? AND comment_id IS NOT NULL",Integer.class,creator.id()));
+        var inbox=mvc.perform(get("/notifications").cookie(owner.cookie())).andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("Bạn được nhắc trong bình luận"))).andReturn();
+        var id=jdbc.queryForObject("SELECT id FROM notification WHERE recipient_id=? AND comment_id IS NOT NULL",String.class,owner.id());
+        mvc.perform(post("/notifications/"+id+"/read").cookie(worker.cookie()).with(csrf())).andExpect(status().isNotFound());
+        mvc.perform(post("/notifications/"+id+"/read").cookie(owner.cookie())).andExpect(status().isForbidden());
+        mvc.perform(post("/notifications/"+id+"/open").cookie(owner.cookie()).with(csrf())).andExpect(redirectedUrl(url(t)+"#comment-"+jdbc.queryForObject("SELECT comment_id FROM notification WHERE id=?",String.class,id)));
+        assertEquals(1,jdbc.queryForObject("SELECT COUNT(*) FROM notification WHERE id=? AND read_at IS NOT NULL",Integer.class,id));
+        mvc.perform(post(postComment).cookie(creator.cookie()).with(csrf()).param("body","bad mention").param("mentionIds",foreign.id())).andExpect(status().isBadRequest());
+        assertEquals(1,jdbc.queryForObject("SELECT COUNT(*) FROM task_comment WHERE task_id=?",Integer.class,t.getId()));
+    }
+    @Test @DisplayName("W1.1 M3 private file download checks membership, MIME signature, hide retention and pin rights")
+    void privateAttachmentsAndPins()throws Exception{
+        var t=task();String base=url(t)+"/attachments";byte[] bytes="synthetic attachment data\n".getBytes(java.nio.charset.StandardCharsets.UTF_8);
+        var file=new org.springframework.mock.web.MockMultipartFile("file","..\\private.txt","text/plain",bytes);
+        attachmentService.upload(creator.id(),group,t.getId(),file);
+        String id=jdbc.queryForObject("SELECT id FROM task_attachment WHERE task_id=?",String.class,t.getId());
+        mvc.perform(get(base+"/"+id).cookie(worker.cookie())).andExpect(status().isOk()).andExpect(header().string("X-Content-Type-Options","nosniff")).andExpect(header().string("Content-Disposition",org.hamcrest.Matchers.containsString("attachment"))).andExpect(content().bytes(bytes));
+        mvc.perform(get(base+"/"+id).cookie(foreign.cookie())).andExpect(status().isNotFound());
+        assertThrows(RuleViolation.class,()->attachmentService.upload(creator.id(),group,t.getId(),new org.springframework.mock.web.MockMultipartFile("file","wrong.pdf","application/pdf",bytes)));
+        mvc.perform(post(url(t)+"/pins/attachment/"+id).cookie(worker.cookie()).with(csrf())).andExpect(status().isForbidden());
+        mvc.perform(post(url(t)+"/pins/attachment/"+id).cookie(creator.cookie()).with(csrf())).andExpect(status().is3xxRedirection());
+        mvc.perform(post(base+"/"+id+"/hide").cookie(worker.cookie()).with(csrf())).andExpect(status().isForbidden());
+        mvc.perform(post(base+"/"+id+"/hide").cookie(creator.cookie()).with(csrf())).andExpect(status().is3xxRedirection());
+        assertEquals("READY",jdbc.queryForObject("SELECT lifecycle FROM task_attachment WHERE id=?",String.class,id));
+        assertEquals(bytes.length,jdbc.queryForObject("SELECT size_bytes FROM task_attachment WHERE id=?",Long.class,id));
+        mvc.perform(get(base+"/"+id).cookie(worker.cookie())).andExpect(status().isNotFound());
+    }
+    private List<TaskCommentEntity> commentsFor(Task t){return jdbc.query("SELECT id,task_id,group_id,author_id,body,version,created_at,updated_at,hidden_at,hidden_by FROM task_comment WHERE task_id=?",(rs,n)->{
+        var c=new TaskCommentEntity();c.id=rs.getString("id");c.taskId=rs.getString("task_id");c.groupId=rs.getString("group_id");c.authorId=rs.getString("author_id");c.body=rs.getString("body");c.version=rs.getLong("version");return c;
+    },t.getId());}
+    @Test void editedMentionsNotifyOnlyNewMemberAndPaginationStaysBounded()throws Exception {
+        var t=task();String base=url(t)+"/comments";
+        mvc.perform(post(base).cookie(creator.cookie()).with(csrf()).param("body","First mention").param("mentionIds",owner.id())).andExpect(status().is3xxRedirection());
+        String id=commentsFor(t).getFirst().id;
+        mvc.perform(post(base+"/"+id+"/edit").cookie(creator.cookie()).with(csrf()).param("body","New mention").param("version","0").param("mentionIds",owner.id(),worker.id())).andExpect(status().is3xxRedirection());
+        assertEquals(1,jdbc.queryForObject("SELECT COUNT(*) FROM notification WHERE comment_id=? AND recipient_id=?",Integer.class,id,owner.id()));
+        assertEquals(2,jdbc.queryForObject("SELECT COUNT(*) FROM notification WHERE comment_id=? AND recipient_id=?",Integer.class,id,worker.id()));
+        mvc.perform(get(base+"/"+id+"/revisions").cookie(creator.cookie())).andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("First mention")));
+        mvc.perform(get(base+"/"+id+"/revisions").cookie(worker.cookie())).andExpect(status().isForbidden());
+        for(int i=0;i<22;i++)mvc.perform(post(base).cookie(creator.cookie()).with(csrf()).param("body","page-item-"+i)).andExpect(status().is3xxRedirection());
+        var response=mvc.perform(get(url(t)).cookie(creator.cookie())).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        assertEquals(20,java.util.regex.Pattern.compile("<li[^>]*id=\"comment-[0-9a-f-]{36}\"").matcher(response).results().count());
+        mvc.perform(get(url(t)+"?page=1").cookie(worker.cookie())).andExpect(status().isOk());
     }
 }

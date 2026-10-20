@@ -18,4 +18,13 @@ Cập nhật 18/10/2026. Bảy mục review vòng2 đã có RED → GREEN, commi
 
 Không có cloud/account/email/domain/resource tính phí nào được agent tạo, không dùng credential thật. AWS2GB dự toán vượt50k/tuần; lựa chọn rẻ hơn vẫn cần xác nhận tổng phí và tình trạng còn hàng.
 
+## W1.1 — trạng thái hiện tại, 21/10/2026
+
+| Việc | Trạng thái / bằng chứng | Hành động |
+|---|---|---|
+| Web Push endpoint và sender | Đã bổ sung provider allowlist, DNS/IP checks ngay resolver của socket, TLS hostname gốc, không proxy/redirect/retry ngầm; fake transport và blocked-DNS tests có receipt W1.1 riêng. Sender mặc định tắt. | M6 cần kiểm provider/browser/origin/egress thực; không suy provider accepted là popup đã hiện. |
+| Desktop push E2E | Chưa chạy; chưa có trusted HTTPS origin/browser/provider được cấp phạm vi. Không bật browser permission trên profile thật. | Cần M6 riêng với origin, browser test context được phép và quyết định host/budget. |
+| Antivirus / file scanning | Chưa có scanner. Kiểm tra magic/OOXML chỉ xác nhận định dạng giới hạn, không phải malware scan. | Server owner chọn scanner/policy và vận hành hook; không tuyên bố file an toàn. |
+| Backup generation pair | Local test `BackupRestoreTest#pairedAttachmentGeneration` chạy DB synthetic + blob synthetic thành công; script đòi operator xác nhận writers đã pause. Chưa có kiểm chứng trên volume/app thực hoặc offsite. | Trước backup thật dừng mọi app writer; restore vào DB/root mới và giữ cách ly tới khi hậu kiểm xong. |
+
 P7-02: full check đầu phiên tái hiện `Mismatch: group_member`. So 16 hàng/cột xác nhận dữ liệu nguồn/restored giống nhau; thay checksum native bằng SHA-256 logic cho manifest mới, giữ đếm hàng/FK và từ chối dữ liệu thay đổi. Full check bản sửa 70 test PASS, static/gitleaks/dependency/migration OK (target/p7-02-final-check.log); lỗi test này đã giải quyết.

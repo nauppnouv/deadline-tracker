@@ -57,7 +57,63 @@
 <p class="muted" th:unless="${canStatus}">Chỉ người đang được giao công việc có thể cập nhật trạng thái.</p>
 </aside>
 </div>
+<section class="card">
+<h2>Tệp đính kèm</h2>
+<form th:action="@{/groups/{g}/tasks/{t}/attachments(g=${group.id},t=${task.id})}" method="post" enctype="multipart/form-data">
+<label for="attachment-file">Tải một tệp (PDF, PNG, JPEG, TXT, DOCX, XLSX; tối đa 10 MiB)</label>
+<input id="attachment-file" name="file" type="file" accept=".pdf,.png,.jpg,.jpeg,.txt,.docx,.xlsx" required>
+<label for="attachment-comment">Gắn với bình luận (không bắt buộc)</label><select id="attachment-comment" name="commentId"><option value="">Công việc</option><option th:each="entry : ${timeline.entries}" th:if="${entry.comment != null}" th:value="${entry.id}" th:text="${#strings.abbreviate(entry.text,60)}"></option></select><button type="submit">Tải tệp lên</button>
+</form>
+<ul><li th:each="file : ${attachments}">
+<a th:href="@{/groups/{g}/tasks/{t}/attachments/{id}(g=${group.id},t=${task.id},id=${file.id})}" th:text="${file.displayName}"></a>
+<small th:text="${file.sizeBytes + ' bytes'}"></small>
+<form th:if="${canEdit}" th:action="@{/groups/{g}/tasks/{t}/pins/attachment/{id}(g=${group.id},t=${task.id},id=${file.id})}" method="post"><button class="secondary" type="submit">Ghim tệp</button></form>
+<form th:if="${file.uploaderId == actorId or group.ownerId == actorId}" th:action="@{/groups/{g}/tasks/{t}/attachments/{id}/hide(g=${group.id},t=${task.id},id=${file.id})}" method="post"><button class="secondary" type="submit">Ẩn tệp</button></form>
+</li></ul>
+<h3>Mục đã ghim</h3>
+<ul><li th:each="pin : ${pins}">
+<a th:if="${pin.commentId != null}" th:href="${'#comment-' + pin.commentId}">Bình luận đã ghim</a>
+<a th:if="${pin.attachmentId != null}" th:href="@{/groups/{g}/tasks/{t}/attachments/{id}(g=${group.id},t=${task.id},id=${pin.attachmentId})}">Tệp đã ghim</a>
+<form th:if="${canEdit}" th:action="@{/groups/{g}/tasks/{t}/pins/{kind}/{id}/remove(g=${group.id},t=${task.id},kind=${pin.commentId != null ? 'comment' : 'attachment'},id=${pin.commentId != null ? pin.commentId : pin.attachmentId})}" method="post"><button type="submit" class="secondary">Bỏ ghim</button></form>
+</li></ul>
+</section>
+<section class="card">
+<h2>Trao đổi và lịch sử</h2>
+<form th:action="@{/groups/{g}/tasks/{t}/comments(g=${group.id},t=${task.id})}" method="post">
+<label for="comment-body">Bình luận</label>
+<textarea id="comment-body" name="body" maxlength="4000" rows="4" required></textarea>
+<label for="mention-ids">Nhắc thành viên</label>
+<select id="mention-ids" name="mentionIds" multiple size="4">
+<option th:each="person : ${members}" th:if="${person.active}" th:value="${person.id}" th:text="${person.displayName}"></option>
+</select>
+<button type="submit">Gửi bình luận</button>
+</form>
+<p class="muted" th:if="${timeline.entries.isEmpty()}">Chưa có hoạt động.</p>
+<ol class="timeline">
+<li th:each="entry : ${timeline.entries}" th:id="${entry.kind == 'COMMENT' ? 'comment-' + entry.id : null}">
+<p><strong th:text="${names[entry.actor]}"></strong> · <time th:text="${time.format(entry.at)}"></time></p>
+<p class="pre-wrap" th:text="${entry.kind == 'EVENT' ? 'Cập nhật công việc: ' + entry.text : (entry.kind == 'FILE' ? 'Tệp đính kèm: ' + entry.text : entry.text)}"></p>
+<div th:if="${entry.comment != null}">
+<form th:if="${canEdit}" th:action="@{/groups/{g}/tasks/{t}/pins/comment/{id}(g=${group.id},t=${task.id},id=${entry.comment.id})}" method="post"><button class="secondary" type="submit">Ghim bình luận</button></form>
+<form th:if="${entry.comment.authorId == actorId and entry.comment.hiddenAt == null}" th:action="@{/groups/{g}/tasks/{t}/comments/{c}/edit(g=${group.id},t=${task.id},c=${entry.comment.id})}" method="post">
+<label th:for="${'edit-' + entry.comment.id}">Sửa bình luận</label>
+<textarea th:id="${'edit-' + entry.comment.id}" name="body" maxlength="4000" required th:text="${entry.comment.body}"></textarea>
+<input type="hidden" name="updateMentions" value="true"><label>Nhắc thành viên (tối đa 10)<select name="mentionIds" multiple size="4"><option th:each="person : ${members}" th:if="${person.active}" th:value="${person.id}" th:text="${person.displayName}" th:selected="${mentionSelections[entry.comment.id].contains(person.id)}"></option></select></label>
+<a th:href="@{/groups/{g}/tasks/{t}/comments/{c}/revisions(g=${group.id},t=${task.id},c=${entry.comment.id})}">Xem bản sửa trước</a>
+<input type="hidden" name="version" th:value="${entry.comment.version}"><button type="submit">Lưu bản sửa</button>
+</form>
+<form th:if="${entry.comment.authorId == actorId or group.ownerId == actorId}" th:action="@{/groups/{g}/tasks/{t}/comments/{c}/hide(g=${group.id},t=${task.id},c=${entry.comment.id})}" method="post"><button class="secondary" type="submit">Ẩn bình luận</button></form>
+</div>
+</li>
+</ol>
+<nav th:if="${timeline.pages > 1}" aria-label="Trang lịch sử">
+<a th:if="${timeline.page > 0}" th:href="@{/groups/{g}/tasks/{t}(g=${group.id},t=${task.id},page=${timeline.page - 1})}">Mới hơn</a>
+<span th:text="${timeline.page + 1 + ' / ' + timeline.pages}"></span>
+<a th:if="${timeline.page + 1 < timeline.pages}" th:href="@{/groups/{g}/tasks/{t}(g=${group.id},t=${task.id},page=${timeline.page + 1})}">Cũ hơn</a>
+</nav>
+</section>
 </main>
+<script defer th:src="@{/js/mentions.js}"></script>
 <script defer th:src="@{/js/app.js}">
 </script>
 </body>

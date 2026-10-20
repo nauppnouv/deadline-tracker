@@ -358,3 +358,37 @@ US-19 xác minh các hành vi trên; US-20/US-22 chứng minh môi trường ch�
 Nhắc hạn chủ động, bình luận, lịch sử hiển thị, lưu trữ/khôi phục việc, rời/loại thành viên/chuyển Owner, tìm kiếm, xuất CSV, Kanban, quên mật khẩu tự phục vụ trước khi mở rộng cho người lạ. Chỉ tạo story chi tiết khi có nhu cầu được xác minh và quyết định ưu tiên.
 
 Mỗi tuần chỉ chọn một story đang làm; có thể lấy một phần nhỏ từ story đó. Không mở đồng thời đăng nhập, frontend và database khi bài danh sách thành viên còn chưa hiểu.
+
+## W1.1 — collaboration increment (được giao local ngày 21/10/2026)
+
+Các story dưới đây mở rộng bản W1 cho checkout W1.1 riêng. Tiêu chí kỹ thuật chưa được kiểm đạt cho tới khi có receipt trên commit thực tế; dữ liệu/thử nghiệm đều phải synthetic.
+
+### W1.1-C1 — Bình luận và timeline
+
+- Thành viên đúng nhóm đọc timeline, tạo comment plain text tối đa 4.000 code points, sửa comment của mình bằng optimistic version và ẩn mềm comment theo quyền; Owner có thể ẩn comment điều phối.
+- Revision lưu trước/sau và actor; nội dung hiện ẩn không được lộ ở timeline, API hoặc notification. Timeline kết hợp TaskEvent/comment/file, page size 20, thứ tự ổn định; TaskEvent giữ nguyên.
+
+### W1.1-C2 — Mention và inbox
+
+- Gợi ý/tìm trong tối đa 10 thành viên hoạt động cùng nhóm mỗi lượt; mention bằng ID, không `@everyone`, không tự cấp quyền.
+- Recipient là assignee/creator hiện còn quyền và người được mention, loại actor, bỏ trùng. Sửa comment chỉ notify người được thêm.
+- Ghi notification và delivery intent cùng transaction với comment. Inbox hỗ trợ read/unread, POST+CSRF, owner-only; quyền được kiểm lại khi mở/deep-link.
+
+### W1.1-C3 — Attachment và pin
+
+- Allowlist PDF, PNG, JPEG, TXT, DOCX, XLSX; giới hạn mỗi file 10 MiB, request 12 MiB/1 file, 20 file/task, 200 MiB/group. Tính file tombstone vào quota.
+- Storage riêng ngoài webroot với server UUID, staged/ready/failed, signature/OOXML validation và reconciliation. Download quyền membership + attachment disposition + nosniff.
+- Owner hoặc task creator ghim/bỏ ghim tối đa 5 item/task. File backup/restore đi cùng DB generation và SHA-256 manifest.
+
+### W1.1-C4 — Desktop push và reminders
+
+- Người dùng chủ động bật/tắt thiết bị, event preferences và reminder offsets 24h/1h. Không hỏi permission ngoài click; inbox hoạt động dù push không khả dụng.
+- Durable outbox chạy sau commit, lease/retry có giới hạn, dedupe, xử lý HTTP provider class và kiểm lại recipient/grant/preference trước retry.
+- Service worker chỉ push/click, không cache trang/API/file đăng nhập. Push payload chung; logout/reset/anonymize thu hồi grants ở server.
+
+### W1.1-C5 — Server preparation
+
+- Có migration/metadata contract/runtime-grant/backup restore runbooks, local jar/source hash và evidence giới hạn.
+- Chưa tạo server/host/domain/cert/cloud, không gửi push thiết bị thật hay thay launcher. Scanner antivirus thật và HTTPS/browser E2E có trusted origin thuộc bước M6 với quyết định riêng.
+
+Trạng thái W1.1-C1…C5 ngày21/10: implementation/local candidate và runbooks đã có; phạm vi author verification/receipt ở [w11-final](verification/w11-final.md). Desktop push thiết bị thật/server, scanner/offsite và owner acceptance vẫn chưa kiểm, không đổi các story lịch sử thành đã được owner nghiệm thu.

@@ -47,6 +47,11 @@ class MigrationRuntimeSeparationTest extends DatabaseTest {
         for(String table:List.of("app_user","project_group","group_member","task","invitation"))
             grants.append("GRANT INSERT, UPDATE ON `").append(database).append("`.").append(table).append(" TO '").append(runtimeUser).append("'@'%';\n");
         grants.append("GRANT INSERT ON `").append(database).append("`.task_event TO '").append(runtimeUser).append("'@'%';\n");
+        for(String table:List.of("task_comment","notification","task_attachment","notification_preference","push_device","push_preference","push_delivery"))
+            grants.append("GRANT INSERT, UPDATE ON `").append(database).append("`.").append(table).append(" TO '").append(runtimeUser).append("'@'%';\n");
+        grants.append("GRANT INSERT ON `").append(database).append("`.task_comment_revision TO '").append(runtimeUser).append("'@'%';\n");
+        grants.append("GRANT INSERT, DELETE ON `").append(database).append("`.comment_mention TO '").append(runtimeUser).append("'@'%';\n");
+        grants.append("GRANT INSERT, DELETE ON `").append(database).append("`.task_pin TO '").append(runtimeUser).append("'@'%';\n");
         for(String table:List.of("SPRING_SESSION","SPRING_SESSION_ATTRIBUTES"))
             grants.append("GRANT INSERT, UPDATE, DELETE ON `").append(database).append("`.").append(table).append(" TO '").append(runtimeUser).append("'@'%';\n");
         admin(grants.toString());
@@ -59,7 +64,8 @@ class MigrationRuntimeSeparationTest extends DatabaseTest {
         var values=new HashMap<String,Object>(Map.of("DB_PASSWORD",runtimePassword,"spring.datasource.url",url,
             "spring.datasource.username",runtimeUser,"spring.datasource.password",runtimePassword,
             "SERVER_ADDRESS","127.0.0.1","server.forward-headers-strategy","native",
-            "app.ops.execute","false","logging.level.root","ERROR"));
+            "app.ops.execute","false","logging.level.root","ERROR",
+            "app.attachments.root",Path.of(System.getProperty("java.io.tmpdir"),"w11-runtime-attachments").toString()));
         env.getPropertySources().addFirst(new MapPropertySource("runtime-only-fixture",values));
         return new SpringApplicationBuilder(DeadlineTrackerApplication.class).environment(env).profiles(profile)
             .properties("server.port=0").web(web?WebApplicationType.SERVLET:WebApplicationType.NONE).run();
@@ -84,7 +90,7 @@ class MigrationRuntimeSeparationTest extends DatabaseTest {
     void separateProcessAndIdempotence()throws Exception {
         assertEquals(0,migrateProcess(migrationEnv()));
         assertEquals(0,migrateProcess(migrationEnv()));
-        assertEquals(4,migration.queryForObject("SELECT COUNT(*) FROM flyway_schema_history WHERE success=1",Integer.class));
+        assertEquals(9,migration.queryForObject("SELECT COUNT(*) FROM flyway_schema_history WHERE success=1",Integer.class));
         assertEquals(Set.of(migrationUser),new HashSet<>(migration.queryForList("SELECT DISTINCT installed_by FROM flyway_schema_history",String.class)));
         assertEquals(Set.of(migrationUser+"@%"),new HashSet<>(migration.queryForList("SELECT DISTINCT DEFINER FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA=DATABASE()",String.class)));
         assertEquals(0,migration.queryForObject("SELECT COUNT(*) FROM project_group",Integer.class));
@@ -99,6 +105,7 @@ class MigrationRuntimeSeparationTest extends DatabaseTest {
         assertThrows(Exception.class,()->migration.queryForObject("SELECT 1",Integer.class));
         String username="p302_"+UUID.randomUUID().toString().replace("-","").substring(0,15);
         try(var context=start("prod",true)) {
+            assertFalse(context.getBean(org.springframework.scheduling.annotation.ScheduledAnnotationBeanPostProcessor.class).getScheduledTasks().isEmpty());
             assertTrue(context.getBeansOfType(Flyway.class).isEmpty());
             assertNotNull(context.getBean(SchemaInvariantVerifier.class));
             assertNull(context.getEnvironment().getProperty("MIGRATION_DB_PASSWORD"));
@@ -109,6 +116,14 @@ class MigrationRuntimeSeparationTest extends DatabaseTest {
             var task=work.createTask(actor,group.getId(),"P3-02 task","",actor,Instant.now().plusSeconds(3600));
             work.changeStatus(actor,group.getId(),task.getId(),TaskStatus.IN_PROGRESS,task.getVersion());
             assertEquals(2,runtime.queryForObject("SELECT COUNT(*) FROM task_event WHERE task_id=?",Integer.class,task.getId()));
+            var comments=context.getBean(CommentService.class);String comment=comments.create(actor,group.getId(),task.getId(),"Runtime comment",List.of(actor));
+            var commentRow=context.getBean(vn.deadline.tracker.persistence.TaskCommentRepository.class).findById(comment).orElseThrow();
+            comments.edit(actor,group.getId(),task.getId(),comment,"Runtime edited comment",commentRow.version);
+            assertEquals(1,comments.revisions(actor,group.getId(),task.getId(),comment).size());
+            var attachments=context.getBean(AttachmentService.class);attachments.pin(actor,group.getId(),task.getId(),comment,false);
+            assertEquals(1,attachments.pins(actor,group.getId(),task.getId()).size());attachments.unpin(actor,group.getId(),task.getId(),comment,false);
+            context.getBean(ReminderPreferenceService.class).update(actor,true,true,false);
+            assertEquals(1,runtime.queryForObject("SELECT COUNT(*) FROM notification_preference WHERE user_id=? AND reminders_enabled=TRUE",Integer.class,actor));
             org.springframework.session.SessionRepository sessions=context.getBean(JdbcIndexedSessionRepository.class);
             org.springframework.session.Session session=sessions.createSession();session.setAttribute("synthetic","value");sessions.save(session);
             assertNotNull(sessions.findById(session.getId()));sessions.deleteById(session.getId());assertNull(sessions.findById(session.getId()));
@@ -116,6 +131,7 @@ class MigrationRuntimeSeparationTest extends DatabaseTest {
             assertEquals(1,runtime.queryForObject("SELECT COUNT(*) FROM group_member WHERE group_id=? AND role='OWNER'",Integer.class,group.getId()));
         }
         try(var context=start("ops")) {
+            assertTrue(context.getBeansOfType(org.springframework.scheduling.annotation.ScheduledAnnotationBeanPostProcessor.class).isEmpty());
             assertTrue(context.getBeansOfType(Flyway.class).isEmpty());assertNotNull(context.getBean(SchemaInvariantVerifier.class));
             assertFalse(context.getEnvironment().getProperty("spring.flyway.enabled",Boolean.class,true));
             assertNotNull(context.getBean(OpsActions.class).resetPassword(username));

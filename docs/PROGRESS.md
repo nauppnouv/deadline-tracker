@@ -1,3 +1,5 @@
+> **W1.1 hiện tại:** kết quả local M0–M5, candidate và giới hạn ở [w11-final](verification/w11-final.md). Các mục cũ bên dưới giữ nguyên snapshot lịch sử.
+
 ## Mật khẩu tài khoản tối thiểu 8 — 21/10/2026
 
 - Theo yêu cầu mới của chủ dự án, đăng ký/đổi mật khẩu dùng 8–128 Unicode code points; form và thông báo đồng bộ. Giữ Argon2, khoảng trắng và hủy phiên sau đổi/reset, ngưỡng secret DB/migration không đổi. BR-24 cập nhật, D-44 bổ sung, AI material chưa đọc.
@@ -209,3 +211,25 @@ D20 username nội bộ44ký tự; D21 disabled assignee; D22 vá Tomcat; D23 c�
 - R2-01 DATA-08 UAT-14 bổ sung ca retention đồng thời: RED hai lượt exit 0 nhưng còn 0 backup. Khóa mkdir nguyên tử chặn lượt chồng lấn trước file mới; GREEN còn 1 bộ tốt và lượt kế tiếp thành công. OPS ghi stale-lock; DEPLOY khớp quyền introspection.
 - RED → GREEN; `bash scripts/check.sh`: 138/0/0/0, mọi cổng OK. Bằng chứng: `docs/verification/r2-01-lock.txt`.
 - Tiếp tục đúng thứ tự yêu cầu; không push/merge, không thay V1–V4, không thay phiên bản. Deploy/pilot thật chưa chạy.
+## W1.1 — M0 baseline và phạm vi (21/10/2026)
+
+- Candidate min8 đã tiến từ baseline plan `5ebb026` thành commit `d2d1a97` có parent đúng và đúng 13 paths. Reconcile đủ185 hash: bốn file tài liệu được cập nhật sau baseline; source/template/test min8 khớp raw bytes. Không repin/reset/clean candidate.
+- Tạo worktree riêng `feat/w11-collaboration-webpush` tại `D:/Documents/coding/deadline-tracker-w11-20261021T015624+0700`, HEAD d2d1a97; giữ 13 raw paths và Git blob IDs. Root/candidate/JAR/launcher public bytes khớp before/after checkpoint ngoài repo.
+- M0 scope, permissions/quota/events ở PROJECT_PLAN, BACKLOG, D-45 và [ma trận kiểm](verification/w11-m0.md); AI-written mới đều `chưa đọc`. M0 baseline đạt theo receipt; hành vi W1.1 chưa chạy. Cần chốt library/provider transport bằng kiểm nguồn hiện hành trước code push.
+- Tiếp theo M1 comment/revision/timeline; checkpoint trước migration. Sau đó M2 inbox/mention, M3 filesystem + backup/restore, M4 push/reminder, M5 focused/full check một lần/JAR/runbooks. Chưa compile/test/migrate/build; không claim an toàn, server-ready, pilot, owner acceptance hoặc Gate A.
+
+## W1.1 tiếp tục — implementation/integration (21/10/2026)
+
+- M1–M3 code tồn tại từ mốc tiếp tục: V5 comments/revisions, V6 mention/inbox, V7 attachment/pins; giữ nguyên V1–V4 và overlay 13 path min8. Chưa full-suite.
+- Sửa reminder compile lỗi thiếu repository method; V8 mapping/metadata đồng bộ thêm snapshot fields để inbox lọc reminder stale. `/account` có lựa chọn opt-in 24h/1h; scheduler có dedupe và transaction. Web Push sender chưa làm do transport SSRF blocker; không có push thật.
+- Thêm backup/restore generation riêng cho DB + private blob, hash/size manifest, target restore không overwrite. Chỉ thử trên MariaDB/container synthetic. Yêu cầu operator xác nhận writers đã pause; chưa xác nhận app lock, offsite, crash durability hay volume thật.
+- Targeted checks: compile PASS; SchemaStartupTest 11/0/0/0; TaskWebTest 11/0/0/0; ReminderSchedulerTest 2/0/0/0; AuthWebTest reminder preference 1/0/0/0; paired attachment generation restore 1/0/0/0; actual HTTP chunked multipart 1/0/0/0 receipt trước lượt này. Một lượt kiểm hợp nhất trước sửa assertion boolean có 1 test-side error; sau sửa targeted rerun xanh.
+- Tiếp theo: kiểm lại M3/schema/CSRF, hoàn thiện hoặc ghi rõ M4 độc lập an toàn, cập nhật receipt/AI_WRITTEN; full `scripts/check.sh`, hashes/checkpoint, candidate JAR và local milestone commits chỉ sau khi scope code ổn định. Không đổi launcher/push/merge/deploy.
+\n
+
+## W1.1 M0–M5 — kết quả local cuối (21/10/2026)
+
+- Đã có comments/revisions/timeline, mention/inbox/event preferences, file task/comment+pins+reconcile/scanner hook, Web Push opt-in/grants/epochs/outbox/provider policy và reminder24h/1h. V5–V9 + exact schema/runtime-grant/paired DB+files restore đồng bộ.
+- Full kiểm checkout mới từ snapshot cố định: **266 tests / 33 classes,0failure/error/skip**, exit0; build/static/secret/dependency/migration gates OK. Browser desktop/mobile và5permission states giả lập đạt; preview đã đóng. Lượt full trước bị snapshot không nhất quán exit1/51fail được giữ nguyên trong evidence.
+- Candidate riêng: `D:\Documents\coding\deadline-tracker-w11-20261021T015624+0700\target\w11-candidate-20261021T035528+0700\candidate-w11.jar`, SHA256 `db03fc0b30dbe6e73d8db06e6eec4a108814400ee9dc83e5fe08fea1f384828d`. Source/commit/receipt/hash ở [w11-final](verification/w11-final.md) và `D:\Documents\coding\deadline-tracker-checkpoints\w11-final-20261021T035528+0700/FINAL-CHECKPOINT.json`; launcher8443/repo gốc/P3/JAR cũ giữ nguyên.
+- M6 chuẩn bị [runbook](W11_SERVER_RUNBOOK.md), chưa server/push thật/tab đóng/scanner/offsite/ACL/proxy thật. Tài liệu AI **chưa đọc**, không review độc lập/pilot/Gate A. Dừng tại bàn giao; chưa push/merge/deploy.

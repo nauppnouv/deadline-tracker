@@ -108,6 +108,12 @@ remaining_sessions="$("${sql[@]}" "$RESTORE_DB" -e 'SELECT COUNT(*) FROM SPRING_
 remaining_attributes="$("${sql[@]}" "$RESTORE_DB" -e 'SELECT COUNT(*) FROM SPRING_SESSION_ATTRIBUTES')"
 [[ "$remaining_sessions" == 0 && "$remaining_attributes" == 0 ]] || { echo 'Restored sessions were not cleared' >&2; exit 1; }
 echo 'SESSIONS_CLEARED (after snapshot comparison)'
+# W1.1 backup grants predate logout/reset; never reactivate devices or deliveries.
+if [[ "$("${sql[@]}" "$RESTORE_DB" -e "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='push_device'")" == 1 ]]; then
+  "${sql[@]}" "$RESTORE_DB" -e "UPDATE push_device SET enabled=FALSE,grant_epoch=grant_epoch+1; UPDATE push_preference SET enabled=FALSE,grant_epoch=grant_epoch+1; UPDATE push_delivery SET state='CANCELLED',lease_token=NULL,lease_until=NULL WHERE state IN ('PENDING','LEASED','CONFIG_ERROR');"
+  [[ "$("${sql[@]}" "$RESTORE_DB" -e 'SELECT COUNT(*) FROM push_device WHERE enabled=TRUE')" == 0 ]] || exit 1
+  echo 'PUSH_GRANTS_REVOKED (inbox retained; enable devices again after review)'
+fi
 protect_verified_backup
 echo 'BẮT BUỘC: đặt lại mật khẩu từng tài khoản bằng ops reset-password trước khi mở lại web'
 echo 'Verify identity first; reset every account allowed to sign in; keep disabled accounts disabled. Verification does not authorize reopening web.'

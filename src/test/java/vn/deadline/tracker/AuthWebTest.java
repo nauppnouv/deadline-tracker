@@ -86,6 +86,16 @@ class AuthWebTest extends DatabaseTest {
         login(username,"Another long passphrase 456!");
         assertThrows(RuleViolation.class,()->accounts.changePassword(id,PASSWORD,"Another long passphrase 789!"));
     }
+    @Test @DisplayName("W1.1 reminder preferences are visible and can only change with CSRF")
+    void reminderPreferencesForm() throws Exception {
+        String username=name(),id=accounts.register(username,"Reminder account",PASSWORD);Cookie session=login(username,PASSWORD);
+        mvc.perform(get("/account").cookie(session)).andExpect(status().isOk()).andExpect(content().string(org.hamcrest.Matchers.containsString("Bật nhắc hạn trong hộp thông báo")));
+        mvc.perform(post("/account/reminders").cookie(session).param("enabled","true").param("twentyFourHours","true")).andExpect(status().isForbidden());
+        mvc.perform(post("/account/reminders").cookie(session).with(csrf()).param("enabled","true").param("twentyFourHours","true"))
+            .andExpect(status().is3xxRedirection()).andExpect(redirectedUrl("/account?reminders-updated"));
+        var stored=jdbc.queryForMap("SELECT reminders_enabled,remind_24h,remind_1h FROM notification_preference WHERE user_id=?",id);
+        assertEquals(Boolean.TRUE,stored.get("reminders_enabled"));assertEquals(Boolean.TRUE,stored.get("remind_24h"));assertEquals(Boolean.FALSE,stored.get("remind_1h"));
+    }
     @Test @DisplayName("SEC-03 UAT-10 group object access ignores forged identity and isolates owners")
     void accessMatrix() throws Exception {
         String userA=name(),userB=name();String a=accounts.register(userA,"Owner A",PASSWORD),b=accounts.register(userB,"Owner B",PASSWORD);
@@ -134,8 +144,8 @@ class AuthWebTest extends DatabaseTest {
             if(Set.of("/login","/register","/error").contains(pattern))continue;
             String path=pattern.replaceAll("\\{[^}]+}","not-a-member");
             if(mapping.getMethodsCondition().getMethods().contains(org.springframework.web.bind.annotation.RequestMethod.POST))
-                mvc.perform(post(path).with(csrf())).andExpect(path.startsWith("/groups/")?status().isNotFound():status().is3xxRedirection());
-            else mvc.perform(get(path)).andExpect(path.startsWith("/groups/")?status().isNotFound():status().is3xxRedirection());
+                mvc.perform(post(path).with(csrf()).contentType(path.endsWith("/attachments")?"multipart/form-data; boundary=synthetic":path.equals("/api/push/devices")?"application/json":"application/x-www-form-urlencoded")).andExpect(path.startsWith("/groups/")?status().isNotFound():path.startsWith("/api/push/")?status().isUnauthorized():status().is3xxRedirection());
+            else mvc.perform(get(path)).andExpect(path.startsWith("/groups/")?status().isNotFound():path.startsWith("/api/push/")?status().isUnauthorized():status().is3xxRedirection());
         }
     }
     @Test @DisplayName("SEC-06 login rotates session, cookies protected, expiration rejects old session")

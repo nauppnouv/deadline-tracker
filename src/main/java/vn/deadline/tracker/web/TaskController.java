@@ -12,8 +12,8 @@ public class TaskController {
         @NotBlank(message="Vui lòng chọn người phụ trách.") @Size(max=36) String assigneeId,
         @NotNull(message="Vui lòng chọn hạn nộp.") @DateTimeFormat(iso=DateTimeFormat.ISO.DATE_TIME) LocalDateTime dueAt,
         @NotNull @PositiveOrZero Long version){}
-    private final WorkService work;private final PeopleService people;private final Clock clock;
-    public TaskController(WorkService work,PeopleService people,Clock clock){this.work=work;this.people=people;this.clock=clock;}
+    private final WorkService work;private final PeopleService people;private final CommentService comments;private final AttachmentService attachments;private final Clock clock;
+    public TaskController(WorkService work,PeopleService people,CommentService comments,AttachmentService attachments,Clock clock){this.work=work;this.people=people;this.comments=comments;this.attachments=attachments;this.clock=clock;}
     @GetMapping("/groups/{group}/tasks/new") String create(@PathVariable String group,@AuthenticationPrincipal TrackerPrincipal actor,Model model){
         formModel(actor.id(),group,null,model);model.addAttribute("form",new Form("","",actor.id(),LocalDateTime.ofInstant(clock.instant().plusSeconds(86400),TimeView.ZONE).truncatedTo(ChronoUnit.MINUTES),0L));return "task-form";
     }
@@ -22,12 +22,26 @@ public class TaskController {
         try{var task=work.createTask(actor.id(),group,form.title(),form.description(),form.assigneeId(),instant(form.dueAt()));return redirect(task);}
         catch(RuleViolation e){return formError(e,errors,model,response);}
     }
-    @GetMapping("/groups/{group}/tasks/{task}") String detail(@PathVariable String group,@PathVariable String task,@AuthenticationPrincipal TrackerPrincipal actor,Model model){
+    @GetMapping("/groups/{group}/tasks/{task}") String detail(@PathVariable String group,@PathVariable String task,@RequestParam(defaultValue="0") int page,@AuthenticationPrincipal TrackerPrincipal actor,Model model){
         var item=work.task(actor.id(),group,task);var g=work.group(actor.id(),group);var members=people.members(actor.id(),group);
         model.addAttribute("group",g);model.addAttribute("task",item);model.addAttribute("names",members.stream().collect(Collectors.toMap(PeopleService.Person::id,PeopleService.Person::displayName)));
+        model.addAttribute("actorId",actor.id());model.addAttribute("members",members);model.addAttribute("mentionSelections",comments.mentionIds(actor.id(),group,task));
+        model.addAttribute("timeline",comments.list(actor.id(),group,task,page));
+        model.addAttribute("attachments",attachments.list(actor.id(),group,task));
+        model.addAttribute("pins",attachments.pins(actor.id(),group,task));
         model.addAttribute("canEdit",g.isOwner(actor.id())||item.getCreatedBy().equals(actor.id()));model.addAttribute("canStatus",item.getAssigneeId().equals(actor.id()));
         model.addAttribute("statuses",TaskStatus.values());model.addAttribute("now",clock.instant());return "task";
     }
+    @PostMapping("/groups/{group}/tasks/{task}/comments") String comment(@PathVariable String group,@PathVariable String task,@AuthenticationPrincipal TrackerPrincipal actor,@RequestParam String body,@RequestParam(required=false) java.util.List<String> mentionIds){
+        comments.create(actor.id(),group,task,body,mentionIds);return "redirect:/groups/"+group+"/tasks/"+task;
+    }
+    @PostMapping("/groups/{group}/tasks/{task}/comments/{comment}/edit") String editComment(@PathVariable String group,@PathVariable String task,@PathVariable String comment,@AuthenticationPrincipal TrackerPrincipal actor,@RequestParam String body,@RequestParam long version,@RequestParam(required=false) java.util.List<String> mentionIds,@RequestParam(defaultValue="false") boolean updateMentions){
+        comments.edit(actor.id(),group,task,comment,body,version,updateMentions&&mentionIds==null?java.util.List.of():mentionIds);return "redirect:/groups/"+group+"/tasks/"+task;
+    }
+    @PostMapping("/groups/{group}/tasks/{task}/comments/{comment}/hide") String hideComment(@PathVariable String group,@PathVariable String task,@PathVariable String comment,@AuthenticationPrincipal TrackerPrincipal actor){
+        comments.hide(actor.id(),group,task,comment);return "redirect:/groups/"+group+"/tasks/"+task;
+    }
+    @GetMapping("/groups/{group}/tasks/{task}/comments/{comment}/revisions") String revisions(@PathVariable String group,@PathVariable String task,@PathVariable String comment,@AuthenticationPrincipal TrackerPrincipal actor,Model model){model.addAttribute("revisions",comments.revisions(actor.id(),group,task,comment));model.addAttribute("taskPath","/groups/"+group+"/tasks/"+task);return "comment-revisions";}
     @GetMapping("/groups/{group}/tasks/{task}/edit") String edit(@PathVariable String group,@PathVariable String task,@AuthenticationPrincipal TrackerPrincipal actor,Model model){
         var item=work.task(actor.id(),group,task);requireEditor(actor.id(),group,item);formModel(actor.id(),group,item,model);
         model.addAttribute("form",new Form(item.getTitle(),item.getDescription(),item.getAssigneeId(),LocalDateTime.ofInstant(item.getDueAt(),TimeView.ZONE).truncatedTo(ChronoUnit.MINUTES),item.getVersion()));return "task-form";

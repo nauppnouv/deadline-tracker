@@ -12,6 +12,19 @@ Yêu cầu mới của chủ dự án: mật khẩu tài khoản tối thiểu8,
 
 # Phần AI viết — sửa phát hiện P7
 
+## W1.1 implementation continuation — 21/10/2026
+
+Code, tests and documentation written/changed in the W1.1 worktree remain **chưa đọc** by the owner. This entry does not replace comprehension or approval.
+
+| Tệp/phạm vi | Phần AI viết | Trạng thái |
+|---|---|---|
+| `src/main/java/vn/deadline/tracker/**`, `src/main/resources/db/migration/V5*`–`V8*`, templates and `scripts/schema-*` | W1.1 comments, mentions/inbox, private attachments/pins, reminder preferences/scheduler, schema exact contract | chưa đọc |
+| `scripts/backup-generation.sh`; `scripts/verify-generation-restore.sh`; `src/test/java/vn/deadline/tracker/ReminderSchedulerTest.java`; changes to `BackupRestoreTest.java`, `AuthWebTest.java`, `MigrationRuntimeSeparationTest.java` | Paired DB+blob generation, reduced runtime grants and focused synthetic tests | chưa đọc |
+| `docs/OPS.md`, `docs/DEPLOY.md`, `docs/MIGRATION.md`, `docs/BLOCKERS.md`, `docs/DECISIONS.md`, `docs/PROGRESS.md`, `docs/EVIDENCE.md` | Local W1.1 backup/deploy/migration runbook, SSRF/Web Push boundary and current test status | chưa đọc |
+| `docs/verification/w11-account-preview.png` | Synthetic local account/preferences screen capture | chưa đọc |
+
+No desktop push send, real browser permission, malware scan, server rollout, user pilot, or safety/Gate A conclusion is claimed.
+
 ## Local release finalization — 21/10/2026
 
 EXECUTE cho phép đúng năm đường dẫn tài liệu dưới đây, một commit local chứa toàn bộ candidate có sẵn và gói ZIP chọn lọc ngoài hai checkout. Không viết nhật ký học, không nhận thay owner đã đọc/hiểu hoặc chấp thuận residual. Các mục lịch sử dưới đây giữ phạm vi/ngày gốc.
@@ -182,3 +195,27 @@ Phạm vi do chủ dự án yêu cầu: sửa đúng năm phát hiện review, t
 | src/test/java/vn/deadline/tracker/BackupVerifiedRetentionTest.java | Bốn ca trước/sau rename, post-rename error, lỗi đọc current; kiểm all3/current/lock, backup và actual restore retry không can thiệp pointer | chưa đọc |
 | docs/OPS.md; docs/DECISIONS.md | Hành vi interruption, generation dư, D-41 và giới hạn vận hành | chưa đọc |
 | docs/verification/f08-remediation.txt; docs/EVIDENCE.md; docs/PROGRESS.md; docs/AI_WRITTEN.md | Bằng chứng RED/GREEN/full/clone, hash/ledger và giới hạn review của tác giả; một agent thực hiện | chưa đọc |
+## W1.1 — collaboration increment M0–M5 — 21/10/2026
+
+Chủ dự án gọi EXECUTE M0–M5 với một agent; sau đó cho phép tự reconcile baseline và đổi model UI sang GPT-6 Luna High. Local candidate mới chưa phải release/server/pilot. Không nhận thay owner đã đọc/hiểu hoặc duyệt Gate A.
+
+| Tệp | Phần AI viết trong lượt này | Trạng thái |
+|---|---|---|
+| docs/PROJECT_PLAN.md; docs/BACKLOG.md; docs/DECISIONS.md | Scope W1.1, user stories C1–C5, defaults và D-45; dữ liệu giả/local | chưa đọc |
+| docs/verification/w11-m0.md | Baseline provenance mới, quyền/quota/event matrix, trạng thái chưa chạy và giới hạn | chưa đọc |
+| docs/PROGRESS.md; docs/EVIDENCE.md; docs/AI_WRITTEN.md | M0 receipt pointer, test status thực, bước kế tiếp và registry lượt này | chưa đọc |
+| src/main/java, src/main/resources, src/test, scripts, pom.xml | W1.1 implementation/tests/config/build changes sẽ được thêm theo milestone; chưa có code ở M0 | chưa đọc |
+| docs/verification/w11-*.md và server/backup/rollback runbooks | Receipts, hạn chế và cách vận hành candidate được tạo trong M1–M5 | chưa đọc |
+
+## W1.1 M4/M5 tiếp tục — 21/10/2026
+
+| Tệp | Phần AI viết | Trạng thái |
+|---|---|---|
+| src/main/java/vn/deadline/tracker/{service,web,security,ops,persistence}; src/main/resources; pom.xml | M4 subscription/grants/epochs, transport/outbox/scheduler, UI/service worker; nối đầy đủ mention/revisions/file timeline/pins và scanner hook | chưa đọc |
+| src/test/java/vn/deadline/tracker/{PushDeliveryTest,AttachmentLifecycleTest,TaskWebTest,AuthWebTest,ChunkedRequestTest,BackupRestoreTest,MigrationRuntimeSeparationTest}.java | Permission/rollback/retry/lease/SSRF/grant/file/quota/restore/migration fixture tests và assertions cho hợp đồng mới | chưa đọc |
+| scripts/{schema-inventory.sql,schema-required.txt,backup-generation.sh,verify-generation-restore.sh,verify-restore.sh} | Contract V5–V9, generation pair, restore revoke và chặn file thừa/thiếu | chưa đọc |
+| README.md; docs/{DECISIONS,MIGRATION,DEPLOY,OPS,BLOCKERS,PROGRESS,EVIDENCE,BACKLOG,AI_WRITTEN,W11_SERVER_RUNBOOK}.md; docs/verification/w11-*.md | Candidate/runbook, status thật, receipts và giới hạn | chưa đọc |
+
+| service/EventPreferenceService; publisher/worker; account form/events; static/js/mentions.js; V9/task_attachment.comment_id; attachment/comment visibility; tests and schema-required | Hoàn thiện event preferences, gợi ý thành viên, file gắn comment và bằng chứng cuối | chưa đọc |
+
+`src/test/java/vn/deadline/tracker/D28SchemaDefinitionTest.java`: mở rộng independent metadata queries và các số lượng schema V5–V9; giữ exact-set comparisons và mutation assertions. Trạng thái: **chưa đọc**.

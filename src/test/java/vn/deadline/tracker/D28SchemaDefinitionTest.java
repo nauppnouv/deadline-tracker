@@ -108,7 +108,7 @@ class D28SchemaDefinitionTest extends DatabaseTest {
         Files.writeString(Path.of("target/d28-metadata.txt"),"version="+jdbc.queryForObject("SELECT VERSION()",String.class)+"\n"+jdbc.queryForList("SELECT TABLE_NAME,COLUMN_NAME,COLUMN_TYPE,EXTRA,GENERATION_EXPRESSION FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND IS_GENERATED='ALWAYS'")+"\nCHECKS="+jdbc.queryForList("SELECT TABLE_NAME,CONSTRAINT_NAME,CHECK_CLAUSE FROM information_schema.CHECK_CONSTRAINTS WHERE CONSTRAINT_SCHEMA=DATABASE()"),StandardCharsets.UTF_8);
         var expected=Files.readAllLines(Path.of("scripts/schema-required.txt")).stream().filter(s->s.startsWith("CHECKDEF|")||s.startsWith("GENERATEDDEF|")).collect(Collectors.toCollection(TreeSet::new));
         assertEquals(actual,expected,"Missing or surplus definition contracts");
-        assertEquals(10,actual.stream().filter(s->s.startsWith("CHECKDEF|")).count());
+        assertEquals(15,actual.stream().filter(s->s.startsWith("CHECKDEF|")).count());
         assertEquals(1,actual.stream().filter(s->s.startsWith("GENERATEDDEF|")).count());
         var expectedTriggers=Files.readAllLines(Path.of("scripts/schema-required.txt")).stream().filter(s->s.startsWith("TRIGGERDEF|")).collect(Collectors.toCollection(TreeSet::new));
         assertEquals(5,triggerBodies.size());
@@ -116,7 +116,7 @@ class D28SchemaDefinitionTest extends DatabaseTest {
     }
     @Test @DisplayName("D-33 DATA-02 exact contract covers charset and collation of every text column")
     void completeTextContract() throws Exception {
-        var actual=new TreeSet<>(jdbc.queryForList("SELECT CONCAT('TEXTDEF|',TABLE_NAME,'|',COLUMN_NAME,'|',CHARACTER_SET_NAME,'|',COLLATION_NAME) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN ('app_user','project_group','group_member','task','invitation','task_event','SPRING_SESSION','SPRING_SESSION_ATTRIBUTES') AND CHARACTER_SET_NAME IS NOT NULL",String.class));
+        var actual=new TreeSet<>(jdbc.queryForList("SELECT CONCAT('TEXTDEF|',TABLE_NAME,'|',COLUMN_NAME,'|',CHARACTER_SET_NAME,'|',COLLATION_NAME) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN ('app_user','project_group','group_member','task','invitation','task_event','task_comment','task_comment_revision','comment_mention','notification','task_attachment','task_pin','notification_preference','push_preference','push_device','push_delivery','SPRING_SESSION','SPRING_SESSION_ATTRIBUTES') AND CHARACTER_SET_NAME IS NOT NULL",String.class));
         Files.write(Path.of("target/d28-text-contract-derived.txt"),actual,StandardCharsets.UTF_8);
         var expected=Files.readAllLines(Path.of("scripts/schema-required.txt")).stream().filter(s->s.startsWith("TEXTDEF|")).collect(Collectors.toCollection(TreeSet::new));
         assertFalse(actual.isEmpty());
@@ -124,10 +124,10 @@ class D28SchemaDefinitionTest extends DatabaseTest {
     }
     @Test @DisplayName("F-04 DATA-02 exact contract covers type, length, precision, nullability, default and extra for all columns")
     void completeColumnContract() throws Exception {
-        var actual=new TreeSet<>(jdbc.queryForList("SELECT CONCAT('COLDEF|',TABLE_NAME,'|',COLUMN_NAME,'|',COLUMN_TYPE,'|',DATA_TYPE,'|',COALESCE(CAST(CHARACTER_MAXIMUM_LENGTH AS CHAR),'<NULL>'),'|',COALESCE(CAST(NUMERIC_PRECISION AS CHAR),'<NULL>'),'|',COALESCE(CAST(NUMERIC_SCALE AS CHAR),'<NULL>'),'|',COALESCE(CAST(DATETIME_PRECISION AS CHAR),'<NULL>'),'|',IS_NULLABLE,'|',REPLACE(COALESCE(COLUMN_DEFAULT,'<NULL>'),'|','<PIPE>'),'|',EXTRA) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN ('app_user','project_group','group_member','task','invitation','task_event','SPRING_SESSION','SPRING_SESSION_ATTRIBUTES')",String.class));
+        var actual=new TreeSet<>(jdbc.queryForList("SELECT CONCAT('COLDEF|',TABLE_NAME,'|',COLUMN_NAME,'|',COLUMN_TYPE,'|',DATA_TYPE,'|',COALESCE(CAST(CHARACTER_MAXIMUM_LENGTH AS CHAR),'<NULL>'),'|',COALESCE(CAST(NUMERIC_PRECISION AS CHAR),'<NULL>'),'|',COALESCE(CAST(NUMERIC_SCALE AS CHAR),'<NULL>'),'|',COALESCE(CAST(DATETIME_PRECISION AS CHAR),'<NULL>'),'|',IS_NULLABLE,'|',REPLACE(COALESCE(COLUMN_DEFAULT,'<NULL>'),'|','<PIPE>'),'|',EXTRA) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN ('app_user','project_group','group_member','task','invitation','task_event','task_comment','task_comment_revision','comment_mention','notification','task_attachment','task_pin','notification_preference','push_preference','push_device','push_delivery','SPRING_SESSION','SPRING_SESSION_ATTRIBUTES')",String.class));
         Files.write(Path.of("target/f04-column-contract-derived.txt"),actual,StandardCharsets.UTF_8);
         var expected=Files.readAllLines(Path.of("scripts/schema-required.txt")).stream().filter(s->s.startsWith("COLDEF|")).collect(Collectors.toCollection(TreeSet::new));
-        assertEquals(63,actual.size());
+        assertEquals(152,actual.size());
         assertEquals(actual,expected,"Missing or surplus column definitions");
     }
     ExecResult shell(String command) throws Exception {

@@ -1,0 +1,8 @@
+<!doctype html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Thông báo')}"></head>
+<body><header th:replace="~{fragments :: header}"></header><main class="container card">
+<h1>Thông báo của bạn</h1><p>Mở công việc để xem nội dung và đánh dấu thông báo đã đọc.</p>
+<form th:action="@{/notifications/{id}/open(id=${notificationId})}" method="post"><button type="submit">Mở công việc</button></form>
+<a th:href="@{/notifications}">Về hộp thông báo</a>
+</main></body></html>
