@@ -11,12 +11,15 @@ import java.util.HashSet;
 
 /** Shared metadata contract: required objects and exact CHECK/generated/text/column/trigger definitions. */
 @Component
-@Profile({"prod","test"})
+@Profile({"prod","test","ops"})
 @DependsOnDatabaseInitialization
 public class SchemaInvariantVerifier implements InitializingBean {
     private final JdbcTemplate jdbc;
     public SchemaInvariantVerifier(JdbcTemplate jdbc) { this.jdbc=jdbc; }
     @Override public void afterPropertiesSet() throws Exception {
+        // Validation only: runtime must never repair or migrate schema/history.
+        org.flywaydb.core.Flyway.configure().dataSource(jdbc.getDataSource())
+            .locations("classpath:db/migration").cleanDisabled(true).load().validate();
         String sql=new ClassPathResource("db/invariants/schema-inventory.sql").getContentAsString(StandardCharsets.UTF_8);
         var actual=new HashSet<>(jdbc.queryForList(sql,String.class));
         var required=new HashSet<>(new ClassPathResource("db/invariants/schema-required.txt").getContentAsString(StandardCharsets.UTF_8)

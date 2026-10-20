@@ -4,7 +4,7 @@ Các ví dụ chạy trên dữ liệu thử. Người vận hành chịu trách
 
 ## Reset và đổi định danh
 
-Chuẩn bị JDK25, jar đã qua check, biến DB_URL/DB_USER/DB_PASSWORD trỏ đúng DB. Mở terminal tương tác riêng; không pipe/redirect/ghi hình console có mật khẩu tạm.
+Chuẩn bị JDK25, jar đã qua check, biến DB_URL/DB_USER/DB_PASSWORD của runtime trỏ đúng DB đã migrate bằng [tiến trình riêng](MIGRATION.md). Profile ops tắt Flyway auto-migration và kiểm checksum lịch sử cùng exact schema/trigger trước khi thao tác; schema chưa migrate, checksum sai hoặc thiếu quyền TRIGGER phải bị từ chối. Không cấp MIGRATION_DB_* hoặc spring.flyway.url/user/password cho web/ops, không truyền root secret. Mở terminal tương tác riêng; không pipe/redirect/ghi hình console có mật khẩu tạm.
 
 ```bash
 java -Duser.timezone=UTC -jar target/deadline-tracker-0.1.0-SNAPSHOT.jar --spring.profiles.active=ops ops reset-password username

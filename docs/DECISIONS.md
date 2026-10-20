@@ -131,3 +131,18 @@ Câu chữ mới được chủ dự án duyệt:
 - Chủ dự án yêu cầu tiếp tục sửa với một agent. Review e628fbd phát hiện TERM sau rename current làm EXIT xóa generation đã công bố, khiến con trỏ treo. Giữ review cũ làm lịch sử; không sửa verdict hoặc hồ sơ đó.
 - Không suy trạng thái filesystem từ biến verified_unpublished: cleanup chỉ bỏ generation khi current vắng hoặc con trỏ hợp lệ trỏ rõ tới generation khác. Current tham chiếu chính generation đó, sai kiểu/symlink/không đọc được/không xác định an toàn thì giữ lại để kiểm tra. Giữ nguyên real exit lỗi/ngắt và không báo thành công giả; không chặn signal để che lỗi.
 - Regression trước/sau rename, rename thành công rồi trả lỗi và current read failure; đối chiếu bộ cũ, current mới, cleanup/lock và actual automatic backup/restore retry. OPS công khai generation dư sau ngắt và giới hạn fsync/trust/dung lượng. Không sửa V1–V4, grant, dependency/JDK/image; không tự chấp nhận residual hoặc ký Gate A. Biên bản `docs/verification/f08-remediation.txt`.
+
+## D-42 — P3-01, root secret không thuộc môi trường web (20/10/2026)
+
+- Owner EXECUTE sửa P3-01 sau báo cáo chỉ đọc. Bỏ yêu cầu đọc/so DB_ROOT_PASSWORD trong preflight web; không dùng root secret giả để chạy qua. Giữ kiểm DB_PASSWORD và password datasource effective, độ dài/placeholder, bind loopback và native forwarded headers.
+- Chặn effective runtime username root (case-insensitive) như lớp phòng sai cấu hình, không phải kiểm identity/grants thực. Root-vs-app secret/principal được người cấp DB kiểm ở bước provisioning riêng, root credential không cấp cho web; chưa có provisioner tự động mới.
+- Thực hiện ở worktree riêng từ d992edc; không đổi quyền DB đang chạy, Flyway datasource model, dependency/JDK/image hoặc V1–V4. P3-02/R2, khả năng override danh tính qua JDBC và residual TRIGGER vẫn cần xử lý/duyệt theo môi trường đích.
+- Test RED trước sửa rồi GREEN và full check theo biên bản P3-01. Một agent, chưa commit/push/merge, chưa thay JAR local, không ký Gate A hoặc triển khai AWS. Không sửa packet/review cũ để chuyển verdict.
+
+## D-43 — P3-02, tách tiến trình migration và runtime (20/10/2026)
+
+- Owner EXECUTE P3-02 trên worktree P3-01, DB giả riêng, giữ verifier/TRIGGER, không đổi quyền DB đang dùng hoặc triển khai AWS. Đây là lựa chọn kỹ thuật trong phạm vi đó, không mở rộng A cho R1–R5 sang server.
+- Thêm entry point migrate trước Spring context, chỉ đọc MIGRATION_DB_*; URL loopback dạng số không options, principal không root, secret không placeholder. Web/ops tắt auto-migration, từ chối credential migration và override bật lại Flyway. Dev/fixture vẫn auto-migrate.
+- Runtime chỉ validate checksum history và exact schema/trigger; ops cũng chạy verifier. Không bỏ kiểm TRIGGER, không đổi V1–V4 hoặc schema contract. Runtime mẫu giảm quyền DML theo bảng, không sửa Flyway history/CREATE ALTER DROP TABLE. TRIGGER vẫn cho CREATE/DROP TRIGGER, đã kiểm thực trên bảng probe riêng; không gọi quyền này là chỉ đọc metadata.
+- Fixture giữ definer account và SELECT/INSERT/TRIGGER khi khóa login/thu hồi quyền nâng schema; test Owner/task/event/session/reset vẫn chạy. Tập quyền này là bằng chứng DB giả, không là provisioner hoặc chứng nhận quyền tối thiểu trên đích. Hướng dẫn chi tiết trong MIGRATION.md; preflight không tự audit effective identity/grants.
+- Biên bản docs/verification/p3-02-remediation.md ghi RED/GREEN/full và giới hạn. Một agent, chưa commit/push/merge, chưa thay JAR local; không thay dependency/JDK/image, quyền DB đang dùng, không ký Gate A. Review/packet cũ giữ nguyên lịch sử.

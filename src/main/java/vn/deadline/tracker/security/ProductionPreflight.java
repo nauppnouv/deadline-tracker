@@ -15,12 +15,20 @@ public final class ProductionPreflight implements EnvironmentPostProcessor,Order
         "replace-with-a-different-long-random-root-password");
     @Override public int getOrder(){return Ordered.LOWEST_PRECEDENCE;}
     @Override public void postProcessEnvironment(ConfigurableEnvironment env,SpringApplication application) {
+        if(env.acceptsProfiles(Profiles.of("prod","ops"))) {
+            if(!Boolean.FALSE.equals(env.getProperty("spring.flyway.enabled",Boolean.class)))
+                throw invalid("spring.flyway.enabled","must be false in runtime; use the separate migrate command");
+            for(String key:Set.of("MIGRATION_DB_URL","MIGRATION_DB_USER","MIGRATION_DB_PASSWORD",
+                    "spring.flyway.url","spring.flyway.user","spring.flyway.password"))
+                if(env.getProperty(key)!=null)throw invalid(key,"belongs only to the separate migration process");
+        }
         if(!env.acceptsProfiles(Profiles.of("prod")))return;
-        String app=password("DB_PASSWORD",env.getProperty("DB_PASSWORD"));
-        String root=password("DB_ROOT_PASSWORD",env.getProperty("DB_ROOT_PASSWORD"));
-        if(app.equals(root))throw invalid("DB_ROOT_PASSWORD","must differ from DB_PASSWORD");
-        String effective=password("spring.datasource.password",env.getProperty("spring.datasource.password"));
-        if(effective.equals(root))throw invalid("spring.datasource.password","must differ from DB_ROOT_PASSWORD");
+        password("DB_PASSWORD",env.getProperty("DB_PASSWORD"));
+        password("spring.datasource.password",env.getProperty("spring.datasource.password"));
+        // Root credentials belong to DB provisioning, never to the web process.
+        // This catches configuration mistakes; it does not audit DB privileges.
+        if("root".equalsIgnoreCase(env.getProperty("spring.datasource.username","").strip()))
+            throw invalid("spring.datasource.username","root runtime principal forbidden; use a schema account");
         loopback("SERVER_ADDRESS",env.getProperty("SERVER_ADDRESS"));
         loopback("server.address",env.getProperty("server.address"));
         if(!"native".equalsIgnoreCase(env.getProperty("server.forward-headers-strategy","")))

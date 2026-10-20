@@ -26,7 +26,7 @@ class SchemaStartupTest extends DatabaseTest {
         var environment=new org.springframework.core.env.StandardEnvironment();
         environment.getPropertySources().addFirst(new org.springframework.core.env.MapPropertySource("schema-fixture",Map.of(
                 "spring.datasource.url",url,"spring.datasource.username",DB.getUsername(),"spring.datasource.password",DB.getPassword(),"spring.session.jdbc.cleanup-cron","-",
-                "DB_PASSWORD",DB.getPassword(),"DB_ROOT_PASSWORD",UUID.randomUUID().toString(),"SERVER_ADDRESS","127.0.0.1","server.forward-headers-strategy","native")));
+                "DB_PASSWORD",DB.getPassword(),"SERVER_ADDRESS","127.0.0.1","server.forward-headers-strategy","native")));
         return new SpringApplicationBuilder(DeadlineTrackerApplication.class).environment(environment).web(WebApplicationType.NONE).profiles(profile).run();
     }
     void rejected(String object) {

@@ -1,3 +1,33 @@
+## P3-02 — DATA-01/02/09, migration riêng và runtime giảm quyền (20/10/2026)
+
+## Hồ sơ bản local — 21/10/2026
+
+Định danh và cách vận hành hiện tại: [LOCAL_RELEASE](LOCAL_RELEASE.md). Full new commit/parent và kiểm release ZIP nằm trong `release-manifest.json` ngoài repo. Các kết quả có ngày dưới đây vẫn thuộc revision/snapshot ban đầu; đợt finalization **không chạy test hành vi ở commit mới** và không thực hiện review độc lập.
+
+| Hồ sơ | Revision/snapshot thực tế | Kết quả và giới hạn |
+|---|---|---|
+| P3-02 ngày 20/10 | Nền d992edc + candidate chưa commit theo [biên bản](verification/p3-02-remediation.md) | Full 230 tests / 29 classes; 0 failure/error/skip; audit dependency bỏ qua (không SEC-13 mới). Không gọi là suite tại new release commit |
+| Review độc lập ngày 20/10 | 182-file snapshot trước overlay ba docs IR-01; bản sao REVIEW.md trong CP-006/evidence | Không phát hiện lỗi ứng dụng mới trong phạm vi review; IR-01 là khuyến nghị runbook thấp. Không phải review overlay/commit mới, không ký Gate A |
+| IR-01 ngày 21/10 | Ba docs MIGRATION/DEPLOY/AI_WRITTEN sau review; CP-003…005 | Kiểm tĩnh wording/links/raw hashes; cùng tác giả, không review độc lập hoặc kiểm grants thật |
+| CP-006 ngày 21/10 | `D:/Documents/coding/deadline-tracker-checkpoints/20261021T002924+0700`, raw snapshot182 + identity21 sau IR-01, HEAD nền d992edc | Focused **8 JUnit** / 0 failure/error/skip, Maven offline exit0; legacy probe **29 checks**, có provenance lặp, exit0; **66/66** fresh main classes khớp candidate JAR. DB giả cách ly, không DB cũ thật; không cộng thành 37 JUnit |
+| Finalization ngày 21/10 | Năm docs trên cùng code/config/test/script/build byte CP-006, sau đó commit local toàn candidate | Chỉ kiểm docs/identity/byte/package. Lệnh, exit và hash mới trong evidence/finalization của ZIP; không build/test/rehearsal/audit mới |
+
+JAR giữ SHA256 `f69e177d406861ce6347dd824b5a01f85fa1a10bc7d0254ac67a3ba47254dc2a`. Raw working-tree hashes CP-006 và Git blob/source hashes được tách trong manifest (Git áp line-ending attributes khi commit/export). Bytecode không được build lại cho docs. Gói chọn raw report/receipt/log đã kiểm, kèm XML projection của CP-006; projection bỏ properties/stdout, **không phải raw Surefire XML**, raw path/hash giữ trong focused-xml-receipt.json. Một số đường dẫn trong hồ sơ lịch sử chỉ có tại máy gốc.
+
+Chưa kiểm mới: dependency audit/SEC-13, grants/server/proxy/public HTTPS/firewall, backup lịch/offsite/RPO/RTO, pilot thật hoặc mọi tình huống mất điện. Runtime có TRIGGER DDL; residual/owner comprehension/story completion và Gate A chưa được chấp thuận. Không sửa các dòng UAT/SEC/DATA hoặc ngày/revision lịch sử để biểu diễn acceptance mới.
+
+- RED trước sửa: `bash scripts/mvn.sh -o '-Dtest=ProductionPreflightTest#rejectsMigrationInRuntime+rejectsRuntimeMigrationCredentials+runtimeProfilesDisableFlyway' test`, exit1; 9 tests, 9 failures/0 errors/0 skips. GREEN `bash scripts/mvn.sh -o -Dtest=ProductionPreflightTest,ProductionSecurityTest,OpsWorkflowTest,SchemaStartupTest test`, exit0; 53 tests/4 classes, 0 failures/errors/skips.
+- `bash scripts/mvn.sh -o -Dtest=MigrationRuntimeSeparationTest test`, exit0; 8 tests/1 class. DB/schema/principal giả mới trong container disposable; migrate process riêng, idempotent, runtime/ops hoạt động với quyền giảm, definer khóa login vẫn tạo Owner/guard. Thiếu migration/TRIGGER, checksum sai và no-op trigger bị chặn. Runtime không CREATE/ALTER/DROP TABLE hoặc ghi history; **vẫn CREATE/DROP TRIGGER**, không gọi là không DDL. Lỗi biên dịch test lần đầu giữ log riêng, không tính product RED.
+- Full `RUN_DEPENDENCY_AUDIT=0 AUDIT_SKIP_REASON='Offline scope; no dependency changes; not current SEC-13 evidence' MIGRATION_BASELINE_REF=0ed33309821c1fdd55cbd551246b89f1cd78d324 bash scripts/check.sh -o`, exit0; **230 tests/29 classes, 0 failures/errors/skips**; build/static/gitleaks/migration đạt; audit bỏ qua vì offline, không SEC-13 mới. Lượt này gồm test thay đổi cuối về URL loopback và launcher portable.
+- JAR đóng gói: `python -X utf8 <evidence>/packaged-smoke.py`, exit0; migrate V1–V4 và chạy lại exit0, missing env exit1 dự kiến; web prod principal runtime không root/migration env, definer khóa login, GET /login trả200/form đúng. Container/anonymous volume giả mới đã dọn theo tên/label riêng.
+- Hồ sơ D:/Documents/coding/security-revalidation-20261018/local-runs/p3-02-fix-20261020T125454Z-9d9f8c; receipt docs/verification/p3-02-remediation.md, runbook docs/MIGRATION.md. Worktree chưa commit; không đổi grants/DB/JAR đang dùng, dependency/JDK/image/migrations hoặc source gốc. Chưa review độc lập, chấp thuận residual server hoặc Gate A.
+
+## P3-01 — SEC-12/SEC-06/SEC-09, root secret khỏi web (20/10/2026)
+
+- RED `bash scripts/mvn.sh -o '-Dtest=ProductionPreflightTest#startsWithoutRootSecret+neverReadsRootSecret+rejectsRootRuntimeUsername' test`: exit1, 5 tests/3 failures/2 errors/0 skips trước sửa sản phẩm. Lỗi do root requirement/canary/guard username; không nhầm lỗi môi trường là RED.
+- GREEN targeted `bash scripts/mvn.sh -o -Dtest=ProductionPreflightTest,ProductionSecurityTest test`: exit0, 29 tests/0 failures/errors/skips. Không root secret trong fixture web prod; vẫn kiểm effective password, bind/proxy, header/cookie/lỗi/log.
+- Full `RUN_DEPENDENCY_AUDIT=0 MIGRATION_BASELINE_REF=0ed33309821c1fdd55cbd551246b89f1cd78d324 bash scripts/check.sh -o`: exit0, 213 tests/28 classes, 0 failures/errors/skips; build/static/gitleaks/migration đạt, dependency audit bỏ qua vì offline (không SEC-13 mới). [Biên bản và giới hạn](verification/p3-01-remediation.md). Một agent, không kết luận an toàn, Gate A hoặc triển khai AWS.
+
 ## F-08 — DATA-08/UAT-14, cleanup sau công bố current (19/10/2026)
 
 - RED `bash scripts/mvn.sh -q '-Dtest=BackupVerifiedRetentionTest#interruptedPointerPublicationKeepsCurrent' test` trên e628fbd trước sửa sản phẩm: exit1, 4 tests/3 failures/0 errors/skips. Ngắt trước rename qua; sau rename, post-rename error và current-read failure đều fail đúng assertion con trỏ trỏ generation đã mất. Diff/hash/probe lưu trước execution.

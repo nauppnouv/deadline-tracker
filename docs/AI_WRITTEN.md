@@ -1,5 +1,54 @@
 # Phần AI viết — sửa phát hiện P7
 
+## Local release finalization — 21/10/2026
+
+EXECUTE cho phép đúng năm đường dẫn tài liệu dưới đây, một commit local chứa toàn bộ candidate có sẵn và gói ZIP chọn lọc ngoài hai checkout. Không viết nhật ký học, không nhận thay owner đã đọc/hiểu hoặc chấp thuận residual. Các mục lịch sử dưới đây giữ phạm vi/ngày gốc.
+
+| Tệp | Phần AI viết trong lượt này | Trạng thái |
+|---|---|---|
+| README.md | Trạng thái local, link runbook, clone bundle/dựng mới và giới hạn bằng chứng | chưa đọc |
+| docs/PROGRESS.md | Khối hiện tại đặt trước lịch sử, scope commit/package, story/Gate A còn mở | chưa đọc |
+| docs/EVIDENCE.md | Bảng provenance full/review/IR-01/CP-006, 8 JUnit và 29 checks, giới hạn kiểm mới | chưa đọc |
+| docs/AI_WRITTEN.md | Registry finalization, giữ các registry lịch sử | chưa đọc |
+| docs/LOCAL_RELEASE.md | Runbook launcher trên máy hiện tại, dựng mới, backup/restore references và handoff | chưa đọc |
+
+Các hướng dẫn/manifest/checkpoint/prompt do AI tạo ngoài repo trong gói bàn giao cũng **chưa đọc**; manifest chỉ ghi kết quả máy kiểm, không là chứng nhận bảo mật. Implementation/test đã tồn tại giữ registry P3-01/P3-02 bên dưới; không đổi trạng thái đọc.
+
+## IR-01 — runbook DB mới/DB đã migrate — 21/10/2026
+
+Phạm vi tài liệu riêng được chủ dự án đồng ý trong chat sau CP-002. Chỉ sửa ba tệp dưới; không đổi code, V1–V4, installed_by, grants hoặc JAR/DB đang dùng; không commit/triển khai. Kiểm tài liệu/diff không phải test hành vi, kiểm grants thật hoặc ký Gate A.
+
+| Tệp | Mô tả | Trạng thái |
+|---|---|---|
+| docs/MIGRATION.md | Hai nhánh DB, bảng CURRENT_USER/installed_by/DEFINER, điều kiện khóa principal không làm runtime; giữ definer/quyền trigger, nêu kiểm đích chưa chạy | chưa đọc |
+| docs/DEPLOY.md | Bước provisioning dẫn chiếu hai nhánh; không tạo lại DB cũ, không khóa nhầm runtime, điều kiện kiểm trước mở writer | chưa đọc |
+| docs/AI_WRITTEN.md | Ghi phạm vi IR-01 và giới hạn bằng chứng; không viết nhật ký học thay chủ dự án | chưa đọc |
+
+## P3-02 — migration riêng, runtime giảm quyền — 20/10/2026
+
+| Tệp | Mô tả | Trạng thái |
+|---|---|---|
+| src/main/java/vn/deadline/tracker/DeadlineTrackerApplication.java; src/main/java/vn/deadline/tracker/ops/MigrationCommand.java | Entry point migrate trước Spring, credential riêng, loopback-only, Flyway rồi verifier, không mở web | chưa đọc |
+| src/main/java/vn/deadline/tracker/security/ProductionPreflight.java; src/main/resources/application-prod.properties; src/main/resources/application-ops.properties | Prod/ops tắt auto-migration và từ chối migration config/credential trong runtime | chưa đọc |
+| src/main/java/vn/deadline/tracker/service/SchemaInvariantVerifier.java | Validate Flyway checksum không ghi schema/history; thêm ops, giữ exact schema/trigger | chưa đọc |
+| src/test/java/vn/deadline/tracker/ProductionPreflightTest.java; src/test/java/vn/deadline/tracker/ProductionSecurityTest.java; src/test/java/vn/deadline/tracker/MigrationRuntimeSeparationTest.java | RED trước sửa, fixture migrate riêng; grant tạm, tiến trình riêng, runtime/ops, definer khóa login, TRIGGER và drift bị từ chối | chưa đọc |
+| README.md; docs/MIGRATION.md; docs/DEPLOY.md; docs/OPS.md | Runbook secret/process riêng, quyền theo bảng, definer và residual TRIGGER | chưa đọc |
+| docs/DECISIONS.md; docs/EVIDENCE.md; docs/PROGRESS.md; docs/verification/p3-02-remediation.md; docs/AI_WRITTEN.md | D-43, bằng chứng, giới hạn, trạng thái chưa triển khai/Gate A | chưa đọc |
+
+Công cụ/bằng chứng ngoài repo tại D:/Documents/coding/security-revalidation-20261018/local-runs/p3-02-fix-20261020T125454Z-9d9f8c cũng chưa đọc. Không viết nhật ký học thay người học.
+
+## P3-01 — web không cần root secret — 20/10/2026
+
+| Tệp | Mô tả | Trạng thái |
+|---|---|---|
+| src/main/java/vn/deadline/tracker/security/ProductionPreflight.java | Bỏ đọc/so DB_ROOT_PASSWORD; giữ kiểm DB_PASSWORD/effective password và bind/proxy; chặn effective runtime username root, không thay kiểm quyền DB thực | chưa đọc |
+| src/test/java/vn/deadline/tracker/ProductionPreflightTest.java | RED/GREEN không root secret, canary phát hiện đọc root, root username và hồi quy secret/config | chưa đọc |
+| src/test/java/vn/deadline/tracker/ProductionSecurityTest.java; src/test/java/vn/deadline/tracker/SchemaStartupTest.java | Bỏ root secret khỏi fixture context prod; giữ kiểm header/cookie/schema | chưa đọc |
+| .env.example; README.md; docs/DEPLOY.md | Tách root secret của bootstrap DB khỏi môi trường web; kiểm secret/principal ở provisioning riêng, nêu P3-02/R2 còn mở | chưa đọc |
+| docs/DECISIONS.md; docs/EVIDENCE.md; docs/PROGRESS.md; docs/verification/p3-01-remediation.md; docs/AI_WRITTEN.md | Quyết định kỹ thuật đúng EXECUTE, lệnh/exit/giới hạn và hồ sơ kiểm ngoài repo; không ký Gate A | chưa đọc |
+
+Công cụ thu log/XML/hash ngoài repo tại D:/Documents/coding/security-revalidation-20261018/local-runs/p3-01-fix-d992edc-20261020T123411Z-834c2e cũng chưa đọc. Không viết nhật ký học thay người học.
+
 ## F-04 — hợp đồng kiểu và thuộc tính cột — 19/10/2026
 
 | Tệp | Mô tả | Trạng thái |

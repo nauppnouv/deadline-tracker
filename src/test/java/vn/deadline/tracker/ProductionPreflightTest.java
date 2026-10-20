@@ -18,23 +18,28 @@ class ProductionPreflightTest {
         @org.springframework.context.annotation.Bean Object marker(){BEAN_CREATED.set(true);return new Object();}
     }
     Map<String,Object> valid() {
-        return new HashMap<>(Map.of("DB_PASSWORD","App fixture password 123!","DB_ROOT_PASSWORD","Root fixture password 456!",
+        return new HashMap<>(Map.of("DB_PASSWORD","App fixture password 123!",
             "SERVER_ADDRESS","127.0.0.1","server.forward-headers-strategy","native"));
     }
     org.springframework.context.ConfigurableApplicationContext start(Map<String,Object> settings,String profile) {
+        return start(settings,profile,null);
+    }
+    org.springframework.context.ConfigurableApplicationContext start(Map<String,Object> settings,String profile,PropertySource<?> extra) {
         BEAN_CREATED.set(false);
         var env=new StandardEnvironment();
         env.getPropertySources().remove(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME);
         env.getPropertySources().remove(StandardEnvironment.SYSTEM_PROPERTIES_PROPERTY_SOURCE_NAME);
         env.getPropertySources().addFirst(new MapPropertySource("preflight-fixture",settings));
+        if(extra!=null)env.getPropertySources().addFirst(extra);
         return new SpringApplicationBuilder(Minimal.class).environment(env).web(WebApplicationType.NONE).profiles(profile).run();
     }
     @ParameterizedTest @CsvSource({
         "DB_PASSWORD,<missing>","DB_PASSWORD,CHANGE_ME_DB_PASSWORD", "DB_PASSWORD,replace-with-a-long-random-local-database-password", "DB_PASSWORD,123456789012345",
-        "DB_ROOT_PASSWORD,<missing>","DB_ROOT_PASSWORD,CHANGE_ME_ROOT_PASSWORD", "DB_ROOT_PASSWORD,replace-with-a-different-long-random-root-password", "DB_ROOT_PASSWORD,123456789012345", "DB_ROOT_PASSWORD,<same>",
         "SERVER_ADDRESS,<missing>","SERVER_ADDRESS,0.0.0.0","SERVER_ADDRESS,192.0.2.1","SERVER_ADDRESS,localhost",
         "server.address,0.0.0.0", "server.forward-headers-strategy,none", "server.forward-headers-strategy,framework", "server.forward-headers-strategy,<missing>",
-        "spring.datasource.password,short"
+        "spring.datasource.password,short", "spring.datasource.password,CHANGE_ME_OVERRIDE_PASSWORD",
+        "spring.datasource.password,replace-with-a-long-random-local-database-password",
+        "spring.datasource.password,replace-with-a-different-long-random-root-password"
     })
     @DisplayName("SEC-06/09/12 R2 prod preflight refuses unsafe configuration before creating beans")
     void rejects(String key,String value) {
@@ -44,11 +49,57 @@ class ProductionPreflightTest {
         assertTrue(error.getMessage().contains(key),error.getMessage());
         assertFalse(error.getMessage().contains("fixture password"),"Never echo passwords");
     }
-    @Test @DisplayName("SEC-09/12 R2 prod accepts distinct 16 character passwords and loopback; default bind is loopback")
+    @Test @DisplayName("SEC-09/12 P3-01 prod accepts a 16 character app password and loopback without root secret")
     void accepts() {
-        var settings=valid();settings.put("DB_PASSWORD","abcdefghijklmnop");settings.put("DB_ROOT_PASSWORD","qrstuvwxyzABCDEF");
+        var settings=valid();settings.put("DB_PASSWORD","abcdefghijklmnop");
         try(var context=start(settings,"prod")){assertTrue(context.isActive());assertTrue(BEAN_CREATED.get());assertEquals("127.0.0.1",context.getEnvironment().getProperty("server.address"));}
         settings.put("SERVER_ADDRESS","::1");settings.put("server.address","::1");try(var context=start(settings,"prod")){assertTrue(context.isActive());}
+    }
+    @Test @DisplayName("SEC-12 P3-01 prod starts without any root secret")
+    void startsWithoutRootSecret() {
+        try(var context=start(valid(),"prod")) {
+            assertTrue(context.isActive());assertTrue(BEAN_CREATED.get());
+            assertNull(context.getEnvironment().getProperty("DB_ROOT_PASSWORD"));
+        }
+    }
+    @Test @DisplayName("SEC-12 P3-01 preflight never resolves a root secret even when a source offers it")
+    void neverReadsRootSecret() {
+        var rootSource=new PropertySource<Object>("root-secret-access-canary") {
+            @Override public Object getProperty(String name) {
+                if(name.equals("DB_ROOT_PASSWORD"))throw new AssertionError("Web attempted to resolve root secret");
+                return null;
+            }
+        };
+        try(var context=start(valid(),"prod",rootSource)) {assertTrue(context.isActive());assertTrue(BEAN_CREATED.get());}
+    }
+    @ParameterizedTest @CsvSource({"DB_USER,root","spring.datasource.username,root","spring.datasource.username,ROOT"})
+    @DisplayName("SEC-12 P3-01 effective runtime username root is refused before beans without root secret")
+    void rejectsRootRuntimeUsername(String key,String value) {
+        var settings=valid();settings.put(key,value);
+        var error=assertThrows(Exception.class,()->{try(var ignored=start(settings,"prod")){fail("root runtime accepted");}});
+        assertFalse(BEAN_CREATED.get());assertTrue(error.getMessage().contains("spring.datasource.username"));
+    }
+    @ParameterizedTest @CsvSource({"prod","ops"})
+    @DisplayName("P3-02 web and ops refuse automatic Flyway migration before beans")
+    void rejectsMigrationInRuntime(String profile) {
+        var settings=valid();settings.put("spring.flyway.enabled","true");
+        var error=assertThrows(Exception.class,()->{try(var ignored=start(settings,profile)){fail("runtime migration accepted");}});
+        assertFalse(BEAN_CREATED.get());assertTrue(error.getMessage().contains("spring.flyway.enabled"));
+    }
+    @ParameterizedTest @CsvSource({"prod,MIGRATION_DB_PASSWORD","ops,MIGRATION_DB_PASSWORD","prod,spring.flyway.password","prod,spring.flyway.user","ops,MIGRATION_DB_USER"})
+    @DisplayName("P3-02 runtime refuses migration credentials even with Flyway disabled")
+    void rejectsRuntimeMigrationCredentials(String profile,String key) {
+        var settings=valid();settings.put("spring.flyway.enabled","false");settings.put(key,"Migration fixture must remain separate 123!");
+        var error=assertThrows(Exception.class,()->{try(var ignored=start(settings,profile)){fail("migration credentials accepted");}});
+        assertFalse(BEAN_CREATED.get());assertTrue(error.getMessage().contains(key));
+        assertFalse(error.getMessage().contains("Migration fixture"));
+    }
+    @ParameterizedTest @CsvSource({"prod","ops"})
+    @DisplayName("P3-02 prod and ops default to no Flyway auto-migration")
+    void runtimeProfilesDisableFlyway(String profile) {
+        try(var context=start(valid(),profile)) {
+            assertFalse(context.getEnvironment().getProperty("spring.flyway.enabled",Boolean.class,true));
+        }
     }
     @Test @DisplayName("SEC-12 R2 dev profile keeps local configuration independent of prod preflight")
     void dev() { try(var context=start(Map.of(),"dev")){assertTrue(context.isActive());} }

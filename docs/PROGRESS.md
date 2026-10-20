@@ -1,5 +1,16 @@
 ## F-08 — giữ generation đã công bố khi ngắt sau rename — 19/10/2026
 
+## Chốt bản local P3-01/P3-02 — 21/10/2026
+
+- Đợt finalization theo EXECUTE: đồng bộ README/PROGRESS/EVIDENCE/AI_WRITTEN và thêm [LOCAL_RELEASE](LOCAL_RELEASE.md); chốt toàn bộ 21 thay đổi candidate có sẵn cùng tài liệu thành một commit local trên `fix/p3-01-web-root-secret`, rồi bàn giao ZIP chọn lọc. Full parent/new commit, trạng thái Git và kiểm gói được ghi ngoài repo trong `release-manifest.json`/checkpoint; không tự ghi hash commit vào chính nội dung commit.
+- Baseline trước sửa: repo gốc `fix/p7-security-data-findings` sạch; candidate 21 paths; cả hai HEAD `d992edc4172afc8eff050312066a7b33af35b6b5`. 182 raw hashes worktree và identity21 khớp CP-006 `20261021T002924+0700`. Repo gốc giữ pin/sạch; source ngoài năm docs và candidate public/JAR được đối chiếu byte, không đổi launcher/settings/secret/state/certificate hoặc dữ liệu.
+- CP-006 đã chạy ngày 21/10: **8 JUnit, 0 failure/error/skip**, **29 probe checks** gồm kiểm provenance lặp; fresh 66 main classes khớp JAR. Không cộng thành 37 JUnit. Review độc lập 20/10 thuộc snapshot trước overlay IR-01; không chuyển verdict sang overlay hoặc commit mới. Full 230 tests/29 classes là lịch sử P3-02, audit bỏ qua; không SEC-13 mới.
+- Bộ candidate có sẵn tại máy này dùng HTTPS loopback 8443, launcher ghim repo gốc; bộ local cũ 8080 là bản khác. Dựng mới cần prerequisites, secret và DB riêng, không mang private/runtime state/DB vào ZIP. Xem LOCAL_RELEASE cho lệnh start/status/stop và OPS/MIGRATION cho backup/restore/DB mới hoặc cũ.
+- Kiểm đợt chốt: tài liệu/links, identity, byte và package; không full suite/rehearsal, app/DB/HTTP hoặc audit mới. Receipt ngoài repo mới là kết quả thực tế của commit/package, không biến test lịch sử thành test chạy tại commit mới. AI-written **chưa đọc**.
+- Chốt local không hoàn thành mọi story/mốc học: US-20 còn truy cập server độc lập; US-21 còn lịch/người phụ trách/offsite thực; US-22/M7 còn nhóm thật 4–5 người, hai tuần và phản hồi. TRIGGER DDL/effective grants, stack support/canonicalization/private storage và residual owner acceptance/Gate A vẫn mở. Không tự chạy thêm review/rehearsal sau bàn giao.
+
+Các mục có ngày bên dưới là lịch sử nguyên trạng; câu “chưa commit/candidate chưa cài/bản cũ đang chạy” chỉ phản ánh thời điểm của mục đó, không phải trạng thái release ngày 21/10.
+
 - Chủ dự án yêu cầu tiếp tục với một agent. Review tại `D:/Documents/coding/security-revalidation-20261018/independent-runs/f07-20261019T154042Z/REVIEW.md` đã xác nhận F-07 gốc giữ all3, nhưng F-08 TERM sau rename current gây cleanup xóa generation đang tham chiếu. Giữ hồ sơ/verdict lịch sử nguyên vẹn.
 - Cleanup nay đối chiếu current trên đĩa trước khi xóa generation tưởng là chưa công bố; current đã tham chiếu hoặc không xác định an toàn thì giữ. Không che exit lỗi/ngắt. OPS/D-41 ghi generation dư, dung lượng và giới hạn; không sửa V1–V4/grant/dependency/JDK/image.
 - RED trước sửa: 4 ca/3 assertion failures/0 errors/skips; GREEN cả BackupVerifiedRetentionTest: 14/0/0/0, gồm actual automatic backup/restore retry sau lỗi/ngắt, không can thiệp pointer thủ công. Biên bản `docs/verification/f08-remediation.txt`, ledger/log/XML ngoài repo.
@@ -24,6 +35,21 @@
 - `mvn -q -Dtest=GroupInvitationWebTest test`: 2/0. Biên bản và hash: `docs/verification/f03-remediation.txt`. Chưa có review độc lập; không tuyên bố SEC-05 đạt, Gate A chưa ký.
 - Bước tiếp theo: F-06, sửa mô tả quyền TRIGGER và chứng minh trên fixture MariaDB tạm.
 # Tiến độ và điểm tiếp tục
+
+## P3-02 — migration riêng khỏi runtime — 20/10/2026
+
+- Làm trong worktree P3-01 theo EXECUTE, giữ thay đổi P3-01 chưa commit. Lệnh migrate dùng MIGRATION_DB_* trước Spring, prod/ops tắt auto-migrate và từ chối credential migration; verifier giữ exact schema/trigger và validate history không ghi DB. D-43 và runbook MIGRATION.md.
+- RED9/9 failures trước sửa, GREEN tập trung53/4 classes, integration8/1 class; full check offline exit0 **230 tests/29 classes, 0 failures/errors/skips**. Build/static/gitleaks/migration đạt, dependency audit bỏ qua (không SEC-13 mới). Biên bản docs/verification/p3-02-remediation.md giữ cả lỗi compile test ban đầu.
+- JAR thật trên DB/container giả mới: migrate và lặp lại thành công, web prod bằng runtime không root/migration env mở /login200 khi definer khóa login. Tiến trình/container/anonymous volume smoke đã dọn; bản đang dùng không thay.
+- DB giả riêng chứng minh runtime/ops làm việc với quyền giảm; definer khóa login vẫn hoạt động. Runtime không TABLE DDL/history writes nhưng TRIGGER vẫn CREATE/DROP trigger được. Chưa có automatic grants audit/provisioner, chưa chấp thuận residual cho server.
+- Không đổi grants/DB/JAR local đang dùng, source gốc, dependency/JDK/image hoặc V1–V4; không AWS/Gate A. Bước nhỏ tiếp theo: review candidate về ranh giới migration, definer và TRIGGER trước khi thay bản local; triển khai/grant trên đích cần phạm vi riêng.
+
+## P3-01 — bỏ root secret khỏi web — 20/10/2026
+
+- EXECUTE chỉ P3-01 trên worktree fix/p3-01-web-root-secret từ d992edc; repo ghim gốc giữ nguyên sạch. Không đổi dependency/JDK/image/migration hoặc quyền DB đang chạy, không triển khai AWS.
+- RED trước sửa sản phẩm: 5 ca, 3 failures/2 errors/0 skips. GREEN targeted: ProductionPreflightTest + ProductionSecurityTest 29 tests, không failures/errors/skips, prod không cần root secret và canary không bị đọc.
+- Đã giữ kiểm app/effective secret, chặn root effective username và bind/proxy; cập nhật ranh giới provisioning. Full scripts/check.sh offline: exit0, 213 tests/28 classes, 0 failures/errors/skips; build/static/gitleaks/migration đạt, dependency audit bỏ qua vì offline (không SEC-13 mới). Chi tiết ở docs/verification/p3-01-remediation.md.
+- P3-02/Flyway-runtime chung credential và residual TRIGGER/actual grants còn mở; không tự chấp nhận scope server/Gate A. Bản local đang chạy vẫn là JAR d992edc cũ, chưa thay bằng candidate sửa.
 
 ## F-02 — exact body trigger V4 — 19/10/2026
 
