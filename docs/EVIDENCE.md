@@ -364,3 +364,10 @@ These are author-run focused checks on the worktree, not the final commit, full 
 - [Biên bản](verification/w11-r2.md), AI **chưa đọc**. Baseline69ede08 + regression RED7/6fail/0error; final SQL literal check17tests/3classes xanh, build/package/static/gitleaks qua. Migration guard riêng exit0.
 - scripts/check.sh có chọn suite R2/reminder/R1 exit127 tại audit NVD timeout; audit mới riêng15.3phút cũng exit127, không current SEC-13/full PASS. Không thêm skip/suppression hoặc đổi threshold/update/dependencies. Evidence mới `D:/Documents/coding/security-remediation-w11-r2-r3-20261021-session`.
 - Snapshot/commit/clean clone tách riêng; P7 độc lập và owner decisions chưa giải quyết. **Chưa đề nghị pilot.**
+
+
+## W11-R3 — OOXML format validation (21/10/2026)
+
+- [Biên bản](verification/w11-r3.md), AI **chưa đọc**. Control baseline69ede08 + corrected HTTP fixture RED44tests/34behavioral failures/0errors/skips; malformed packages tới READY. Lỗi tạo fixture/rate-limit ở các run trước giữ riêng, không tính là product RED.
+- Validator đọc byte giải nén thực/CRC, kiểm content types/relationships/XML thiết yếu, parser cấm DTD/XXE, giữ chặn macro/size/signature. Không chứng minh antivirus bypass hoặc khai thác Word.
+- Targeted cuối59tests/3classes xanh; combined R2+R3 qua scripts/check.sh có chọn suites:68tests/5classes xanh, package/static/gitleaks qua, migration riêng exit0; toàn script exit127 do audit timeout. Không current SEC-13/full PASS, không chuyển overlay thành clean-commit evidence. Self-review đúng commit cuối sẽ lưu ngoài repo. **Chưa đề nghị pilot.**

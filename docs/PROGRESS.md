@@ -247,3 +247,10 @@ D20 username nội bộ44ký tự; D21 disabled assignee; D22 vá Tomcat; D23 c�
 - Sửa DB keyset pagination(created_at,id), page20+1 lookahead, SQL membership/stale filtering và unread COUNT. Cursor có validation và next/latest links; giữ R1.
 - RED7tests/6failures; bản sửa cuối17tests/3classes xanh, package/static/gitleaks qua; migration guard riêng exit0. Audit NVD timeout, chưa full PASS. [Chi tiết](verification/w11-r2.md). R3 implementation/checks đang xử lý riêng, chưa commit chung vào R2.
 - AI **chưa đọc**; self-review tại commit cuối sẽ ghi ngoài repo, P7 độc lập/owner decisions còn mở. **Chưa đề nghị pilot.**
+
+
+## W11-R3 — OOXML format validation (21/10/2026)
+
+- R2 đã commit riêng02b956c3692dcd0ced23401772493ee89be4ec64. R3 thêm OfficePackageValidator, DOCX/XLSX synthetic fixtures và HTTP/MariaDB regression; giữ R1 và V1–V9.
+- RED corrected44/34fail; GREEN cuối59/3 và combined68/5 xanh, package/static/gitleaks qua; migration riêng exit0. Audit NVD retry/timeout, chưa full PASS. [Receipt và policy limits](verification/w11-r3.md).
+- Sau commit R3: fresh clone exact final HEAD, full check/self-review và hashes mới ghi ngoài repo để không đổi pin đang review. Đây là tác giả tự review, P7 độc lập/owner comprehension/residual decisions vẫn mở; AI **chưa đọc**. **Chưa đề nghị pilot.**

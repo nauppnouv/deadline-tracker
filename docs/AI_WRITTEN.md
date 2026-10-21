@@ -236,3 +236,12 @@ Chủ dự án gọi EXECUTE M0–M5 với một agent; sau đó cho phép tự 
 | NotificationRepository.java; NotificationService.java; NotificationController.java; templates/notifications.html | DB keyset pagination, filtered unread COUNT, cursor validation/links | chưa đọc |
 | NotificationPaginationTest.java; W11HttpTestSupport.java; ReminderSchedulerTest.java | Actual HTTP/MariaDB/SQL bounded retrieval và fixtures/regressions | chưa đọc |
 | docs/verification/w11-r2.md; docs/EVIDENCE.md; docs/PROGRESS.md; docs/BLOCKERS.md; docs/AI_WRITTEN.md | RED/GREEN, snapshot provenance và audit blocker/limits | chưa đọc |
+
+
+## W11-R3 — 21/10/2026
+
+| Tệp | Phần AI viết | Trạng thái |
+|---|---|---|
+| AttachmentService.java; OfficePackageValidator.java | OPC/content types/essential XML, DTD/XXE protection, actual expanded bytes và ZIP CRC/metadata policy | chưa đọc |
+| OoxmlFixtures.java; OoxmlUploadTest.java | Minimal synthetic DOCX/XLSX, HTTP/MariaDB DB/storage/download invariants, malformed/XXE/archive limits | chưa đọc |
+| docs/verification/w11-r3.md; docs/EVIDENCE.md; docs/PROGRESS.md; docs/BLOCKERS.md; docs/AI_WRITTEN.md | RED/GREEN, combined checks, audit/runtime blockers và evidence limits | chưa đọc |

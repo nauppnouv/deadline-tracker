@@ -44,3 +44,10 @@ Receipt: `D:/Documents/coding/security-revalidation-w11-r1-20261021T213445+0700/
 AI **chưa đọc**. `security-remediation-w11-r2-r3-20261021-session/audit-current-receipt.json` exit127 sau15.3phút NVD retries; chỉ PID đã xác minh command/creation/evidence ownership bị dừng. Curl và Java HTTP200 cho một request nhỏ không chứng minh Dependency-Check update/scan thành công. `r2-check-receipt.json` lặp lại retry, timeout180s sau test/package/static/gitleaks qua; migration guard riêng exit0. Giữ12.1.8/CVSS7/update policy, không suppression/skip/upgrade hoặc PASS cũ.
 
 Chưa SEC-13/full PASS. Nếu operator có NVD key, cấu hình ngoài source/log; xác minh updater hoàn thành và report current trước khi đóng blocker. Tiếp tục R2/R3 độc lập. Correction audit-current tách XML các lượt test khác khỏi audit0tests. **Chưa đề nghị pilot**; không P7 độc lập/Gate A/owner acceptance.
+
+
+### R3 combined check và phần còn mở
+
+AI **chưa đọc**. `r3-check-receipt.json`:68tests/5classes xanh, package/static/gitleaks qua, script exit127 tại audit timeout180s. Audit ban đầu gặp stale lock sau owned R2 timeout; lock và current owners lưu trong STALE-AUDIT-LOCK/AUDIT-CACHE-OWNERS, chỉ bỏ lock của cache lượt mới sau xác minh, updater tiếp tục rồi NVD retry. Runner tiếp theo dùng cache riêng mỗi full run; không tắt update. Migration guard riêng exit0.
+
+R2/R3 behavioral fixes đã có regression, nhưng SEC-13 updater chưa hoàn thành. P7 độc lập, owner comprehension/residual decisions, native ACL/scanner/offsite/push thiết bị/provider và power-loss vẫn chưa được giải quyết. Format checks không full Office XSD/antivirus. Không kết luận an toàn/production/Gate A. **Chưa đề nghị pilot.**
