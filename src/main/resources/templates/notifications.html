@@ -12,4 +12,6 @@
 <form th:action="@{/notifications/{id}/open(id=${item.id})}" method="post"><button type="submit">Mở công việc</button></form>
 <form th:if="${item.readAt == null}" th:action="@{/notifications/{id}/read(id=${item.id})}" method="post"><button class="secondary" type="submit">Đánh dấu đã đọc</button></form>
 </li></ol>
+<nav aria-label="Trang thông báo"><a th:if="${nextCursor != null}" th:href="@{/notifications(before=${nextCursor})}">Thông báo cũ hơn</a>
+<a th:href="@{/notifications}">Thông báo mới nhất</a></nav>
 </main></body></html>

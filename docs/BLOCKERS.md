@@ -37,3 +37,10 @@ AI viết: **chưa đọc**. Docker hiện chạy được; regression HTTP/Mari
 Sau15phút riêng audit, tiến trình Maven audit có command line thuộc evidence root được dừng và ghi `AUDIT-TIMEOUT.json`; không đổi dependencies, threshold, tắt audit/update hoặc dùng PASS cũ. Build/package/static/gitleaks trước đó qua; migration guard sau audit chưa được full chạy tới, kiểm riêng exit0. Đây là blocker audit/SEC-13, không phải behavioral RED R1 và không phải full PASS.
 
 Receipt: `D:/Documents/coding/security-revalidation-w11-r1-20261021T213445+0700/full-worktree-receipt.json`. Chạy lại audit/check khi NVD API truy cập ổn định; nếu operator có NVD API key thì cấu hình ngoài source, không ghi key vào log. Không mở pilot/Gate A từ kết quả test này.
+
+
+## W11-R2/R3 — audit mới vẫn kẹt updater NVD (21/10/2026)
+
+AI **chưa đọc**. `security-remediation-w11-r2-r3-20261021-session/audit-current-receipt.json` exit127 sau15.3phút NVD retries; chỉ PID đã xác minh command/creation/evidence ownership bị dừng. Curl và Java HTTP200 cho một request nhỏ không chứng minh Dependency-Check update/scan thành công. `r2-check-receipt.json` lặp lại retry, timeout180s sau test/package/static/gitleaks qua; migration guard riêng exit0. Giữ12.1.8/CVSS7/update policy, không suppression/skip/upgrade hoặc PASS cũ.
+
+Chưa SEC-13/full PASS. Nếu operator có NVD key, cấu hình ngoài source/log; xác minh updater hoàn thành và report current trước khi đóng blocker. Tiếp tục R2/R3 độc lập. Correction audit-current tách XML các lượt test khác khỏi audit0tests. **Chưa đề nghị pilot**; không P7 độc lập/Gate A/owner acceptance.

@@ -240,3 +240,10 @@ D20 username nội bộ44ký tự; D21 disabled assignee; D22 vá Tomcat; D23 c�
 - Regression HTTP thật + MariaDB tạm: baseline RED8tests/2failures/0errors; bản sửa GREEN8/0/0/0. Kiểm cả response và row attachment/pin/blob trước/sau. Setup error trước RED giữ riêng, không tính thành behavioral RED.
 - Full check trước commit: build/package và274tests/34classes,0failure/error/skip; static/gitleaks qua. Receipt toàn script exit127 do audit NVD request failures, dừng riêng Maven audit sau15phút; chưa SEC-13/full PASS. Migration guard chạy riêng exit0. Sau commit sẽ review lại clone sạch đúng pin mới; kết quả ghi ngoài repo để không đổi commit đang review. [Chi tiết](verification/w11-r1.md).
 - R2/R3 và owner/residual vẫn mở. Tài liệu AI **chưa đọc**; chưa đề nghị pilot/Gate A; không push/merge/deploy.
+
+
+## W11-R2 — bounded inbox (21/10/2026)
+
+- Sửa DB keyset pagination(created_at,id), page20+1 lookahead, SQL membership/stale filtering và unread COUNT. Cursor có validation và next/latest links; giữ R1.
+- RED7tests/6failures; bản sửa cuối17tests/3classes xanh, package/static/gitleaks qua; migration guard riêng exit0. Audit NVD timeout, chưa full PASS. [Chi tiết](verification/w11-r2.md). R3 implementation/checks đang xử lý riêng, chưa commit chung vào R2.
+- AI **chưa đọc**; self-review tại commit cuối sẽ ghi ngoài repo, P7 độc lập/owner decisions còn mở. **Chưa đề nghị pilot.**

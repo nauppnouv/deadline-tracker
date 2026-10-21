@@ -49,19 +49,20 @@ class ReminderSchedulerTest extends DatabaseTest {
 
         assertEquals(2,scheduler.runOnce(NOW));
         assertEquals(0,scheduler.runOnce(NOW));
-        assertEquals(2,notificationRows.findByRecipientIdOrderByCreatedAtDescIdDesc(actor).size());
+        assertEquals(2,notifications.inbox(actor).size());
+        var original=notifications.inbox(actor);
 
         var row=taskRows.findById(day.getId()).orElseThrow();
         row.dueAt=row.dueAt.plusSeconds(120);
         taskRows.saveAndFlush(row);
         assertEquals(1,notifications.inbox(actor).size());
-        var stale=notificationRows.findByRecipientIdOrderByCreatedAtDescIdDesc(actor).stream().filter(n->n.taskId.equals(day.getId())).findFirst().orElseThrow();
+        var stale=original.stream().filter(n->n.taskId.equals(day.getId())).findFirst().orElseThrow();
         assertThrows(RuleViolation.class,()->notifications.open(actor,stale.id));
         assertEquals(0,scheduler.runOnce(NOW));
         String newAssignee=user();invitations.join(newAssignee,invitations.issue(actor,group));
         var reassigned=taskRows.findById(hour.getId()).orElseThrow();reassigned.assigneeId=newAssignee;taskRows.saveAndFlush(reassigned);
         assertTrue(notifications.inbox(actor).isEmpty());
-        var staleAssignee=notificationRows.findByRecipientIdOrderByCreatedAtDescIdDesc(actor).stream().filter(n->n.taskId.equals(hour.getId())).findFirst().orElseThrow();
+        var staleAssignee=original.stream().filter(n->n.taskId.equals(hour.getId())).findFirst().orElseThrow();
         assertThrows(RuleViolation.class,()->notifications.open(actor,staleAssignee.id));
     }
 
@@ -69,10 +70,10 @@ class ReminderSchedulerTest extends DatabaseTest {
         String actor=user(),group=work.createGroup(actor,"Opt out group","").getId();
         var task=work.createTask(actor,group,"No reminder","",actor,NOW.plus(Duration.ofHours(1)));
         assertEquals(0,scheduler.runOnce(NOW));
-        assertTrue(notificationRows.findByRecipientIdOrderByCreatedAtDescIdDesc(actor).isEmpty());
+        assertTrue(notifications.inbox(actor).isEmpty());
         preferences.update(actor,true,false,true);
         taskRows.findById(task.getId()).ifPresent(row->{row.status=vn.deadline.tracker.domain.TaskStatus.DONE;row.completedAt=NOW;taskRows.saveAndFlush(row);});
         assertEquals(0,scheduler.runOnce(NOW));
-        assertTrue(notificationRows.findByRecipientIdOrderByCreatedAtDescIdDesc(actor).isEmpty());
+        assertTrue(notifications.inbox(actor).isEmpty());
     }
 }

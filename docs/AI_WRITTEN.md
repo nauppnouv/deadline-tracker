@@ -227,3 +227,12 @@ Chủ dự án gọi EXECUTE M0–M5 với một agent; sau đó cho phép tự 
 | service/EventPreferenceService; publisher/worker; account form/events; static/js/mentions.js; V9/task_attachment.comment_id; attachment/comment visibility; tests and schema-required | Hoàn thiện event preferences, gợi ý thành viên, file gắn comment và bằng chứng cuối | chưa đọc |
 
 `src/test/java/vn/deadline/tracker/D28SchemaDefinitionTest.java`: mở rộng independent metadata queries và các số lượng schema V5–V9; giữ exact-set comparisons và mutation assertions. Trạng thái: **chưa đọc**.
+
+
+## W11-R2 — 21/10/2026
+
+| Tệp | Phần AI viết | Trạng thái |
+|---|---|---|
+| NotificationRepository.java; NotificationService.java; NotificationController.java; templates/notifications.html | DB keyset pagination, filtered unread COUNT, cursor validation/links | chưa đọc |
+| NotificationPaginationTest.java; W11HttpTestSupport.java; ReminderSchedulerTest.java | Actual HTTP/MariaDB/SQL bounded retrieval và fixtures/regressions | chưa đọc |
+| docs/verification/w11-r2.md; docs/EVIDENCE.md; docs/PROGRESS.md; docs/BLOCKERS.md; docs/AI_WRITTEN.md | RED/GREEN, snapshot provenance và audit blocker/limits | chưa đọc |

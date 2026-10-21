@@ -357,3 +357,10 @@ These are author-run focused checks on the worktree, not the final commit, full 
 - Bao phủ Owner/Member ở hai group, uploader/Owner hợp lệ, thiếu CSRF, outsider, sai task/file và group metadata không nhất quán; request bị từ chối giữ toàn bộ row attachment/pin và bytes blob. Testcontainers/datasource thực được kiểm, storage/tmp riêng.
 - Setup attempt đầu exit1 vì so URL chưa bỏ query được lưu riêng; không gọi là behavioral RED. Full check trước commit build/package và274tests/34classes,0failure/error/skip; static/gitleaks qua, nhưng receipt toàn script exit127 do audit NVD request failures và timeout15phút. Migration guard riêng exit0; chưa audit/full PASS. Review commit mới sẽ ghi ngoài repo sau commit. [Receipt và giới hạn](verification/w11-r1.md).
 - Các kết quả này là worktree + diff bản sửa; không chuyển kết quả review cũ sang commit mới và không đóng R2/R3/pilot/Gate A.
+
+
+## W11-R2 — bounded inbox (21/10/2026)
+
+- [Biên bản](verification/w11-r2.md), AI **chưa đọc**. Baseline69ede08 + regression RED7/6fail/0error; final SQL literal check17tests/3classes xanh, build/package/static/gitleaks qua. Migration guard riêng exit0.
+- scripts/check.sh có chọn suite R2/reminder/R1 exit127 tại audit NVD timeout; audit mới riêng15.3phút cũng exit127, không current SEC-13/full PASS. Không thêm skip/suppression hoặc đổi threshold/update/dependencies. Evidence mới `D:/Documents/coding/security-remediation-w11-r2-r3-20261021-session`.
+- Snapshot/commit/clean clone tách riêng; P7 độc lập và owner decisions chưa giải quyết. **Chưa đề nghị pilot.**
