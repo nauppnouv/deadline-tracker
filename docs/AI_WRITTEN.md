@@ -12,6 +12,14 @@ Yêu cầu mới của chủ dự án: mật khẩu tài khoản tối thiểu8,
 
 # Phần AI viết — sửa phát hiện P7
 
+## W11-R1 — 21/10/2026
+
+| Tệp | Phần AI viết | Trạng thái |
+|---|---|---|
+| src/main/java/vn/deadline/tracker/service/AttachmentService.java | Ràng task/group và attachment/group trước quyền ẩn file | chưa đọc |
+| src/test/java/vn/deadline/tracker/AttachmentHideAuthorizationTest.java | Tám regression HTTP thật/MariaDB, CSRF/session và DB/blob invariants | chưa đọc |
+| docs/verification/w11-r1.md; docs/EVIDENCE.md; docs/PROGRESS.md; docs/BLOCKERS.md; docs/AI_WRITTEN.md | Receipt RED/GREEN, audit timeout, giới hạn và phần còn mở | chưa đọc |
+
 ## W1.1 implementation continuation — 21/10/2026
 
 Code, tests and documentation written/changed in the W1.1 worktree remain **chưa đọc** by the owner. This entry does not replace comprehension or approval.

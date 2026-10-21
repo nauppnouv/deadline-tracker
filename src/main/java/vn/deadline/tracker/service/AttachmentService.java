@@ -52,7 +52,14 @@ public class AttachmentService {
     @Transactional(readOnly=true) public Download download(String actor,String group,String task,String id)throws IOException{
         access.member(actor,group);tasks.findByIdAndGroupId(task,group).orElseThrow(RuleViolation::missing);var row=attachments.findByIdAndTaskId(id,task).filter(a->visible(a)).orElseThrow(RuleViolation::missing);Path p=blob(row.storageKey);if(Files.isSymbolicLink(p)||!Files.isRegularFile(p,NOFOLLOW_LINKS)||!p.toRealPath().startsWith(root)||Files.size(p)!=row.sizeBytes||!hash(p).equals(row.sha256))throw RuleViolation.missing();return new Download(row,Files.newInputStream(p));
     }
-    public void hide(String actor,String group,String task,String id){access.member(actor,group);var row=attachments.findByIdAndTaskId(id,task).orElseThrow(RuleViolation::missing);var g=access.member(actor,group);if(!row.uploaderId.equals(actor)&&!g.isOwner(actor))throw RuleViolation.forbidden();row.hiddenAt=clock.instant().truncatedTo(ChronoUnit.MICROS);row.hiddenBy=actor;pins.findByTaskIdAndAttachmentId(task,id).ifPresent(pins::delete);}
+    public void hide(String actor,String group,String task,String id){
+        var g=access.member(actor,group);
+        tasks.findByIdAndGroupId(task,group).orElseThrow(RuleViolation::missing);
+        var row=attachments.findByIdAndTaskId(id,task).filter(a->group.equals(a.groupId)).orElseThrow(RuleViolation::missing);
+        if(!row.uploaderId.equals(actor)&&!g.isOwner(actor))throw RuleViolation.forbidden();
+        row.hiddenAt=clock.instant().truncatedTo(ChronoUnit.MICROS);row.hiddenBy=actor;
+        pins.findByTaskIdAndAttachmentId(task,id).ifPresent(pins::delete);
+    }
     public void pin(String actor,String group,String task,String itemId,boolean attachment){access.member(actor,group);var taskRow=tasks.findByIdAndGroupId(task,group).orElseThrow(RuleViolation::missing);var g=access.member(actor,group);if(!g.isOwner(actor)&&!taskRow.createdBy.equals(actor))throw RuleViolation.forbidden();jdbc.queryForObject("SELECT id FROM task WHERE id=? FOR UPDATE",String.class,task);if(pins.countByTaskId(task)>=5)throw RuleViolation.invalid("Mỗi công việc chỉ được ghim tối đa 5 mục.");
         var pin=new TaskPinEntity();pin.id=UUID.randomUUID().toString();pin.taskId=task;pin.groupId=group;pin.pinnedBy=actor;pin.createdAt=clock.instant().truncatedTo(ChronoUnit.MICROS);
         if(attachment){var row=attachments.findByIdAndTaskId(itemId,task).filter(a->visible(a)).orElseThrow(RuleViolation::missing);if(pins.existsByTaskIdAndAttachmentId(task,itemId))return;pin.attachmentId=itemId;}else{var row=comments.findByIdAndTaskId(itemId,task).filter(c->c.hiddenAt==null).orElseThrow(RuleViolation::missing);if(pins.existsByTaskIdAndCommentId(task,itemId))return;pin.commentId=itemId;}pins.save(pin);

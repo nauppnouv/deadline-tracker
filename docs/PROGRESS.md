@@ -233,3 +233,10 @@ D20 username nội bộ44ký tự; D21 disabled assignee; D22 vá Tomcat; D23 c�
 - Full kiểm checkout mới từ snapshot cố định: **266 tests / 33 classes,0failure/error/skip**, exit0; build/static/secret/dependency/migration gates OK. Browser desktop/mobile và5permission states giả lập đạt; preview đã đóng. Lượt full trước bị snapshot không nhất quán exit1/51fail được giữ nguyên trong evidence.
 - Candidate riêng: `D:\Documents\coding\deadline-tracker-w11-20261021T015624+0700\target\w11-candidate-20261021T035528+0700\candidate-w11.jar`, SHA256 `db03fc0b30dbe6e73d8db06e6eec4a108814400ee9dc83e5fe08fea1f384828d`. Source/commit/receipt/hash ở [w11-final](verification/w11-final.md) và `D:\Documents\coding\deadline-tracker-checkpoints\w11-final-20261021T035528+0700/FINAL-CHECKPOINT.json`; launcher8443/repo gốc/P3/JAR cũ giữ nguyên.
 - M6 chuẩn bị [runbook](W11_SERVER_RUNBOOK.md), chưa server/push thật/tab đóng/scanner/offsite/ACL/proxy thật. Tài liệu AI **chưa đọc**, không review độc lập/pilot/Gate A. Dừng tại bàn giao; chưa push/merge/deploy.
+
+## W11-R1 — sửa quyền ẩn file (21/10/2026)
+
+- Theo yêu cầu sửa riêng R1: `hide` kiểm task/group và attachment/group trước quyền uploader/Owner; không đổi migrations hoặc candidate JAR/launcher.
+- Regression HTTP thật + MariaDB tạm: baseline RED8tests/2failures/0errors; bản sửa GREEN8/0/0/0. Kiểm cả response và row attachment/pin/blob trước/sau. Setup error trước RED giữ riêng, không tính thành behavioral RED.
+- Full check trước commit: build/package và274tests/34classes,0failure/error/skip; static/gitleaks qua. Receipt toàn script exit127 do audit NVD request failures, dừng riêng Maven audit sau15phút; chưa SEC-13/full PASS. Migration guard chạy riêng exit0. Sau commit sẽ review lại clone sạch đúng pin mới; kết quả ghi ngoài repo để không đổi commit đang review. [Chi tiết](verification/w11-r1.md).
+- R2/R3 và owner/residual vẫn mở. Tài liệu AI **chưa đọc**; chưa đề nghị pilot/Gate A; không push/merge/deploy.

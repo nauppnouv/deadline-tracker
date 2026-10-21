@@ -350,3 +350,10 @@ These are author-run focused checks on the worktree, not the final commit, full 
 - Full kiểm checkout mới từ snapshot cố định: **266 tests / 33 classes,0failure/error/skip**, exit0; build/static/secret/dependency/migration gates OK. Browser desktop/mobile và5permission states giả lập đạt; preview đã đóng. Lượt full trước bị snapshot không nhất quán exit1/51fail được giữ nguyên trong evidence.
 - Candidate riêng: `D:\Documents\coding\deadline-tracker-w11-20261021T015624+0700\target\w11-candidate-20261021T035528+0700\candidate-w11.jar`, SHA256 `db03fc0b30dbe6e73d8db06e6eec4a108814400ee9dc83e5fe08fea1f384828d`. Source/commit/receipt/hash ở [w11-final](verification/w11-final.md) và `D:\Documents\coding\deadline-tracker-checkpoints\w11-final-20261021T035528+0700/FINAL-CHECKPOINT.json`; launcher8443/repo gốc/P3/JAR cũ giữ nguyên.
 - M6 chuẩn bị [runbook](W11_SERVER_RUNBOOK.md), chưa server/push thật/tab đóng/scanner/offsite/ACL/proxy thật. Tài liệu AI **chưa đọc**, không review độc lập/pilot/Gate A. Dừng tại bàn giao; chưa push/merge/deploy.
+
+## W11-R1 — HTTP/MariaDB regression (21/10/2026)
+
+- SEC-03/R1: baseline `48371f59ad66d5ad98f2e0bf6988d896ceca9f9b` tái hiện qua HTTP thật có session/CSRF và MariaDB11.8.9: path tráo group trả302, row ẩn file/pin bị đổi. RED8JUnit/2failures/0errors/0skips; GREEN sau sửa8/0/0/0,exit0.
+- Bao phủ Owner/Member ở hai group, uploader/Owner hợp lệ, thiếu CSRF, outsider, sai task/file và group metadata không nhất quán; request bị từ chối giữ toàn bộ row attachment/pin và bytes blob. Testcontainers/datasource thực được kiểm, storage/tmp riêng.
+- Setup attempt đầu exit1 vì so URL chưa bỏ query được lưu riêng; không gọi là behavioral RED. Full check trước commit build/package và274tests/34classes,0failure/error/skip; static/gitleaks qua, nhưng receipt toàn script exit127 do audit NVD request failures và timeout15phút. Migration guard riêng exit0; chưa audit/full PASS. Review commit mới sẽ ghi ngoài repo sau commit. [Receipt và giới hạn](verification/w11-r1.md).
+- Các kết quả này là worktree + diff bản sửa; không chuyển kết quả review cũ sang commit mới và không đóng R2/R3/pilot/Gate A.

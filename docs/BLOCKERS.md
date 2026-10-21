@@ -28,3 +28,12 @@ Không có cloud/account/email/domain/resource tính phí nào được agent t�
 | Backup generation pair | Local test `BackupRestoreTest#pairedAttachmentGeneration` chạy DB synthetic + blob synthetic thành công; script đòi operator xác nhận writers đã pause. Chưa có kiểm chứng trên volume/app thực hoặc offsite. | Trước backup thật dừng mọi app writer; restore vào DB/root mới và giữ cách ly tới khi hậu kiểm xong. |
 
 P7-02: full check đầu phiên tái hiện `Mismatch: group_member`. So 16 hàng/cột xác nhận dữ liệu nguồn/restored giống nhau; thay checksum native bằng SHA-256 logic cho manifest mới, giữ đếm hàng/FK và từ chối dữ liệu thay đổi. Full check bản sửa 70 test PASS, static/gitleaks/dependency/migration OK (target/p7-02-final-check.log); lỗi test này đã giải quyết.
+
+
+## W11-R1 — dependency audit NVD (21/10/2026)
+
+AI viết: **chưa đọc**. Docker hiện chạy được; regression HTTP/MariaDB và toàn274test/34class của bản sửa đều qua. Full `scripts/check.sh` có receipt exit127 ở dependency-check12.1.8: log báo `NVD API request failures are occurring; retrying request`. Hai thread dump cho thấy Maven đang chờ NvdCveClient future; cache chưa update.
+
+Sau15phút riêng audit, tiến trình Maven audit có command line thuộc evidence root được dừng và ghi `AUDIT-TIMEOUT.json`; không đổi dependencies, threshold, tắt audit/update hoặc dùng PASS cũ. Build/package/static/gitleaks trước đó qua; migration guard sau audit chưa được full chạy tới, kiểm riêng exit0. Đây là blocker audit/SEC-13, không phải behavioral RED R1 và không phải full PASS.
+
+Receipt: `D:/Documents/coding/security-revalidation-w11-r1-20261021T213445+0700/full-worktree-receipt.json`. Chạy lại audit/check khi NVD API truy cập ổn định; nếu operator có NVD API key thì cấu hình ngoài source, không ghi key vào log. Không mở pilot/Gate A từ kết quả test này.
